@@ -9,6 +9,7 @@ go 1.25.8
 replace github.com/survivorbat/huhtest => github.com/timofurrer/huhtest v0.0.0-20250922072747-46976a734937
 
 require (
+	charm.land/fang/v2 v2.0.1
 	charm.land/glamour/v2 v2.0.0
 	charm.land/lipgloss/v2 v2.0.2
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
@@ -72,7 +73,7 @@ require (
 )
 
 require (
-	github.com/charmbracelet/ultraviolet v0.0.0-20251205161215-1948445e3318 // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20260205113103-524a6607adb8 // indirect
 	github.com/charmbracelet/x/exp/charmtone v0.0.0-20250603201427-c31516f43444 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect
 	github.com/charmbracelet/x/windows v0.2.2 // indirect
@@ -98,7 +99,6 @@ require (
 	github.com/charmbracelet/bubbles v0.21.1-0.20250623103423-23b8fd6302d7 // indirect
 	github.com/charmbracelet/bubbletea v1.3.6 // indirect
 	github.com/charmbracelet/colorprofile v0.4.2 // indirect
-	github.com/charmbracelet/fang v0.4.4
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834
 	github.com/charmbracelet/x/ansi v0.11.6 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.15 // indirect
