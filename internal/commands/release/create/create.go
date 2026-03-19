@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MakeNowJust/heredoc/v2"
 	"charm.land/huh/v2"
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 

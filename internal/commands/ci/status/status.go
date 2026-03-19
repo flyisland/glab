@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/MakeNowJust/heredoc/v2"
 	"charm.land/huh/v2"
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/gosuri/uilive"
 	"github.com/spf13/cobra"
 

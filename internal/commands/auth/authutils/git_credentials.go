@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/MakeNowJust/heredoc/v2"
 	"charm.land/huh/v2"
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/google/shlex"
 
 	"gitlab.com/gitlab-org/cli/internal/git"

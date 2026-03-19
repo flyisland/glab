@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/MakeNowJust/heredoc/v2"
 	"charm.land/huh/v2"
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/spf13/cobra"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"

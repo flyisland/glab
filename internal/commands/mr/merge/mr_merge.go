@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"charm.land/huh/v2"
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/avast/retry-go/v5"
-	"charm.land/huh/v2"
 	"github.com/spf13/cobra"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
