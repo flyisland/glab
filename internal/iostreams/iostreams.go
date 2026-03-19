@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/briandowns/spinner"
-	"github.com/charmbracelet/huh"
+	"charm.land/huh/v2"
 	"github.com/google/shlex"
 	"github.com/muesli/termenv"
 

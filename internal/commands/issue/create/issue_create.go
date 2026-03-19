@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/charmbracelet/huh"
+	"charm.land/huh/v2"
 	"github.com/spf13/cobra"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"

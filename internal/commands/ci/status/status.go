@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/charmbracelet/huh"
+	"charm.land/huh/v2"
 	"github.com/gosuri/uilive"
 	"github.com/spf13/cobra"
 
