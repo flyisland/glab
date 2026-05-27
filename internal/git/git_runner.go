@@ -19,6 +19,10 @@ import (
 
 type GitRunner interface {
 	Git(args ...string) (string, error)
+	// GitWithIO runs git with the provided stdout and stderr writers attached
+	// directly to the subprocess, allowing live output (progress bars, errors)
+	// to reach the user during long-running operations like fetch and checkout.
+	GitWithIO(stdout, stderr io.Writer, args ...string) error
 }
 
 // Executor is a subset of cmdutils.Executor defined here to avoid a circular
@@ -58,6 +62,20 @@ func (gitc StandardGitCommand) Git(args ...string) (string, error) {
 		return "", err
 	}
 	return stdout.String(), nil
+}
+
+func (gitc StandardGitCommand) GitWithIO(stdout, stderr io.Writer, args ...string) error {
+	env := append(os.Environ(), "LC_ALL=C")
+
+	if gitc.executor == nil {
+		cmd := GitCommand(args...)
+		cmd.Env = env
+		cmd.Stdout = stdout
+		cmd.Stderr = stderr
+		return cmd.Run()
+	}
+
+	return gitc.executor.ExecWithIO(context.Background(), "git", args, env, nil, stdout, stderr)
 }
 
 const (
