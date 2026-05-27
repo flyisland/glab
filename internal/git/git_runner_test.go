@@ -1,9 +1,12 @@
 package git
 
 import (
+	"bytes"
+	"os/exec"
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -61,4 +64,46 @@ func TestStandardGitCommand_Git_SetsLocale(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, output, "Git command should produce output")
 	})
+}
+
+// TestStandardGitCommand_GitWithIO_WrapsExitError verifies that when the
+// subprocess fails, GitWithIO wraps the *exec.ExitError with git's stderr
+// message instead of returning a bare "exit status N". Without the wrap the
+// CLI prints a cryptic "Error: exit status 128" after git's real message has
+// already been streamed live.
+func TestStandardGitCommand_GitWithIO_WrapsExitError(t *testing.T) {
+	// Cannot call t.Parallel(): we rely on t.Chdir to drop into a non-git
+	// directory, and t.Chdir is incompatible with parallel tests.
+
+	// Strip inherited GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE so this test
+	// really runs outside any git repo (e.g. when invoked via lefthook).
+	unsetGitHookEnv(t)
+
+	// chdir to a fresh temp dir that is NOT a git repo, so `git rev-parse`
+	// exits with status 128 and prints a recognizable stderr message.
+	tempDir := t.TempDir()
+	t.Chdir(tempDir)
+
+	var stdout, stderr bytes.Buffer
+	gitc := StandardGitCommand{}
+	err := gitc.GitWithIO(&stdout, &stderr, "rev-parse", "--verify", "HEAD")
+
+	require.Error(t, err, "git rev-parse outside a repo should fail")
+
+	// The wrapped error must include git's stderr message — proves GitWithIO
+	// captures the stderr stream alongside teeing it to the live writer.
+	assert.Contains(t, err.Error(), "not a git repository",
+		"wrapped error should include git's stderr message; got: %v", err)
+
+	// The original *exec.ExitError must remain in the chain so callers using
+	// errors.As / errors.Is keep working.
+	var exitErr *exec.ExitError
+	require.ErrorAs(t, err, &exitErr, "*exec.ExitError should remain in the chain")
+	assert.Equal(t, 128, exitErr.ExitCode(), "git rev-parse outside a repo should exit 128")
+
+	// The live stderr writer received the same message (io.MultiWriter
+	// guarantees it; we assert it so a future regression dropping the tee
+	// is caught here too).
+	assert.Contains(t, stderr.String(), "not a git repository")
+	assert.Empty(t, stdout.String(), "no stdout expected on this failure")
 }

@@ -68,11 +68,18 @@ func (gitc StandardGitCommand) GitWithIO(stdout, stderr io.Writer, args ...strin
 	env := append(os.Environ(), "LC_ALL=C")
 
 	if gitc.executor == nil {
+		var stderrBuf bytes.Buffer
 		cmd := GitCommand(args...)
 		cmd.Env = env
 		cmd.Stdout = stdout
-		cmd.Stderr = stderr
-		return cmd.Run()
+		cmd.Stderr = io.MultiWriter(stderr, &stderrBuf)
+		if err := cmd.Run(); err != nil {
+			if msg := strings.TrimSpace(stderrBuf.String()); msg != "" {
+				return fmt.Errorf("%s: %w", msg, err)
+			}
+			return err
+		}
+		return nil
 	}
 
 	return gitc.executor.ExecWithIO(context.Background(), "git", args, env, nil, stdout, stderr)
