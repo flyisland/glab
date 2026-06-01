@@ -36,9 +36,17 @@ func NewCmdList(f cmdutils.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get a list of deploy keys for the current project.",
-		Long:  "",
+		Long: heredoc.Docf(`Each row shows the key's title, key, push access, and creation date.
+		Pass %[1]s--show-id%[1]s to also display the key ID, which the %[1]sget%[1]s and %[1]sdelete%[1]s
+		commands accept as an argument. Use %[1]s--repo%[1]s to target a project other than
+		the current one.
+		`, "`"),
 		Example: heredoc.Doc(`
-			glab deploy-key list`),
+			# List the current project's deploy keys
+			glab deploy-key list
+
+			# Include the key ID in the output
+			glab deploy-key list --show-id`),
 		Args: cobra.MaximumNArgs(1),
 		Annotations: map[string]string{
 			mcpannotations.Safe: "true",

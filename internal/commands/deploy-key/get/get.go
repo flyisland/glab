@@ -32,7 +32,13 @@ func NewCmdGet(f cmdutils.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get <key-id>",
 		Short: "Returns a single deploy key specified by the ID.",
-		Long:  ``,
+		Long: heredoc.Docf(`Pass the ID of the key to return as an argument. Find key IDs by
+		running %[1]sglab deploy-key list --show-id%[1]s. Use %[1]s--repo%[1]s to target a
+		project other than the current one.
+
+		By default, the command prints the key's title, public key, push access,
+		and creation date. Use %[1]s--output json%[1]s to return the full key object.
+		`, "`"),
 		Example: heredoc.Doc(`
 			# Get deploy key with ID as argument
 			glab deploy-key get 1234`),
