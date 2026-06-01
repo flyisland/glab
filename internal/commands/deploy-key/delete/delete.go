@@ -32,9 +32,14 @@ func NewCmdDelete(f cmdutils.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <key-id>",
 		Short: "Deletes a single deploy key specified by the ID.",
-		Long:  ``,
+		Long: heredoc.Docf(`Pass the ID of the key to delete as an argument. Find key IDs by
+		running %[1]sglab deploy-key list --show-id%[1]s. Use %[1]s--repo%[1]s to target a
+		project other than the current one.
+
+		This action is permanent and cannot be undone.
+		`, "`"),
 		Example: heredoc.Doc(`
-			# Delete SSH key with ID as argument
+			# Delete deploy key with ID as argument
 			glab deploy-key delete 1234`),
 		Args: cobra.MaximumNArgs(1),
 		Annotations: map[string]string{
