@@ -93,12 +93,12 @@ func (o *options) run() error {
 
 	reader, err := getReaderFromFilePath(o.inputFilePath)
 	if err != nil {
-		return fmt.Errorf("Unable to read file at %s: %w", o.inputFilePath, err)
+		return fmt.Errorf("unable to read file at %s: %w", o.inputFilePath, err)
 	}
 
 	_, _, err = client.SecureFiles.CreateSecureFile(repo.FullName(), reader, &gitlab.CreateSecureFileOptions{Name: new(o.fileName)})
 	if err != nil {
-		return fmt.Errorf("Error creating secure file: %w", err)
+		return fmt.Errorf("error creating secure file: %w", err)
 	}
 
 	o.io.LogInfof(color.Bold("%s Secure file %s created.\n"), color.GreenCheck(), o.fileName)

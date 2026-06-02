@@ -32,13 +32,13 @@ func ParseCacheID(cacheID string) (string, int64, error) {
 	// Parse the agent ID
 	var agentID int64
 	if _, err := fmt.Sscanf(agentIDStr, "%d", &agentID); err != nil {
-		return "", 0, fmt.Errorf("invalid agent ID in cache ID: %v", err)
+		return "", 0, fmt.Errorf("invalid agent ID in cache ID: %w", err)
 	}
 
 	// Decode the base64-encoded GitLab URL
 	urlBytes, err := base64.StdEncoding.DecodeString(encodedURL)
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to decode GitLab URL: %v", err)
+		return "", 0, fmt.Errorf("failed to decode GitLab URL: %w", err)
 	}
 
 	return string(urlBytes), agentID, nil

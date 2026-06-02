@@ -148,7 +148,7 @@ func (o *options) run(ctx context.Context) error {
 	// 2. Check token type
 	authSource, ok := client.AuthSource().(gitlab.AccessTokenAuthSource)
 	if !ok {
-		return errors.New("cluster graph command supports authentication with only personal and project access tokens. Requires at least the Developer role.")
+		return errors.New("cluster graph command supports authentication with only personal and project access tokens; requires at least the Developer role")
 	}
 
 	// 3. Read the watch request

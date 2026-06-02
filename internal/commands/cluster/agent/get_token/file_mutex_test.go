@@ -64,7 +64,7 @@ func TestFileMutex(t *testing.T) {
 
 		// THEN
 		require.Error(t, err)
-		assert.ErrorIs(t, err, expectedErr)
+		require.ErrorIs(t, err, expectedErr)
 		assert.Nil(t, result)
 	})
 
@@ -150,7 +150,7 @@ func TestFileMutex(t *testing.T) {
 		err = fm.unlock()
 
 		// THEN
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NoFileExists(t, filepath.Join(root.Name(), n))
 	})
 }

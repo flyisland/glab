@@ -36,7 +36,7 @@ func NewCmdUpdate(f cmdutils.Factory) *cobra.Command {
 			c := f.IO().Color()
 
 			if cmd.Flags().Changed("unassign") && cmd.Flags().Changed("assignee") {
-				return &cmdutils.FlagError{Err: fmt.Errorf("--assignee and --unassign are mutually exclusive.")}
+				return &cmdutils.FlagError{Err: errors.New("--assignee and --unassign are mutually exclusive")}
 			}
 
 			// Parse assignees early so we can fail early in case of conflicts
@@ -55,11 +55,11 @@ func NewCmdUpdate(f cmdutils.Factory) *cobra.Command {
 
 			if cmd.Flags().Changed("lock-discussion") && cmd.Flags().Changed("unlock-discussion") {
 				return &cmdutils.FlagError{
-					Err: errors.New("--lock-discussion and --unlock-discussion can't be used together."),
+					Err: errors.New("--lock-discussion and --unlock-discussion can't be used together"),
 				}
 			}
 			if cmd.Flags().Changed("confidential") && cmd.Flags().Changed("public") {
-				return &cmdutils.FlagError{Err: errors.New("--public and --confidential can't be used together.")}
+				return &cmdutils.FlagError{Err: errors.New("--public and --confidential can't be used together")}
 			}
 
 			client, err := f.GitLabClient()

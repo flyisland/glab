@@ -68,7 +68,7 @@ func TestDetectScope_NoContext(t *testing.T) {
 
 	// Verify it's a FlagError
 	var flagErr cmdutils.FlagError
-	assert.ErrorAs(t, err, &flagErr)
+	require.ErrorAs(t, err, &flagErr)
 	assert.Contains(t, err.Error(), "unable to determine scope")
 	assert.Contains(t, err.Error(), "specify --group")
 }

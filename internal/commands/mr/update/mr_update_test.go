@@ -249,7 +249,7 @@ func TestUpdateMergeRequest(t *testing.T) {
 
 			for _, msg := range tc.ExpectedMsg {
 				assert.Contains(t, out, msg)
-				assert.Equal(t, "", stderr.String())
+				assert.Empty(t, stderr.String())
 			}
 		})
 	}

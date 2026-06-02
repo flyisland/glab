@@ -49,21 +49,21 @@ func Test_WriteFile(t *testing.T) {
 
 			if tc.isSymlink {
 				symPath := filepath.Join(dir, "test-symlink")
-				require.Nil(t, os.Symlink(tc.filePath, symPath), "failed to create a symlink")
+				require.NoError(t, os.Symlink(tc.filePath, symPath), "failed to create a symlink")
 				fullPath = symPath
 			}
 
-			require.Nilf(t,
+			require.NoErrorf(t,
 				WriteFile(fullPath, []byte(tc.content), tc.permissions),
 				"unexpected error for testCase %q", tc.name,
 			)
 
 			result, err := os.ReadFile(fullPath)
-			require.Nilf(t, err, "failed to read file %q due to %q", fullPath, err)
+			require.NoErrorf(t, err, "failed to read file %q due to %q", fullPath, err)
 			assert.Equal(t, tc.content, string(result))
 
 			fileInfo, err := os.Lstat(fullPath)
-			require.Nil(t, err, "failed to get info about the file", err)
+			require.NoError(t, err, "failed to get info about the file", err)
 
 			if tc.isSymlink {
 				assert.Equal(t, os.ModeSymlink, fileInfo.Mode()&os.ModeSymlink, "this file should be a symlink")

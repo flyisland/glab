@@ -11,6 +11,7 @@ import (
 	"github.com/google/shlex"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
@@ -137,12 +138,12 @@ func TestGroupOverride(t *testing.T) {
 			return nil
 		})
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		gotGroup := gotOpts.group
 		// make sure the GITLAB_GROUP env variable is not used
-		assert.NotEqual(t, gotGroup, "GROUP/NAME")
+		assert.NotEqual(t, "GROUP/NAME", gotGroup)
 		// make sure the group flag was used instead
-		assert.Equal(t, gotGroup, "GROUP/OVERRIDE")
+		assert.Equal(t, "GROUP/OVERRIDE", gotGroup)
 	})
 
 	t.Run("List command with GITLAB_GROUP env var and no group flag", func(t *testing.T) {
@@ -153,10 +154,10 @@ func TestGroupOverride(t *testing.T) {
 			return nil
 		})
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		gotGroup := gotOpts.group
 		// make sure the GITLAB_GROUP env variable is used
-		assert.Equal(t, gotGroup, "GROUP/NAME")
+		assert.Equal(t, "GROUP/NAME", gotGroup)
 	})
 
 	t.Run("List command with GITLAB_GROUP env var and repo flag", func(t *testing.T) {
@@ -167,13 +168,13 @@ func TestGroupOverride(t *testing.T) {
 			return nil
 		})
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		gotGroup := gotOpts.group
 		// make sure the GITLAB_GROUP env variable is not used
-		assert.Equal(t, gotGroup, "")
+		assert.Empty(t, gotGroup)
 		// make sure the repo option is used instead
 		gotRepo, _ := gotOpts.baseRepo()
-		assert.Equal(t, gotRepo.FullName(), "OWNER2/REPO2")
+		assert.Equal(t, "OWNER2/REPO2", gotRepo.FullName())
 	})
 
 	t.Run("List command with GITLAB_GROUP env var and base repo but no repo flag", func(t *testing.T) {
@@ -184,13 +185,13 @@ func TestGroupOverride(t *testing.T) {
 			return nil
 		})
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		gotGroup := gotOpts.group
 		// make sure the GITLAB_GROUP env variable is used
-		assert.Equal(t, gotGroup, "GROUP/NAME")
+		assert.Equal(t, "GROUP/NAME", gotGroup)
 		// make sure the default baserepo is still used
 		gotRepo, _ := gotOpts.baseRepo()
-		assert.Equal(t, gotRepo.FullName(), "OWNER/REPO")
+		assert.Equal(t, "OWNER/REPO", gotRepo.FullName())
 	})
 
 	t.Run("concurrent calls do not race", func(t *testing.T) {
@@ -220,12 +221,12 @@ func TestGroupOverride(t *testing.T) {
 			return nil
 		})
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		gotGroup := gotOpts.group
 		// make sure no group option is set at all (group settings ignored)
-		assert.Equal(t, gotGroup, "")
+		assert.Empty(t, gotGroup)
 		// make sure the repo flag is used instead
 		gotRepo, _ := gotOpts.baseRepo()
-		assert.Equal(t, gotRepo.FullName(), "OWNER2/REPO2")
+		assert.Equal(t, "OWNER2/REPO2", gotRepo.FullName())
 	})
 }

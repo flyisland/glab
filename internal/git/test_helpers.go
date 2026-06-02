@@ -136,7 +136,7 @@ func CreateBranches(t *testing.T, branches []string) {
 
 	for _, branch := range branches {
 		err := CheckoutNewBranch(branch)
-		require.Nil(t, err)
+		require.NoError(t, err)
 	}
 }
 

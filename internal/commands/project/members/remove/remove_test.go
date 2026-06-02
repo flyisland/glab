@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 	gitlabtesting "gitlab.com/gitlab-org/api/client-go/v2/testing"
@@ -89,7 +90,7 @@ func TestMembersRemove(t *testing.T) {
 			out, err := exec(tc.cli)
 
 			if tc.expectedError != "" {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Contains(t, err.Error(), tc.expectedError)
 			} else {
 				if assert.NoErrorf(t, err, "error running command `members remove %s`: %v", tc.cli, err) {

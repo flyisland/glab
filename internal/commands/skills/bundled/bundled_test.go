@@ -3,7 +3,6 @@
 package bundled
 
 import (
-	"errors"
 	"path"
 	"testing"
 
@@ -45,7 +44,7 @@ func TestGet_Unknown(t *testing.T) {
 
 	_, err := Get("does-not-exist")
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrNotFound), "error should wrap ErrNotFound")
+	assert.ErrorIs(t, err, ErrNotFound, "error should wrap ErrNotFound")
 }
 
 func TestRelPath(t *testing.T) {

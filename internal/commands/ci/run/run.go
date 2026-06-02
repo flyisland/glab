@@ -75,7 +75,7 @@ func createPipeline(cmd *cobra.Command, c *gitlab.CreatePipelineOptions, f cmdut
 	if mr {
 		pipe, err := createMrPipeline(cmd.Context(), branch, f, apiClient, repo)
 		if err != nil {
-			return nil, fmt.Errorf("could not create mr pipeline for branch %s: %v", branch, err)
+			return nil, fmt.Errorf("could not create mr pipeline for branch %s: %w", branch, err)
 		}
 		return &PipelineData{
 			ID:     pipe.ID,
@@ -86,7 +86,7 @@ func createPipeline(cmd *cobra.Command, c *gitlab.CreatePipelineOptions, f cmdut
 	}
 	pipe, err := createBranchPipeline(branch, c, apiClient, repo)
 	if err != nil {
-		return nil, fmt.Errorf("could not create branch pipeline for branch %s: %v", branch, err)
+		return nil, fmt.Errorf("could not create branch pipeline for branch %s: %w", branch, err)
 	}
 	return &PipelineData{
 		ID:     pipe.ID,

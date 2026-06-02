@@ -71,18 +71,18 @@ func StackRootDir(title string) (string, error) {
 func AddStackRefFile(title string, stackRef StackRef) error {
 	refDir, err := StackRootDir(title)
 	if err != nil {
-		return fmt.Errorf("error determining Git root: %v", err)
+		return fmt.Errorf("error determining Git root: %w", err)
 	}
 
 	initialJsonData, err := json.Marshal(stackRef) //nolint:forbidigo // stack reference is written to disk, not stdout
 	if err != nil {
-		return fmt.Errorf("error marshaling data: %v", err)
+		return fmt.Errorf("error marshaling data: %w", err)
 	}
 
 	if _, err = os.Stat(refDir); os.IsNotExist(err) {
 		err = os.MkdirAll(refDir, 0o700) // create directory if it doesn't exist
 		if err != nil {
-			return fmt.Errorf("error creating directory: %v", err)
+			return fmt.Errorf("error creating directory: %w", err)
 		}
 	}
 
@@ -90,7 +90,7 @@ func AddStackRefFile(title string, stackRef StackRef) error {
 
 	err = os.WriteFile(fullPath, initialJsonData, 0o644)
 	if err != nil {
-		return fmt.Errorf("error running writing file: %v", err)
+		return fmt.Errorf("error running writing file: %w", err)
 	}
 
 	return nil
@@ -99,14 +99,14 @@ func AddStackRefFile(title string, stackRef StackRef) error {
 func DeleteStackRefFile(title string, stackRef StackRef) error {
 	refDir, err := StackRootDir(title)
 	if err != nil {
-		return fmt.Errorf("error determining Git root: %v", err)
+		return fmt.Errorf("error determining Git root: %w", err)
 	}
 
 	fullPath := filepath.Join(refDir, stackRef.SHA+".json")
 
 	err = os.Remove(fullPath)
 	if err != nil {
-		return fmt.Errorf("error removing stack file: %v", err)
+		return fmt.Errorf("error removing stack file: %w", err)
 	}
 
 	return nil
@@ -115,19 +115,19 @@ func DeleteStackRefFile(title string, stackRef StackRef) error {
 func UpdateStackRefFile(title string, s StackRef) error {
 	refDir, err := StackRootDir(title)
 	if err != nil {
-		return fmt.Errorf("error determining Git root: %v", err)
+		return fmt.Errorf("error determining Git root: %w", err)
 	}
 
 	fullPath := filepath.Join(refDir, s.SHA+".json")
 
 	initialJsonData, err := json.Marshal(s) //nolint:forbidigo // stack ref file is written to disk, not stdout
 	if err != nil {
-		return fmt.Errorf("error marshaling data: %v", err)
+		return fmt.Errorf("error marshaling data: %w", err)
 	}
 
 	err = os.WriteFile(fullPath, initialJsonData, 0o644)
 	if err != nil {
-		return fmt.Errorf("error writing file: %v", err)
+		return fmt.Errorf("error writing file: %w", err)
 	}
 
 	return nil

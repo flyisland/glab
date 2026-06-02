@@ -211,7 +211,7 @@ func (o *createOptions) validateFlags() error {
 
 func (o *createOptions) validate() error {
 	if strings.TrimSpace(o.body) == "" {
-		return fmt.Errorf("aborted... Note has an empty message.")
+		return fmt.Errorf("aborted: note has an empty message")
 	}
 	if o.reply != "" && len(o.reply) < 8 {
 		return fmt.Errorf("discussion ID prefix must be at least 8 characters, got %d", len(o.reply))

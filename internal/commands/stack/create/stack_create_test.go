@@ -83,7 +83,7 @@ func TestCreateNewStack(t *testing.T) {
 
 			output, err := exec(tc.branch)
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			// When using responder, output may contain ANSI codes from huh prompt, so use Contains
 			if tc.needsResponder {
@@ -99,7 +99,7 @@ func TestCreateNewStack(t *testing.T) {
 			}
 
 			configValue, err := git.GetCurrentStackTitle()
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			createdBaseFile := path.Join(
 				tempDir,

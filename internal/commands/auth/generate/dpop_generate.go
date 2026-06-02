@@ -222,7 +222,10 @@ func getPublicKey(key crypto.PrivateKey) (crypto.PublicKey, error) {
 	case *rsa.PrivateKey:
 		return key.Public(), nil
 	case *ed25519.PrivateKey:
-		publicKey := key.Public().(ed25519.PublicKey)
+		publicKey, ok := key.Public().(ed25519.PublicKey)
+		if !ok {
+			return nil, fmt.Errorf("ed25519 private key did not return an ed25519 public key")
+		}
 		return publicKey, nil
 	default:
 		return nil, fmt.Errorf("unsupported key type")
@@ -254,5 +257,9 @@ func loadPrivateKey(path string, passwordReader PasswordReader) (crypto.PrivateK
 		}
 	}
 
-	return privateKey.(crypto.PrivateKey), nil
+	pk, ok := privateKey.(crypto.PrivateKey)
+	if !ok {
+		return nil, fmt.Errorf("parsed key %T does not satisfy crypto.PrivateKey", privateKey)
+	}
+	return pk, nil
 }

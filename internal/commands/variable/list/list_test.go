@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
@@ -85,7 +86,7 @@ func Test_NewCmdList(t *testing.T) {
 			io.IsInTTY = tt.stdinTTY
 
 			argv, err := shlex.Split(tt.cli)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var gotOpts *options
 			cmd := NewCmdList(f, func(opts *options) error {
@@ -99,10 +100,10 @@ func Test_NewCmdList(t *testing.T) {
 
 			_, err = cmd.ExecuteC()
 			if tt.wantsErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, tt.wants.group, gotOpts.group)
 			assert.Equal(t, tt.wants.outputFormat, gotOpts.outputFormat)

@@ -44,21 +44,21 @@ func Test_SecurefileRemove(t *testing.T) {
 					Return(nil, fmt.Errorf("DELETE https://gitlab.com/api/v4/projects/OWNER%%2FREPO/secure_files/1: 400"))
 			},
 			wantErr:    true,
-			wantStderr: "Error removing secure file: DELETE https://gitlab.com/api/v4/projects/OWNER%2FREPO/secure_files/1: 400",
+			wantStderr: "error removing secure file: DELETE https://gitlab.com/api/v4/projects/OWNER%2FREPO/secure_files/1: 400",
 		},
 		{
 			name:       "Remove a secure file with invalid file ID",
 			cli:        "abc -y",
 			setupMock:  func(tc *gitlabtesting.TestClient) {},
 			wantErr:    true,
-			wantStderr: "Secure file ID must be an integer: abc",
+			wantStderr: "secure file ID must be an integer: abc",
 		},
 		{
 			name:       "Remove a secure file without force delete when not running interactively",
 			cli:        "1",
 			setupMock:  func(tc *gitlabtesting.TestClient) {},
 			wantErr:    true,
-			wantStderr: "--yes or -y flag is required when not running interactively.",
+			wantStderr: "--yes or -y flag is required when not running interactively",
 		},
 	}
 

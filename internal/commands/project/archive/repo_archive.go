@@ -101,25 +101,25 @@ func NewCmdArchive(f cmdutils.Factory) *cobra.Command {
 
 			bt, _, err := client.Repositories.Archive(repo.FullName(), l)
 			if err != nil {
-				return fmt.Errorf("failed to get archive: %v", err)
+				return fmt.Errorf("failed to get archive: %w", err)
 			}
 
 			r := bytes.NewReader(bt)
 			out, err := os.Create(archiveName + ".tmp")
 			if err != nil {
-				return fmt.Errorf("failed to create repository archive: %v", err)
+				return fmt.Errorf("failed to create repository archive: %w", err)
 			}
 
 			counter := &CloneWriter{}
 			if _, err = io.Copy(out, io.TeeReader(r, counter)); err != nil {
 				_ = out.Close()
-				return fmt.Errorf("failed to write repositories: %v", err)
+				return fmt.Errorf("failed to write repositories: %w", err)
 			}
 
 			fmt.Fprint(f.IO().StdOut, "\n")
 			_ = out.Close()
 			if err = os.Rename(archiveName+".tmp", archiveName); err != nil {
-				return fmt.Errorf("failed to rename tmp repos: %v", err)
+				return fmt.Errorf("failed to rename tmp repos: %w", err)
 			}
 			fmt.Fprintln(f.IO().StdOut, "Complete...", archiveName)
 			return nil

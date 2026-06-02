@@ -136,7 +136,7 @@ func NewCmdClone(f cmdutils.Factory, runE func(*options, *ContextOpts) error) *c
 			dbg.Debug("Dir:", opts.dir)
 
 			if ctxOpts.Repo == "" && opts.groupName == "" {
-				return &cmdutils.FlagError{Err: fmt.Errorf("Specify repository argument, or use the --group flag to specify a group to clone all repos from the group.")}
+				return &cmdutils.FlagError{Err: errors.New("specify repository argument, or use the --group flag to specify a group to clone all repos from the group")}
 			}
 
 			opts.archivedSet = cmd.Flags().Changed("archived")
@@ -189,7 +189,7 @@ func NewCmdClone(f cmdutils.Factory, runE func(*options, *ContextOpts) error) *c
 		if errors.Is(err, pflag.ErrHelp) {
 			return err
 		}
-		return &cmdutils.FlagError{Err: fmt.Errorf("%w\nSeparate Git clone flags with '--'.", err)}
+		return &cmdutils.FlagError{Err: fmt.Errorf("%w\nseparate Git clone flags with '--'", err)}
 	})
 
 	return repoCloneCmd

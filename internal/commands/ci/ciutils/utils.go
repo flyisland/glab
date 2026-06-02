@@ -49,7 +49,7 @@ func GetPipelineWithFallback(ctx context.Context, client *gitlab.Client, repoNam
 		if pipeline != nil {
 			return pipeline, nil
 		}
-		return nil, fmt.Errorf("no pipeline found for branch %s and failed to find associated merge request: %v", branch, mrErr)
+		return nil, fmt.Errorf("no pipeline found for branch %s and failed to find associated merge request: %w", branch, mrErr)
 	}
 
 	if mr.HeadPipeline == nil {
@@ -255,7 +255,7 @@ func GetJobId(ctx context.Context, inputs *JobInputs, opts *JobOptions) (int64, 
 	}
 
 	// Otherwise, we try to find the latest job ID based on the job name.
-	pipelineId, err := getPipelineId(inputs, opts)
+	pipelineId, err := getPipelineId(ctx, inputs, opts)
 	if err != nil {
 		return 0, fmt.Errorf("get pipeline: %w", err)
 	}
@@ -297,7 +297,7 @@ func GetJobId(ctx context.Context, inputs *JobInputs, opts *JobOptions) (int64, 
 	return 0, fmt.Errorf("pipeline %d contains no jobs with the name %s", pipelineId, inputs.JobName)
 }
 
-func getPipelineId(inputs *JobInputs, opts *JobOptions) (int64, error) {
+func getPipelineId(ctx context.Context, inputs *JobInputs, opts *JobOptions) (int64, error) {
 	if inputs.PipelineId != 0 {
 		return int64(inputs.PipelineId), nil
 	}
@@ -308,7 +308,7 @@ func getPipelineId(inputs *JobInputs, opts *JobOptions) (int64, error) {
 	}
 
 	// Use fallback logic for robust pipeline lookup including MR pipelines
-	pipeline, err := GetPipelineWithFallback(context.Background(), opts.Client, opts.Repo.FullName(), branch, opts.IO)
+	pipeline, err := GetPipelineWithFallback(ctx, opts.Client, opts.Repo.FullName(), branch, opts.IO)
 	if err != nil {
 		return 0, fmt.Errorf("failed to get pipeline for branch %s: %w", branch, err)
 	}
@@ -342,7 +342,7 @@ func GetBranch(branch string, currentBranch func() (string, error), repo glrepo.
 }
 
 func getJobIdInteractive(ctx context.Context, inputs *JobInputs, opts *JobOptions) (int64, error) {
-	pipelineId, err := getPipelineId(inputs, opts)
+	pipelineId, err := getPipelineId(ctx, inputs, opts)
 	if err != nil {
 		return 0, err
 	}

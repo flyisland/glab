@@ -2,6 +2,7 @@ package lint
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -58,7 +59,7 @@ func NewCmdLint(f cmdutils.Factory) *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts.complete(args)
-			return opts.run()
+			return opts.run(cmd.Context())
 		},
 	}
 
@@ -77,7 +78,7 @@ func (o *options) complete(args []string) {
 	}
 }
 
-func (o *options) run() error {
+func (o *options) run(ctx context.Context) error {
 	var err error
 	out := o.io.StdOut
 	c := o.io.Color()
@@ -89,12 +90,12 @@ func (o *options) run() error {
 
 	repo, err := o.baseRepo()
 	if err != nil {
-		return fmt.Errorf("You must be in a GitLab project repository for this action.\nError: %s", err)
+		return fmt.Errorf("you must be in a GitLab project repository for this action: %w", err)
 	}
 
 	project, err := repo.Project(client)
 	if err != nil {
-		return fmt.Errorf("You must be in a GitLab project repository for this action.\nError: %s", err)
+		return fmt.Errorf("you must be in a GitLab project repository for this action: %w", err)
 	}
 
 	projectID := project.ID
@@ -103,10 +104,15 @@ func (o *options) run() error {
 	var stdout bytes.Buffer
 
 	if git.IsValidURL(o.path) {
-		resp, err := http.Get(o.path)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, o.path, nil)
 		if err != nil {
 			return err
 		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
 		_, err = io.Copy(&stdout, resp.Body)
 		if err != nil {
 			return err
@@ -116,7 +122,7 @@ func (o *options) run() error {
 		content, err = os.ReadFile(o.path)
 		if err != nil {
 			if os.IsNotExist(err) {
-				return fmt.Errorf("%s: no such file or directory.", o.path)
+				return fmt.Errorf("%s: no such file or directory", o.path)
 			}
 			return err
 		}

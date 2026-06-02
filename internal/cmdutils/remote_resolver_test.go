@@ -34,7 +34,7 @@ func Test_remoteResolver(t *testing.T) {
 	resolver := rr.Resolver("")
 	remotes, err := resolver()
 	require.NoError(t, err)
-	require.Equal(t, 2, len(remotes))
+	require.Len(t, remotes, 2)
 
 	assert.Equal(t, "upstream", remotes[0].Name)
 	assert.Equal(t, "fork", remotes[1].Name)
@@ -61,7 +61,7 @@ func Test_remoteResolverOverride(t *testing.T) {
 	resolver := rr.Resolver("gitlab.com")
 	remotes, err := resolver()
 	require.NoError(t, err)
-	require.Equal(t, 1, len(remotes))
+	require.Len(t, remotes, 1)
 
 	assert.Equal(t, "origin", remotes[0].Name)
 }
@@ -86,7 +86,7 @@ func Test_remoteResolverSSHHostMapping(t *testing.T) {
 	resolver := rr.Resolver("")
 	remotes, err := resolver()
 	require.NoError(t, err)
-	require.Equal(t, 1, len(remotes))
+	require.Len(t, remotes, 1)
 
 	assert.Equal(t, "origin", remotes[0].Name)
 	// The remote's RepoHost should be rewritten to the API hostname
@@ -236,7 +236,7 @@ func Test_remoteResolverSSHHostMappingEdgeCases(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			require.Equal(t, tt.expectedCount, len(remotes))
+			require.Len(t, remotes, tt.expectedCount)
 			assert.Equal(t, tt.expectedName, remotes[0].Name)
 			assert.Equal(t, tt.expectedHost, remotes[0].RepoHost())
 		})
@@ -337,7 +337,7 @@ func Test_remoteResolverSplitHostWithSubfolder(t *testing.T) {
 		resolver := rr.Resolver("")
 		remotes, err := resolver()
 		require.NoError(t, err)
-		require.Equal(t, 1, len(remotes))
+		require.Len(t, remotes, 1)
 
 		// BUG: The remote should have RepoHost() = "api.example.com" (the config key)
 		// but it actually returns "git.example.com" (the SSH hostname)
@@ -389,7 +389,7 @@ func Test_remoteResolverSplitHostWithSubfolder(t *testing.T) {
 		// CRITICAL: Both remotes should be returned
 		// MR #2924 bug: Only returns 1 remote (filters out upstream)
 		// Our fix: Returns 2 remotes correctly
-		assert.Equal(t, 2, len(remotes), "Both SSH and HTTPS remotes should be included")
+		assert.Len(t, remotes, 2, "Both SSH and HTTPS remotes should be included")
 
 		// Verify both remotes use the correct API hostname
 		assert.Equal(t, "api.example.com", remotes[0].RepoHost())

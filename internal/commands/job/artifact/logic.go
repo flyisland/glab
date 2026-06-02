@@ -29,7 +29,7 @@ func ensurePathIsCreated(filename string) error {
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		err = os.MkdirAll(dir, 0o700) // Create your file
 		if err != nil {
-			return fmt.Errorf("could not create new path: %v", err)
+			return fmt.Errorf("could not create new path: %w", err)
 		}
 	}
 	return nil
@@ -61,7 +61,7 @@ func readZip(artifact *bytes.Reader, path string, listPaths bool, zipReadLimit i
 
 		destDir, err := filepath.Abs(path)
 		if err != nil {
-			return fmt.Errorf("resolving absolute download directory path: %v", err)
+			return fmt.Errorf("resolving absolute download directory path: %w", err)
 		}
 		destPath := filepath.Join(destDir, sanitizedAssetName)
 		if !strings.HasPrefix(destPath, destDir) {
@@ -91,7 +91,7 @@ func readZip(artifact *bytes.Reader, path string, listPaths bool, zipReadLimit i
 			symlinkCheck, _ := os.Lstat(destPath)
 
 			if symlinkCheck != nil && symlinkCheck.Mode()&os.ModeSymlink != 0 {
-				return fmt.Errorf("can't extract. A file in the artifact would overwrite a symbolic link.")
+				return fmt.Errorf("can't extract: a file in the artifact would overwrite a symbolic link")
 			}
 
 			dstFile, err := os.OpenFile(destPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, v.Mode())

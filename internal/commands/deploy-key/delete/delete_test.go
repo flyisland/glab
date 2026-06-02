@@ -39,7 +39,7 @@ func Test_DeployKeyRemove(t *testing.T) {
 			name:       "Remove a deploy key with invalid key ID",
 			cli:        "abc",
 			wantErr:    true,
-			wantStderr: "Deploy key ID must be an integer: abc",
+			wantStderr: "deploy key ID must be an integer: abc",
 			setupMock:  func(tc *gitlabtesting.TestClient) {},
 		},
 		{

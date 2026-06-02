@@ -163,7 +163,7 @@ func Test_getPipelineWithFallback(t *testing.T) {
 			pipeline, err := ciutils.GetPipelineWithFallback(t.Context(), tc.Client, "OWNER/REPO", tt.branch, ios)
 
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				if tt.expectedErrMsg != "" {
 					assert.Contains(t, err.Error(), tt.expectedErrMsg)
 				}
@@ -171,7 +171,7 @@ func Test_getPipelineWithFallback(t *testing.T) {
 				return
 			}
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.wantPipeline.ID, pipeline.ID)
 			assert.Equal(t, tt.wantPipeline.Status, pipeline.Status)
 		})

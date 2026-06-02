@@ -2,6 +2,7 @@ package delete
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -79,7 +80,7 @@ func (o *options) complete(args []string) {
 
 func (o *options) validate() error {
 	if !o.forceDelete && !o.io.PromptEnabled() {
-		return &cmdutils.FlagError{Err: fmt.Errorf("--yes or -y flag is required when not running interactively.")}
+		return &cmdutils.FlagError{Err: errors.New("--yes or -y flag is required when not running interactively")}
 	}
 
 	return nil

@@ -181,7 +181,7 @@ func TestNewCheckUpdateCmd_no_release(t *testing.T) {
 	output, err := exec("")
 
 	require.Error(t, err)
-	assert.Equal(t, "no release found for glab.", err.Error())
+	assert.Equal(t, "no release found for glab", err.Error())
 	assert.Empty(t, output.String())
 	assert.Empty(t, output.Stderr())
 }
@@ -404,9 +404,9 @@ func Test_checkLastUpdate(t *testing.T) {
 			result, err := checkLastUpdate(f, false)
 
 			if tt.expectError {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.expectedResult, result)
 			}
 
@@ -415,7 +415,7 @@ func Test_checkLastUpdate(t *testing.T) {
 				cfg := config.NewFromString(mainBuf.String())
 				timestamp, err := cfg.Get("", "last_update_check_timestamp")
 
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotEmpty(t, timestamp)
 
 				// Verify the timestamp is in correct format

@@ -72,7 +72,7 @@ func TestTranslate(t *testing.T) {
 				Message:  "boom",
 			},
 			wantCode: 1,
-			wantMsg:  "Orbit API error (HTTP 500): boom",
+			wantMsg:  "orbit API error (HTTP 500): boom",
 		},
 		{
 			name:     "non-HTTP error falls through to generic exit code 1",
@@ -101,7 +101,7 @@ func TestTranslate(t *testing.T) {
 			// THEN it is a *cmdutils.ExitError with the expected code
 			require.Error(t, out)
 			var exitErr *cmdutils.ExitError
-			require.True(t, errors.As(out, &exitErr), "expected *cmdutils.ExitError, got %T", out)
+			require.ErrorAs(t, out, &exitErr, "expected *cmdutils.ExitError, got %T", out)
 			assert.Equal(t, tc.wantCode, exitErr.Code)
 
 			// AND the headline is present in err.Error()

@@ -88,11 +88,11 @@ func (o *options) complete(args []string) {
 
 func (o *options) validate(cmd *cobra.Command) error {
 	if repoOverride, _ := cmd.Flags().GetString("repo"); repoOverride != "" && len(o.args) == 0 {
-		return &cmdutils.FlagError{Err: errors.New("argument required when using the --repo flag.")}
+		return &cmdutils.FlagError{Err: errors.New("argument required when using the --repo flag")}
 	}
 
 	if !validColorFlag(o.useColor) {
-		return &cmdutils.FlagError{Err: fmt.Errorf("did not understand color: %q. Expected one of 'always', 'never', or 'auto'.", o.useColor)}
+		return &cmdutils.FlagError{Err: fmt.Errorf("did not understand color %q: expected one of 'always', 'never', or 'auto'", o.useColor)}
 	}
 
 	return nil

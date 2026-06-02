@@ -76,7 +76,7 @@ func Test_NewCmdDelete(t *testing.T) {
 			io.IsInTTY = tt.stdinTTY
 
 			argv, err := shlex.Split(tt.cli)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			cmd := NewCmdDelete(f)
 			cmd.SetArgs(argv)

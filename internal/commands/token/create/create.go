@@ -178,7 +178,7 @@ func (o *options) run() error {
 			return t.Active && t.Name == o.name
 		})
 		if len(tokens) > 0 {
-			return cmdutils.FlagError{Err: fmt.Errorf("a personal access token with the name %s already exists.", o.name)}
+			return cmdutils.FlagError{Err: fmt.Errorf("a personal access token with the name %s already exists", o.name)}
 		}
 
 		if o.user == "@me" {
@@ -219,7 +219,7 @@ func (o *options) run() error {
 				return t.Active && t.Name == o.name
 			})
 			if len(tokens) > 0 {
-				return cmdutils.FlagError{Err: fmt.Errorf("a group access token with the name %s already exists.", o.name)}
+				return cmdutils.FlagError{Err: fmt.Errorf("a group access token with the name %s already exists", o.name)}
 			}
 
 			options := &gitlab.CreateGroupAccessTokenOptions{
@@ -253,7 +253,7 @@ func (o *options) run() error {
 			})
 
 			if len(tokens) > 0 {
-				return cmdutils.FlagError{Err: fmt.Errorf("a project access token with name %s already exists.", o.name)}
+				return cmdutils.FlagError{Err: fmt.Errorf("a project access token with name %s already exists", o.name)}
 			}
 
 			options := &gitlab.CreateProjectAccessTokenOptions{

@@ -47,7 +47,7 @@ func Test_GetSSHKey(t *testing.T) {
 			Name:       "Get SSH key without ID",
 			cli:        "",
 			wantErr:    true,
-			wantStderr: "the <key-id> argument is required when prompts are disabled.",
+			wantStderr: "the <key-id> argument is required when prompts are disabled",
 			setupMock:  func(tc *gitlabtesting.TestClient) {},
 		},
 	}

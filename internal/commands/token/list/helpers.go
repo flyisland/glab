@@ -28,8 +28,8 @@ func createTablePrinter(tokens Tokens) *tableprinter.TablePrinter {
 		val := reflect.ValueOf(token)
 		for i := range val.Type().NumField() {
 			field := val.Field(i)
-
-			length := len(field.Interface().(string))
+			s, _ := field.Interface().(string)
+			length := len(s)
 			if length > maxColumnWidths[i] {
 				maxColumnWidths[i] = length
 			}

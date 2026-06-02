@@ -3,6 +3,7 @@ package view
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -244,7 +245,7 @@ func (o *options) run(ctx context.Context) error {
 
 	p, _, err := client.Pipelines.GetPipeline(projectID, pipelineID)
 	if err != nil {
-		return fmt.Errorf("Can't get pipeline #%d info: %s", pipelineID, err)
+		return fmt.Errorf("can't get pipeline #%d info: %w", pipelineID, err)
 	}
 	pipelineUser := p.User
 
@@ -499,7 +500,7 @@ func inputCapture(
 				reader := bufio.NewReader(os.Stdin)
 				for {
 					r, _, err := reader.ReadRune()
-					if err != io.EOF && err != nil {
+					if !errors.Is(err, io.EOF) && err != nil {
 						app.Stop()
 						log.Fatal(err)
 					}

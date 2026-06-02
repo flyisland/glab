@@ -3,7 +3,6 @@
 package binarymgr
 
 import (
-	"errors"
 	"path/filepath"
 	"testing"
 
@@ -20,7 +19,7 @@ func TestDetectPlatform_unsupportedOS(t *testing.T) {
 	spec.SupportedOS = []string{"plan9"} // none of the runtime OSes match
 	_, err := detectPlatform(spec)
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrUnsupportedPlatform))
+	assert.ErrorIs(t, err, ErrUnsupportedPlatform)
 }
 
 func TestDetectPlatform_archNormalizerError(t *testing.T) {
@@ -34,7 +33,7 @@ func TestDetectPlatform_archNormalizerError(t *testing.T) {
 	spec.SupportedOS = []string{"darwin", "linux", "windows"}
 	_, err := detectPlatform(spec)
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrUnsupportedPlatform))
+	assert.ErrorIs(t, err, ErrUnsupportedPlatform)
 }
 
 func TestInstallDir_isUnderConfigDir(t *testing.T) {

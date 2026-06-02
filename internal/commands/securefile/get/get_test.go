@@ -50,7 +50,7 @@ func Test_SecurefileGet(t *testing.T) {
 			name:       "Get a securefile with invalid file ID",
 			cli:        "abc",
 			wantErr:    true,
-			wantStderr: "Secure file ID must be an integer: abc",
+			wantStderr: "secure file ID must be an integer: abc",
 			setupMock:  func(tc *gitlabtesting.TestClient) {},
 		},
 	}

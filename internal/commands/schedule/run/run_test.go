@@ -73,7 +73,7 @@ func Test_ScheduleRun(t *testing.T) {
 
 			for _, msg := range tc.ExpectedMsg {
 				assert.Contains(t, out, msg)
-				assert.Equal(t, "", stderr.String())
+				assert.Empty(t, stderr.String())
 			}
 		})
 	}
@@ -84,7 +84,7 @@ func Test_ScheduleRunNoID(t *testing.T) {
 	cmd := NewCmdRun(cmdtest.NewTestFactory(nil))
 	cmd.SetErr(&buf)
 
-	assert.Error(t, cmd.Execute())
+	require.Error(t, cmd.Execute())
 
 	assert.Contains(t, buf.String(), "Error: accepts 1 arg(s), received 0\n")
 }

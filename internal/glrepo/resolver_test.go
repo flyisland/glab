@@ -13,6 +13,7 @@ import (
 	"git.sr.ht/~timofurrer/ugh"
 	"github.com/hashicorp/go-multierror"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
@@ -151,7 +152,7 @@ func Test_ResolveRemotesToRepos(t *testing.T) {
 	// Test the normal and most expected usage
 	t.Run("simple", func(t *testing.T) {
 		r, err := ResolveRemotesToRepos(rem.remotes, rem.apiClient, glinstance.DefaultHostname)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, rem.apiClient, r.apiClient)
 
@@ -194,7 +195,7 @@ func Test_resolveNetwork(t *testing.T) {
 
 		err := resolveNetwork(&rem)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, rem.network, len(rem.remotes))
 		for i := range rem.network {
 			assert.Equal(t, rem.remotes[i].Repo.FullName(), rem.network[i].PathWithNamespace)
@@ -216,9 +217,9 @@ func Test_resolveNetwork(t *testing.T) {
 
 		err := resolveNetwork(&rem)
 
-		assert.Error(t, err)
-		assert.True(t, errors.Is(err, assert.AnError))
-		assert.Len(t, rem.network, 0)
+		require.Error(t, err)
+		require.ErrorIs(t, err, assert.AnError)
+		assert.Empty(t, rem.network)
 	})
 
 	t.Run("MaxRemotesForLookup limit", func(t *testing.T) {
@@ -235,7 +236,7 @@ func Test_resolveNetwork(t *testing.T) {
 
 		err := resolveNetwork(&rem)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, rem.network, maxRemotesForLookup)
 		for i := range rem.network {
 			assert.Equal(t, rem.remotes[i].Repo.FullName(), rem.network[i].PathWithNamespace)
@@ -301,7 +302,7 @@ func Test_BaseRepo(t *testing.T) {
 		localRem.remotes[0].Resolved = "base"
 
 		got, err := localRem.BaseRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
 		assert.Equal(t, localRem.remotes[0].RepoHost(), got.RepoHost())
@@ -316,7 +317,7 @@ func Test_BaseRepo(t *testing.T) {
 		localRem.remotes[0].Resolved = "base: gitlab.com/maxice8/glab"
 
 		got, err := localRem.BaseRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, expectedResolution.FullName(), got.FullName())
 		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
@@ -342,7 +343,7 @@ func Test_BaseRepo(t *testing.T) {
 		localRem.remotes[0].Resolved = "gitlab.com/maxice8/glab"
 
 		got, err := localRem.BaseRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, expectedResolution.FullName(), got.FullName())
 		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
@@ -366,7 +367,7 @@ func Test_BaseRepo(t *testing.T) {
 		localRem.remotes[0].ResolvedBase = "base"
 
 		got, err := localRem.BaseRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
 		assert.Equal(t, localRem.remotes[0].RepoHost(), got.RepoHost())
@@ -381,7 +382,7 @@ func Test_BaseRepo(t *testing.T) {
 		localRem.remotes[0].ResolvedBase = "base: gitlab.com/example/glab"
 
 		got, err := localRem.BaseRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, expectedResolution.FullName(), got.FullName())
 		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
@@ -397,7 +398,7 @@ func Test_BaseRepo(t *testing.T) {
 		localRem.remotes[0].Resolved = "base: gitlab.com/different/repo"
 
 		got, err := localRem.BaseRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Should use ResolvedBase, not Resolved
 		assert.Equal(t, expectedResolution.FullName(), got.FullName())
@@ -408,7 +409,7 @@ func Test_BaseRepo(t *testing.T) {
 		localRem := rem()
 
 		got, err := localRem.BaseRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
 		assert.Equal(t, localRem.remotes[0].RepoHost(), got.RepoHost())
@@ -419,7 +420,7 @@ func Test_BaseRepo(t *testing.T) {
 
 		// Prompt must be true otherwise we won't reach the code we want to test
 		got, err := localRem.BaseRepo(t.Context(), iostreams.New(iostreams.WithStdout(nil, true), iostreams.WithStderr(nil, true)))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
 		assert.Equal(t, localRem.remotes[0].RepoHost(), got.RepoHost())
@@ -461,7 +462,7 @@ func Test_BaseRepo(t *testing.T) {
 		t.Cleanup(cleanup)
 
 		got, err := localRem.BaseRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, originRemote.Repo.FullName(), got.FullName())
 		assert.Equal(t, originRemote.Repo.RepoHost(), got.RepoHost())
@@ -492,7 +493,7 @@ func Test_BaseRepo(t *testing.T) {
 		t.Cleanup(cleanup)
 
 		got, err := localRem.BaseRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, localRem.remotes[0].Repo.FullName(), got.FullName())
 		assert.Equal(t, localRem.remotes[0].Repo.RepoHost(), got.RepoHost())
@@ -528,7 +529,7 @@ func Test_BaseRepo(t *testing.T) {
 		t.Cleanup(cleanup)
 
 		got, err := localRem.BaseRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, originRemote.Repo.FullName(), got.FullName())
 		assert.Equal(t, originRemote.Repo.RepoHost(), got.RepoHost())
@@ -564,7 +565,7 @@ func Test_BaseRepo(t *testing.T) {
 		t.Cleanup(cleanup)
 
 		got, err := localRem.BaseRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, "profclems/glab", got.FullName())
 		assert.Equal(t, "gitlab.com", got.RepoHost())
@@ -591,9 +592,13 @@ func Test_BaseRepo(t *testing.T) {
 
 		// Prompt must be true otherwise we won't reach the code we want to test
 		_, err := localRem.BaseRepo(t.Context(), iostreams.New(iostreams.WithStdout(nil, true), iostreams.WithStderr(nil, true)))
-		multierr := err.(*multierror.Error)
+		multierr := func() *multierror.Error {
+			target := &multierror.Error{}
+			_ = errors.As(err, &target)
+			return target
+		}()
 		assert.Len(t, multierr.Errors, 2)
-		assert.True(t, errors.Is(err, assert.AnError), "Unexpected error type")
+		assert.ErrorIs(t, err, assert.AnError, "Unexpected error type")
 	})
 
 	t.Run("Consult the network, some, but not all, calls fail", func(t *testing.T) {
@@ -675,7 +680,7 @@ func Test_BaseRepo(t *testing.T) {
 		ios := iostreams.New(iostreams.WithStdout(io.Discard, true), iostreams.WithStderr(io.Discard, true))
 
 		got, err := localRem.BaseRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The fix should ensure we use the git remote host, not the API host
 		assert.Equal(t, "owner/repo", got.FullName())
@@ -741,7 +746,7 @@ hosts:
 		ios := iostreams.New(iostreams.WithStdout(nil, true), iostreams.WithStderr(nil, true))
 
 		got, err := localRem.BaseRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The fix should ensure we get the correct path WITHOUT the subfolder prefix
 		assert.Equal(t, "owner/repo", got.FullName())
@@ -807,7 +812,7 @@ func Test_HeadRepo(t *testing.T) {
 		localRem.remotes[0].Resolved = "head"
 
 		got, err := localRem.HeadRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
 		assert.Equal(t, localRem.remotes[0].RepoHost(), got.RepoHost())
@@ -822,7 +827,7 @@ func Test_HeadRepo(t *testing.T) {
 		localRem.remotes[0].Resolved = "head: gitlab.com/maxice8/glab"
 
 		got, err := localRem.HeadRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, expectedResolution.FullName(), got.FullName())
 		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
@@ -846,7 +851,7 @@ func Test_HeadRepo(t *testing.T) {
 		localRem.remotes[0].ResolvedHead = "head"
 
 		got, err := localRem.HeadRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
 		assert.Equal(t, localRem.remotes[0].RepoHost(), got.RepoHost())
@@ -861,7 +866,7 @@ func Test_HeadRepo(t *testing.T) {
 		localRem.remotes[0].ResolvedHead = "head: gitlab.com/example/glab"
 
 		got, err := localRem.HeadRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, expectedResolution.FullName(), got.FullName())
 		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
@@ -877,7 +882,7 @@ func Test_HeadRepo(t *testing.T) {
 		localRem.remotes[0].Resolved = "head: gitlab.com/different/repo"
 
 		got, err := localRem.HeadRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Should use ResolvedHead, not Resolved
 		assert.Equal(t, expectedResolution.FullName(), got.FullName())
@@ -888,7 +893,7 @@ func Test_HeadRepo(t *testing.T) {
 		localRem := rem()
 
 		got, err := localRem.HeadRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
 	})
@@ -898,7 +903,7 @@ func Test_HeadRepo(t *testing.T) {
 
 		// Prompt must be true otherwise we won't reach the code we want to test
 		got, err := localRem.HeadRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, got.FullName(), localRem.remotes[0].FullName())
 	})
@@ -926,7 +931,7 @@ func Test_HeadRepo(t *testing.T) {
 		localRem.network = []gitlab.Project{originNetwork}
 
 		got, err := localRem.HeadRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, "maxice8/glab", got.FullName())
 	})
@@ -949,7 +954,7 @@ func Test_HeadRepo(t *testing.T) {
 		localRem.network = append(localRem.network, originNetwork)
 
 		got, err := localRem.HeadRepo(t.Context(), iostreams.New())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, "profclems/glab", got.FullName())
 	})
@@ -989,7 +994,7 @@ func Test_HeadRepo(t *testing.T) {
 		ios, cleanup := testIOStreamsWithConsole(t, c)
 		t.Cleanup(cleanup)
 		got, err := localRem.HeadRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, originRemote.Repo.FullName(), got.FullName())
 		assert.Equal(t, originRemote.Repo.RepoHost(), got.RepoHost())
@@ -1019,7 +1024,7 @@ func Test_HeadRepo(t *testing.T) {
 		ios, cleanup := testIOStreamsWithConsole(t, c)
 		t.Cleanup(cleanup)
 		got, err := localRem.HeadRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, localRem.remotes[0].Repo.FullName(), got.FullName())
 		assert.Equal(t, localRem.remotes[0].Repo.RepoHost(), got.RepoHost())
@@ -1054,7 +1059,7 @@ func Test_HeadRepo(t *testing.T) {
 		ios, cleanup := testIOStreamsWithConsole(t, c)
 		t.Cleanup(cleanup)
 		got, err := localRem.HeadRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, originRemote.Repo.FullName(), got.FullName())
 		assert.Equal(t, originRemote.Repo.RepoHost(), got.RepoHost())
@@ -1089,7 +1094,7 @@ func Test_HeadRepo(t *testing.T) {
 		ios, cleanup := testIOStreamsWithConsole(t, c)
 		t.Cleanup(cleanup)
 		got, err := localRem.HeadRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, "profclems/glab", got.FullName())
 		assert.Equal(t, "gitlab.com", got.RepoHost())
@@ -1143,7 +1148,7 @@ func Test_HeadRepo(t *testing.T) {
 		ios := iostreams.New(iostreams.WithStdout(io.Discard, true), iostreams.WithStderr(io.Discard, true))
 
 		got, err := localRem.HeadRepo(t.Context(), ios)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The fix should ensure we use the git remote host, not the API host
 		assert.Equal(t, "owner/repo", got.FullName())

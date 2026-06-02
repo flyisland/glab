@@ -94,11 +94,11 @@ func (o *options) complete(args []string) {
 
 func (o *options) validate(cmd *cobra.Command, args []string) error {
 	if !variableutils.IsValidKey(o.key) {
-		return cmdutils.FlagError{Err: fmt.Errorf("invalid key provided.\n%s", variableutils.ValidKeyMsg)}
+		return cmdutils.FlagError{Err: fmt.Errorf("invalid key provided: %s", variableutils.ValidKeyMsg)}
 	}
 
 	if o.value != "" && len(args) == 2 {
-		return cmdutils.FlagError{Err: errors.New("specify value either by the second positional argument or the --value flag.")}
+		return cmdutils.FlagError{Err: errors.New("specify value either by the second positional argument or the --value flag")}
 	}
 
 	value, err := variableutils.GetValue(o.value, o.io, args)
@@ -109,7 +109,7 @@ func (o *options) validate(cmd *cobra.Command, args []string) error {
 
 	if cmd.Flags().Changed("type") {
 		if o.typ != "env_var" && o.typ != "file" {
-			return cmdutils.FlagError{Err: fmt.Errorf("invalid type: %s. --type must be one of `env_var` or `file`.", o.typ)}
+			return cmdutils.FlagError{Err: fmt.Errorf("invalid type %q: --type must be one of `env_var` or `file`", o.typ)}
 		}
 	}
 

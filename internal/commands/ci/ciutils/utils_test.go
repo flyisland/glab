@@ -338,7 +338,7 @@ func TestParseCSVToIntSlice(t *testing.T) {
 
 			output, err := IDsFromArgs(args)
 			if err != nil {
-				require.Nil(t, err)
+				require.NoError(t, err)
 			}
 
 			assert.Equal(t, tc.expectedOut, output)

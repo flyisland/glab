@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
@@ -47,7 +48,7 @@ func mocks(t *testing.T, tc *gitlab_testing.TestClient) {
 		Times(1)
 
 	attestation, err := os.ReadFile("testdata/attestationDownload.json")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tc.MockAttestations.EXPECT().
 		DownloadAttestation("OWNER/REPO", int64(1)).
@@ -88,7 +89,7 @@ func Test_AttestationVerify(t *testing.T) {
 
 	output, err := exec("OWNER/REPO ./testdata/example_artifact.txt")
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, output.String(), "Artifact provenance successfully verified")
 }
 
@@ -113,5 +114,5 @@ func Test_AttestationVerify_Failure(t *testing.T) {
 
 	_, err := exec("OWNER/REPO ./testdata/example_artifact.txt")
 
-	assert.EqualError(t, err, "some error: \n")
+	assert.EqualError(t, err, "some error: ")
 }

@@ -53,12 +53,12 @@ func NewCmdGet(f cmdutils.Factory) *cobra.Command {
 
 			fileID, err := strconv.Atoi(args[0])
 			if err != nil {
-				return fmt.Errorf("Secure file ID must be an integer: %s", args[0])
+				return fmt.Errorf("secure file ID must be an integer: %s", args[0])
 			}
 
 			file, _, err := client.SecureFiles.ShowSecureFileDetails(repo.FullName(), int64(fileID))
 			if err != nil {
-				return fmt.Errorf("Error getting secure file: %v", err)
+				return fmt.Errorf("error getting secure file: %w", err)
 			}
 
 			return f.IO().PrintJSON(file)

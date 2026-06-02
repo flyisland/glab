@@ -5,7 +5,6 @@ package query
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -54,13 +53,13 @@ func newOrbitServer(t *testing.T, respBody string, respFn func(w http.ResponseWr
 	s := &orbitServer{}
 	s.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s.called = true
-		require.Equal(t, http.MethodPost, r.Method)
-		require.Equal(t, "/api/v4/orbit/query", r.URL.Path)
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/api/v4/orbit/query", r.URL.Path)
 
 		raw, err := io.ReadAll(r.Body)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 		s.rawBody = raw
-		require.NoError(t, json.Unmarshal(raw, &s.requestBody))
+		assert.NoError(t, json.Unmarshal(raw, &s.requestBody))
 
 		if respFn != nil {
 			respFn(w, r)
@@ -273,7 +272,7 @@ func TestQuery_Unauthorized(t *testing.T) {
 	// THEN the error maps to ExitUnauthenticated (exit code 3)
 	require.Error(t, err)
 	var exitErr *cmdutils.ExitError
-	require.True(t, errors.As(err, &exitErr))
+	require.ErrorAs(t, err, &exitErr)
 	assert.Equal(t, orbiterr.ExitUnauthenticated, exitErr.Code)
 }
 
@@ -429,7 +428,7 @@ func TestBuildRequest_InvalidJSON_AtCharacterOutsideString(t *testing.T) {
 	require.Error(t, err)
 
 	var exitErr *cmdutils.ExitError
-	require.True(t, errors.As(err, &exitErr))
+	require.ErrorAs(t, err, &exitErr)
 	assert.Contains(t, exitErr.Details, "stray '@'",
 		"error message must point at the stray @ explicitly")
 	assert.Contains(t, exitErr.Details, "string literal",
@@ -455,7 +454,7 @@ func TestBuildRequest_InvalidJSON_AtCharacterOutsideString(t *testing.T) {
 	// previous implementation that flattened the chain through
 	// errors.New.
 	var syn *json.SyntaxError
-	assert.True(t, errors.As(err, &syn),
+	assert.ErrorAs(t, err, &syn,
 		"wrapped error must preserve the original *json.SyntaxError in the chain")
 }
 
@@ -471,7 +470,7 @@ func TestBuildRequest_InvalidJSON_NonAtCharacter(t *testing.T) {
 	require.Error(t, err)
 
 	var exitErr *cmdutils.ExitError
-	require.True(t, errors.As(err, &exitErr))
+	require.ErrorAs(t, err, &exitErr)
 	assert.Equal(t, "query body is not valid JSON", exitErr.Details,
 		"non-@ syntax errors must fall back to the generic message")
 }

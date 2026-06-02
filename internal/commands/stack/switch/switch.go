@@ -40,7 +40,7 @@ func NewCmdStackSwitch(f cmdutils.Factory, gr git.GitRunner) *cobra.Command {
 func switchFunc(f cmdutils.Factory, name string) error {
 	currentStackTitle, err := git.GetCurrentStackTitle()
 	if err != nil {
-		return fmt.Errorf("error getting current stack: %v", err)
+		return fmt.Errorf("error getting current stack: %w", err)
 	}
 	if currentStackTitle == name {
 		// No need to switch, we're already on the right stack
@@ -49,7 +49,7 @@ func switchFunc(f cmdutils.Factory, name string) error {
 
 	stacks, err := git.GetStacks()
 	if err != nil {
-		return fmt.Errorf("getting stacks: %v", err)
+		return fmt.Errorf("getting stacks: %w", err)
 	}
 	var foundStack *git.Stack
 	for _, s := range stacks {

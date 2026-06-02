@@ -6,19 +6,37 @@ run:
 linters:
     default: none
     enable:
+        - asasalint
+        - asciicheck
+        - bidichk
+        - bodyclose
+        - contextcheck
         - copyloopvar
         - depguard
         - dupword
         - errcheck
+        - errorlint
+        - exptostd
+        - fatcontext
         - forbidigo
+        - forcetypeassert
+        - gocheckcompilerdirectives
+        - gochecksumtype
+        - gomoddirectives
         - govet
         - ineffassign
         - makezero
         - mirror
+        - misspell
         - modernize
+        - nilerr
         - nilnesserr
+        - nolintlint
         - nonamedreturns
+        - nosprintfhostport
+        - reassign
         - staticcheck
+        - testifylint
         - unconvert
         - unparam
         - unused
@@ -56,7 +74,6 @@ linters:
           - all
           - -QF*
           - -ST1003
-          - -ST1005
           - -ST1008
           - -ST1012
           - -ST1016

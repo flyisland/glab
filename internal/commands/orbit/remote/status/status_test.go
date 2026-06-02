@@ -4,7 +4,6 @@ package status
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"testing"
 
@@ -88,6 +87,6 @@ func TestStatus_FeatureFlagOff(t *testing.T) {
 	// THEN the error is mapped to ExitOrbitUnavailable (exit code 2)
 	require.Error(t, err)
 	var exitErr *cmdutils.ExitError
-	require.True(t, errors.As(err, &exitErr))
+	require.ErrorAs(t, err, &exitErr)
 	assert.Equal(t, orbiterr.ExitOrbitUnavailable, exitErr.Code)
 }

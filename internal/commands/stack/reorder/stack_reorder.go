@@ -60,17 +60,17 @@ func (o *options) run(ctx context.Context, f cmdutils.Factory, getText cmdutils.
 
 	title, err := git.GetCurrentStackTitle()
 	if err != nil {
-		return fmt.Errorf("error retrieving current stack title: %v", err)
+		return fmt.Errorf("error retrieving current stack title: %w", err)
 	}
 
 	ref, err := git.CurrentStackRefFromCurrentBranch(title)
 	if err != nil {
-		return fmt.Errorf("error checking for stack: %v", err)
+		return fmt.Errorf("error checking for stack: %w", err)
 	}
 
 	stack, err := git.GatherStackRefs(title)
 	if err != nil {
-		return fmt.Errorf("error getting refs from file system: %v", err)
+		return fmt.Errorf("error getting refs from file system: %w", err)
 	}
 
 	o.io.StopSpinner("")
@@ -78,7 +78,7 @@ func (o *options) run(ctx context.Context, f cmdutils.Factory, getText cmdutils.
 
 	branches, err := promptForOrder(ctx, f, getText, stack, ref.Branch)
 	if err != nil {
-		return fmt.Errorf("error getting new branch order: %v", err)
+		return fmt.Errorf("error getting new branch order: %w", err)
 	}
 
 	// resuming spinner
@@ -86,7 +86,7 @@ func (o *options) run(ctx context.Context, f cmdutils.Factory, getText cmdutils.
 
 	updatedStack, err := matchBranchesToStack(stack, branches)
 	if err != nil {
-		return fmt.Errorf("error matching branches to stack: %v", err)
+		return fmt.Errorf("error matching branches to stack: %w", err)
 	}
 
 	if reflect.DeepEqual(stack, updatedStack) {
@@ -95,13 +95,13 @@ func (o *options) run(ctx context.Context, f cmdutils.Factory, getText cmdutils.
 
 	client, err := auth.GetAuthenticatedClient(f.Config(), f.GitLabClient, f.IO())
 	if err != nil {
-		return fmt.Errorf("error authorizing with GitLab: %v", err)
+		return fmt.Errorf("error authorizing with GitLab: %w", err)
 	}
 	o.labClient = client
 
 	err = updateMRs(ctx, f, updatedStack, stack)
 	if err != nil {
-		return fmt.Errorf("error updating merge requests: %v", err)
+		return fmt.Errorf("error updating merge requests: %w", err)
 	}
 
 	o.io.StopSpinner("%s Reordering complete\n", f.IO().Color().GreenCheck())
@@ -119,7 +119,7 @@ func matchBranchesToStack(stack git.Stack, branches []string) (git.Stack, error)
 		// let's find a ref from the branch
 		ref, err := stack.RefFromBranch(branch)
 		if err != nil {
-			return git.Stack{}, fmt.Errorf("could not match branch to stack ref: %v", err)
+			return git.Stack{}, fmt.Errorf("could not match branch to stack ref: %w", err)
 		}
 
 		var next string
@@ -188,12 +188,12 @@ func updateMRs(ctx context.Context, f cmdutils.Factory, newStack git.Stack, oldS
 
 			client, err := f.GitLabClient()
 			if err != nil {
-				return fmt.Errorf("error connecting to GitLab: %v", err)
+				return fmt.Errorf("error connecting to GitLab: %w", err)
 			}
 
 			mr, _, err := mrutils.MRFromArgsWithOpts(ctx, f, []string{ref.Branch}, nil, "opened")
 			if err != nil {
-				return fmt.Errorf("error getting merge request from GitLab: %v", err)
+				return fmt.Errorf("error getting merge request from GitLab: %w", err)
 			}
 
 			var previousBranch string
@@ -216,7 +216,7 @@ func updateMRs(ctx context.Context, f cmdutils.Factory, newStack git.Stack, oldS
 
 			_, err = api.UpdateMR(client, mr.ProjectID, mr.IID, &opts)
 			if err != nil {
-				return fmt.Errorf("error updating merge request on GitLab: %v", err)
+				return fmt.Errorf("error updating merge request on GitLab: %w", err)
 			}
 		}
 	}

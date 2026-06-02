@@ -260,6 +260,7 @@ hosts:
 			if !assert.NotNil(t, got) {
 				return
 			}
+			defer got.Body.Close()
 			req := got.Request
 			if req.Method != tt.want.method {
 				t.Errorf("Request.Method = %q, want %q", req.Method, tt.want.method)
@@ -306,7 +307,7 @@ hosts:
 	})
 
 	httpClient := cmdtest.NewTestApiClient(t, client, "OTOKEN", "gitlab.com")
-	_, err := httpRequest(t.Context(), httpClient, http.MethodGet, "http://host:abc", nil, nil)
+	_, err := httpRequest(t.Context(), httpClient, http.MethodGet, "http://host:abc", nil, nil) //nolint:bodyclose // transport returns nil response on invalid-URL error path
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "invalid request URL")
 }

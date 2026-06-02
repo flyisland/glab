@@ -13,7 +13,7 @@ import (
 	"gitlab.com/gitlab-org/cli/internal/mcpannotations"
 )
 
-var errTodoExists = errors.New("To-do already exists.")
+var errTodoExists = errors.New("to-do already exists")
 
 func NewCmdTodo(f cmdutils.Factory) *cobra.Command {
 	mrToDoCmd := &cobra.Command{

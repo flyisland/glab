@@ -115,7 +115,7 @@ func TestConfigGet(t *testing.T) {
 
 			assert.Equal(t, tt.stdout, stdout.String())
 			assert.Equal(t, tt.stderr, stderr.String())
-			assert.Equal(t, "", tt.config["_written"])
+			assert.Empty(t, tt.config["_written"])
 		})
 	}
 }

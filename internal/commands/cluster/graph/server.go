@@ -40,7 +40,8 @@ type server struct {
 }
 
 func (s *server) Run(ctx context.Context) error {
-	l, err := net.Listen(s.listenNet, s.listenAddr)
+	var lc net.ListenConfig
+	l, err := lc.Listen(ctx, s.listenNet, s.listenAddr)
 	if err != nil {
 		return err
 	}
@@ -53,7 +54,7 @@ func (s *server) Run(ctx context.Context) error {
 		s.io.LogError("Failed to open browser:", err)
 	}
 	err = srv.Serve(l)
-	if err == http.ErrServerClosed {
+	if errors.Is(err, http.ErrServerClosed) {
 		err = nil
 	}
 	return err
@@ -62,7 +63,7 @@ func (s *server) Run(ctx context.Context) error {
 func (s *server) handle(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithCancel(r.Context())
 	defer cancel()
-	conn, _, err := websocket.Dial(ctx, s.graphAPIURL, &websocket.DialOptions{
+	conn, _, err := websocket.Dial(ctx, s.graphAPIURL, &websocket.DialOptions{ //nolint:bodyclose // upgrade response body is consumed by the websocket library
 		HTTPClient: s.httpClient,
 		HTTPHeader: http.Header{
 			"Authorization": []string{s.authorization},

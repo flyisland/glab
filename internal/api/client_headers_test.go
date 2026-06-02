@@ -138,7 +138,7 @@ func TestCustomHeadersWithRequestBody(t *testing.T) {
 	// Verify that the request body is preserved
 	bodyBytes, err := io.ReadAll(req.Body)
 	require.NoError(t, err)
-	require.Equal(t, `{"key": "value", "data": "test"}`, string(bodyBytes))
+	require.JSONEq(t, `{"key": "value", "data": "test"}`, string(bodyBytes))
 }
 
 func TestClientInitializationWithNoCustomHeaders(t *testing.T) {

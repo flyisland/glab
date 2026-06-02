@@ -32,7 +32,7 @@ func TestChangelogGenerate(t *testing.T) {
 	)
 
 	out, err := exec("--version 1.0.0")
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, out.ErrBuf.String())
 
@@ -73,7 +73,7 @@ func TestChangelogGenerateWithError(t *testing.T) {
 			)
 
 			_, err := exec("--version 1.0.0")
-			require.NotNil(t, err)
+			require.Error(t, err)
 		})
 	}
 }

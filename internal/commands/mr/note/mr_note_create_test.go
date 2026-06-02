@@ -140,7 +140,7 @@ func Test_cmdCreate_prompt(t *testing.T) {
 
 		_, err := exec(`1`)
 		require.Error(t, err)
-		assert.Equal(t, "aborted... Note has an empty message.", err.Error())
+		assert.Equal(t, "aborted: note has an empty message", err.Error())
 	})
 }
 
@@ -520,7 +520,7 @@ func Test_cmdCreate_stdin(t *testing.T) {
 		{
 			name:    "empty stdin produces error",
 			stdin:   "",
-			wantErr: "aborted... Note has an empty message.",
+			wantErr: "aborted: note has an empty message",
 		},
 	}
 

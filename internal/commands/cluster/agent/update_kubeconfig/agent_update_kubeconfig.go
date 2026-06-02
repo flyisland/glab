@@ -124,7 +124,7 @@ func (o *options) run() error {
 		return err
 	}
 	if !metadata.KAS.Enabled {
-		return fmt.Errorf("the GitLab agent server for Kubernetes is disabled on %s. Ask your administrator to enable and configure it.", repo.RepoHost())
+		return fmt.Errorf("the GitLab agent server for Kubernetes is disabled on %s; ask your administrator to enable and configure it", repo.RepoHost())
 	}
 	kasK8SProxyURL, err := agentutils.GetKasK8SProxyURL(metadata)
 	if err != nil {
@@ -147,7 +147,7 @@ func (o *options) run() error {
 	// Retrieve glab executable path for exec
 	glabExecutable, err := os.Executable()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	startingConfig, err := o.configAccess.GetStartingConfig()

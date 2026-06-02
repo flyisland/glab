@@ -107,7 +107,7 @@ func (o *options) run() error {
 
 func keySelectPrompt(ctx context.Context, opts *options) (int64, error) {
 	if !opts.io.PromptEnabled() {
-		return 0, cmdutils.FlagError{Err: errors.New("the <key-id> argument is required when prompts are disabled.")}
+		return 0, cmdutils.FlagError{Err: errors.New("the <key-id> argument is required when prompts are disabled")}
 	}
 
 	sshKeyListOptions := &gitlab.ListSSHKeysOptions{

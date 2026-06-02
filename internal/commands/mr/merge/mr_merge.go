@@ -106,7 +106,7 @@ func NewCmdMerge(f cmdutils.Factory) *cobra.Command {
 
 func (o *options) validate() error {
 	if !o.squashBeforeMerge && o.squashMessage != "" {
-		return &cmdutils.FlagError{Err: errors.New("--squash-message can only be used with --squash.")}
+		return &cmdutils.FlagError{Err: errors.New("--squash-message can only be used with --squash")}
 	}
 
 	return nil

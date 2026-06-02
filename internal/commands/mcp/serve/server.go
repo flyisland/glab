@@ -359,7 +359,7 @@ func (s *mcpServer) createCommandHandler(cmdPath []string, cmd *cobra.Command) m
 		output, err := s.executeGlabCommand(cmdPath, args)
 		if err != nil {
 			// Return the error as content so the user can see what went wrong
-			return &mcp.CallToolResult{
+			return &mcp.CallToolResult{ //nolint:nilerr // MCP surfaces tool errors via IsError on the result, not by returning a Go error
 				Content: []mcp.Content{
 					&mcp.TextContent{
 						Text: output, // This includes the actual error message from the command

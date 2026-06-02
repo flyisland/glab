@@ -63,7 +63,7 @@ func NewCmdUpdate(f cmdutils.Factory) *cobra.Command {
 			for _, v := range variablesToCreate {
 				split := strings.SplitN(v, ":", 2)
 				if len(split) != 2 {
-					return fmt.Errorf("Invalid format for --create-variable: %s", v)
+					return fmt.Errorf("invalid format for --create-variable: %s", v)
 				}
 
 				variablePairsToCreate = append(variablePairsToCreate, [2]string{split[0], split[1]})
@@ -73,7 +73,7 @@ func NewCmdUpdate(f cmdutils.Factory) *cobra.Command {
 			for _, v := range variablesToUpdate {
 				split := strings.SplitN(v, ":", 2)
 				if len(split) != 2 {
-					return fmt.Errorf("Invalid format for --update-variable: %s", v)
+					return fmt.Errorf("invalid format for --update-variable: %s", v)
 				}
 
 				variablePairsToUpdate = append(variablePairsToUpdate, [2]string{split[0], split[1]})

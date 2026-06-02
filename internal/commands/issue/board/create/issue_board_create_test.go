@@ -23,10 +23,11 @@ func TestNewCmdCreate(t *testing.T) {
 			return nil, fmt.Errorf("error expected")
 		}
 
+		path, _ := projectID.(string)
 		return &gitlab.IssueBoard{
 			ID:        11,
 			Name:      *opts.Name,
-			Project:   &gitlab.Project{PathWithNamespace: projectID.(string)},
+			Project:   &gitlab.Project{PathWithNamespace: path},
 			Milestone: nil,
 			Lists:     nil,
 		}, nil

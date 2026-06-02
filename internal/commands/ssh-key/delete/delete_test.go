@@ -57,7 +57,7 @@ func Test_DeleteSSHKey(t *testing.T) {
 			Name:       "Delete SSH key without ID",
 			cli:        "",
 			wantErr:    true,
-			wantStderr: "the <key-id> argument is required when prompts are disabled.",
+			wantStderr: "the <key-id> argument is required when prompts are disabled",
 			setupMock:  func(tc *gitlabtesting.TestClient) {},
 		},
 		{

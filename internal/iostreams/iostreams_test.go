@@ -40,7 +40,7 @@ func Test_HelperFunctions(t *testing.T) {
 			assert.Equal(t, ios.IsErrTTY, got.IsErrTTY)
 			assert.Equal(t, ios.IsInTTY, got.IsInTTY)
 			assert.Equal(t, ios.promptDisabled, got.promptDisabled)
-			assert.Equal(t, "", got.pagerCommand)
+			assert.Empty(t, got.pagerCommand)
 		})
 		t.Run("GLAB_PAGER=", func(t *testing.T) {
 			t.Setenv("GLAB_PAGER", "more")
@@ -227,7 +227,7 @@ func Test_stripControlCharacters(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := stripControlCharacters(tt.args.badString)
-			assert.Equal(t, got, tt.want)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

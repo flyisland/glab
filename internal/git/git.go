@@ -61,7 +61,7 @@ func ParseDefaultBranch(output []byte) (string, error) {
 }
 
 // ErrNotOnAnyBranch indicates that the user is in detached HEAD state
-var ErrNotOnAnyBranch = errors.New("you're not on any Git branch (a 'detached HEAD' state).")
+var ErrNotOnAnyBranch = errors.New("you're not on any Git branch (a 'detached HEAD' state)")
 
 // Ref represents a git commit reference
 type Ref struct {
@@ -170,7 +170,7 @@ func Commits(baseRef, headRef string) ([]*Commit, error) {
 	}
 
 	if len(commits) == 0 {
-		return commits, fmt.Errorf("could not find any commits between %s and %s.", baseRef, headRef)
+		return commits, fmt.Errorf("could not find any commits between %s and %s", baseRef, headRef)
 	}
 
 	return commits, nil
@@ -537,7 +537,7 @@ func GetAllConfig(key string) ([]byte, error) {
 func assertValidConfigKey(key string) error {
 	s := strings.Split(key, ".")
 	if len(s) < 2 {
-		return fmt.Errorf("incorrect Git configuration key.")
+		return fmt.Errorf("incorrect Git configuration key")
 	}
 	return nil
 }

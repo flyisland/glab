@@ -351,7 +351,7 @@ func TestProjectForkExistingRepo(t *testing.T) {
 			// Log stderr for debugging
 
 			if tt.expectError {
-				assert.Error(t, err, "expected an error but got none")
+				require.Error(t, err, "expected an error but got none")
 				if tt.expectNamespaceMessage {
 					assert.Contains(t, out.ErrBuf.String(), "Only user namespaces")
 				}

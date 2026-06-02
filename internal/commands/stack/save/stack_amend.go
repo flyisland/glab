@@ -41,7 +41,7 @@ func NewCmdAmendStack(f cmdutils.Factory, gr git.GitRunner, getText cmdutils.Get
 		RunE: func(cmd *cobra.Command, args []string) error {
 			output, err := amendFunc(cmd.Context(), f, args, getText, description, amendStageAll)
 			if err != nil {
-				return fmt.Errorf("could not run stack amend: %v", err)
+				return fmt.Errorf("could not run stack amend: %w", err)
 			}
 
 			if f.IO().IsOutputTTY() {
@@ -63,29 +63,29 @@ func amendFunc(ctx context.Context, f cmdutils.Factory, args []string, getText c
 	// check if there are even any changes before we start
 	err := checkForChanges()
 	if err != nil {
-		return "", fmt.Errorf("could not save: %v", err)
+		return "", fmt.Errorf("could not save: %w", err)
 	}
 
 	// get stack title
 	title, err := git.GetCurrentStackTitle()
 	if err != nil {
-		return "", fmt.Errorf("error running Git command: %v", err)
+		return "", fmt.Errorf("error running Git command: %w", err)
 	}
 
 	ref, err := git.CurrentStackRefFromCurrentBranch(title)
 	if err != nil {
-		return "", fmt.Errorf("error checking for stack: %v", err)
+		return "", fmt.Errorf("error checking for stack: %w", err)
 	}
 
 	if ref.Branch == "" {
-		return "", fmt.Errorf("not currently in a stack. Change to the branch you want to amend.")
+		return "", fmt.Errorf("not currently in a stack; change to the branch you want to amend")
 	}
 
 	// a description is required, so ask if one is not provided
 	if description == "" {
 		description, err = promptForCommit(ctx, f, getText, ref.Description)
 		if err != nil {
-			return "", fmt.Errorf("error getting commit message: %v", err)
+			return "", fmt.Errorf("error getting commit message: %w", err)
 		}
 	}
 
@@ -94,13 +94,13 @@ func amendFunc(ctx context.Context, f cmdutils.Factory, args []string, getText c
 	// git add files
 	err = addFiles(args[0:], stageAll)
 	if err != nil {
-		return "", fmt.Errorf("error adding files: %v", err)
+		return "", fmt.Errorf("error adding files: %w", err)
 	}
 
 	// run the amend commit
 	err = gitAmend(description)
 	if err != nil {
-		return "", fmt.Errorf("error amending commit with Git: %v", err)
+		return "", fmt.Errorf("error amending commit with Git: %w", err)
 	}
 
 	var output string
@@ -117,7 +117,7 @@ func gitAmend(description string) error {
 	amendCmd := git.GitCommand("commit", "--amend", "-m", description)
 	output, err := run.PrepareCmd(amendCmd).Output()
 	if err != nil {
-		return fmt.Errorf("error running Git command: %v", err)
+		return fmt.Errorf("error running Git command: %w", err)
 	}
 
 	fmt.Println("Amend commit: ", string(output))

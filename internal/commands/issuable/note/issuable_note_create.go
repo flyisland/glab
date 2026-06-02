@@ -63,7 +63,7 @@ func NewCmdNote(f cmdutils.Factory, issueType issuable.IssueType) *cobra.Command
 			}
 
 			if strings.TrimSpace(body) == "" {
-				return errors.New("aborted... Note is empty.")
+				return errors.New("aborted: note is empty")
 			}
 
 			noteInfo, _, err := client.Notes.CreateIssueNote(repo.FullName(), issue.IID, &gitlab.CreateIssueNoteOptions{Body: &body})

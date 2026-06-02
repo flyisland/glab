@@ -123,22 +123,22 @@ func Test_defaultConfig(t *testing.T) {
 	defer StubWriteConfig(&mainBuf, &hostsBuf)()
 
 	cfg := NewBlankConfig()
-	assert.NoError(t, cfg.Write())
-	assert.Equal(t, "", hostsBuf.String())
+	require.NoError(t, cfg.Write())
+	assert.Empty(t, hostsBuf.String())
 
 	proto, err := cfg.Get("", "git_protocol")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "ssh", proto)
 
 	editor, err := cfg.Get("", "editor")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, os.Getenv("EDITOR"), editor)
 
 	aliases, err := cfg.Aliases()
-	assert.Nil(t, err)
-	assert.Equal(t, len(aliases.All()), 2)
+	require.NoError(t, err)
+	assert.Len(t, aliases.All(), 2)
 	expansion, _ := aliases.Get("co")
-	assert.Equal(t, expansion, "mr checkout")
+	assert.Equal(t, "mr checkout", expansion)
 }
 
 func Test_getFromKeyring(t *testing.T) {
@@ -156,15 +156,15 @@ func Test_getFromKeyring(t *testing.T) {
 
 	keyring.MockInit()
 	token, _, err := c.GetWithSource("gitlab.com", "token", false)
-	assert.NoError(t, err)
-	assert.Equal(t, "", token)
+	require.NoError(t, err)
+	assert.Empty(t, token)
 
 	err = keyring.Set("glab:gitlab.com", "", "glpat-1234")
 	require.NoError(t, err)
 
 	token, _, err = c.GetWithSource("gitlab.com", "token", false)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "glpat-1234", token)
 }
 
@@ -176,7 +176,7 @@ func Test_config_Get_NotFoundError(t *testing.T) {
 	cfg := NewBlankConfig()
 
 	local, err := cfg.Local()
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.NotNil(t, local)
 
 	_, err = local.FindEntry("git_protocol")
@@ -510,8 +510,8 @@ func Test_GetFromEnvWithSource_CI_Subfolder(t *testing.T) {
 		t.Setenv("GITLAB_CI", "true")
 
 		value, source := GetFromEnvWithSource("subfolder")
-		assert.Equal(t, "", value)
-		assert.Equal(t, "", source)
+		assert.Empty(t, value)
+		assert.Empty(t, source)
 	})
 
 	t.Run("GITLAB_SUBFOLDER takes precedence over CI_SERVER_URL", func(t *testing.T) {

@@ -4,7 +4,6 @@ package remote
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -34,7 +33,7 @@ func TestGet_UnknownReturnsErrNotFound(t *testing.T) {
 
 	_, err := Get("does-not-exist")
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrNotFound), "error must wrap ErrNotFound")
+	assert.ErrorIs(t, err, ErrNotFound, "error must wrap ErrNotFound")
 }
 
 func TestValidateEntries(t *testing.T) {

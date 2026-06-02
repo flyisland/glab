@@ -21,7 +21,7 @@ func GenerateStackSha(message string, title string, author string, timestamp tim
 	shakeHash.Write(toSha)
 	_, err := shakeHash.Read(hashData)
 	if err != nil {
-		return "", fmt.Errorf("error generating hash for stack branch: %v", err)
+		return "", fmt.Errorf("error generating hash for stack branch: %w", err)
 	}
 
 	return hex.EncodeToString(hashData), nil
@@ -32,7 +32,7 @@ func CreateShaBranch(f cmdutils.Factory, sha string, title string) (string, erro
 
 	prefix, err := cfg.Get("", "branch_prefix")
 	if err != nil {
-		return "", fmt.Errorf("could not get prefix config: %v", err)
+		return "", fmt.Errorf("could not get prefix config: %w", err)
 	}
 
 	if prefix == "" {

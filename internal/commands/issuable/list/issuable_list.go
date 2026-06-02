@@ -95,13 +95,13 @@ func NewCmdList(f cmdutils.Factory, runE func(opts *ListOptions) error, issueTyp
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if opts.Author != "" && len(opts.NotAuthor) != 0 {
 				return cmdutils.FlagError{
-					Err: errors.New("flags --author and --not-author are mutually exclusive."),
+					Err: errors.New("flags --author and --not-author are mutually exclusive"),
 				}
 			}
 
 			if opts.Assignee != "" && len(opts.NotAssignee) != 0 {
 				return cmdutils.FlagError{
-					Err: errors.New("flags --assignee and --not-assignee are mutually exclusive."),
+					Err: errors.New("flags --assignee and --not-assignee are mutually exclusive"),
 				}
 			}
 
@@ -344,7 +344,7 @@ func listRun(opts *ListOptions) error {
 	}
 
 	if opts.IO.StartPager() != nil {
-		return fmt.Errorf("failed to start pager: %q", err)
+		return fmt.Errorf("failed to start pager: %w", err)
 	}
 	defer opts.IO.StopPager()
 
@@ -386,7 +386,7 @@ func listEpicIssues(client *gitlab.Client, opts *ListOptions, projListOpts *gitl
 	listOpts.PerPage = min(maxIssues, api.MaxPerPage)
 
 	for {
-		is, req, err := client.EpicIssues.ListEpicIssues(opts.Group, int64(opts.Epic), &listOpts) //nolint:staticcheck
+		is, req, err := client.EpicIssues.ListEpicIssues(opts.Group, int64(opts.Epic), &listOpts)
 		if err != nil {
 			return nil, err
 		}

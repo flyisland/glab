@@ -3,7 +3,6 @@
 package setup
 
 import (
-	"errors"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -122,7 +121,7 @@ func TestSetup_ShortCircuitOnFFOff(t *testing.T) {
 	require.Error(t, err)
 
 	var exitErr *cmdutils.ExitError
-	require.True(t, errors.As(err, &exitErr), "error should be *cmdutils.ExitError, got %T", err)
+	require.ErrorAs(t, err, &exitErr, "error should be *cmdutils.ExitError, got %T", err)
 	assert.Equal(t, orbiterr.ExitOrbitUnavailable, exitErr.Code)
 }
 

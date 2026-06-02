@@ -15,7 +15,7 @@ import (
 
 // Test started when the test binary is started
 // and calls the main function
-func TestGlab(t *testing.T) { // nolint:unparam
+func TestGlab(t *testing.T) { //nolint:unparam
 	main()
 }
 

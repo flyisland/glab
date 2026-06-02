@@ -123,9 +123,12 @@ func (o *options) run() error {
 		if err != nil {
 			return err
 		}
-		// The AuthSource for apiClient with OAuth2 settings should gives back
+		// The AuthSource for apiClient with OAuth2 settings should give back
 		// gitlab.OAuthTokenSource, which should pass type assertion here.
-		authSource := apiClient.AuthSource().(gitlab.OAuthTokenSource)
+		authSource, ok := apiClient.AuthSource().(gitlab.OAuthTokenSource)
+		if !ok {
+			return fmt.Errorf("expected OAuthTokenSource auth source for %q, got %T", host, apiClient.AuthSource())
+		}
 		oauth2Token, err := authSource.TokenSource.Token()
 		if err != nil {
 			return fmt.Errorf("failed to refresh token for %q: %w", host, err)

@@ -179,7 +179,7 @@ func (o *options) run() error {
 		case 0:
 			return cmdutils.FlagError{Err: fmt.Errorf("no active token found with the %s '%v'", o.nameKind(), o.name)}
 		default:
-			return cmdutils.FlagError{Err: fmt.Errorf("multiple tokens found with the name '%v'. Use the ID instead.", o.name)}
+			return cmdutils.FlagError{Err: fmt.Errorf("multiple tokens found with the name %q; use the ID instead", o.name)}
 		}
 		rotateOptions := &gitlab.RotatePersonalAccessTokenOptions{
 			ExpiresAt: &expirationDate,

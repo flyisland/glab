@@ -484,11 +484,11 @@ func ParseAssignees(assignees []string) *UserAssignments {
 func (ua *UserAssignments) VerifyAssignees() error {
 	// Fail if relative and absolute assignees were given, there is no reason to mix them.
 	if len(ua.ToReplace) != 0 && (len(ua.ToAdd) != 0 || len(ua.ToRemove) != 0) {
-		return errors.New("mixing relative (+,!,-) and absolute assignments is forbidden.")
+		return errors.New("mixing relative (+,!,-) and absolute assignments is forbidden")
 	}
 
 	if m := utils.CommonElementsInStringSlice(ua.ToAdd, ua.ToRemove); len(m) != 0 {
-		return fmt.Errorf("%s %q present in both add and remove, which is forbidden.",
+		return fmt.Errorf("%s %q present in both add and remove, which is forbidden",
 			utils.Pluralize(len(m), "element"),
 			strings.Join(m, " "))
 	}
@@ -534,7 +534,7 @@ func (ua *UserAssignments) UsersFromAddRemove(
 
 	// Only one of those is required
 	if mergeRequestAssignees != nil && issueAssignees != nil {
-		return &[]int64{}, actions, fmt.Errorf("issueAssignees and mergeRequestAssignees can't both be set.")
+		return &[]int64{}, actions, errors.New("issueAssignees and mergeRequestAssignees can't both be set")
 	}
 
 	// Path for Issues

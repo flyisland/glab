@@ -31,7 +31,7 @@ func AddJQFlag(cmd *cobra.Command, io *iostreams.IOStreams) {
 	cmd.PreRunE = func(c *cobra.Command, args []string) error {
 		if io.JQ.IsActive() {
 			if outFlag := lookupOutputFlag(c); outFlag != nil && outFlag.Value.String() != "json" {
-				return &FlagError{Err: fmt.Errorf("Using --jq requires --%s=json (got %q)", outFlag.Name, outFlag.Value.String())}
+				return &FlagError{Err: fmt.Errorf("using --jq requires --%s=json (got %q)", outFlag.Name, outFlag.Value.String())}
 			}
 		}
 

@@ -45,7 +45,7 @@ func NewCmdStackFirst(f cmdutils.Factory, gr git.GitRunner) *cobra.Command {
 			}
 
 			if stack.Empty() {
-				return errors.New("you are on an empty stack. To use a stack, first save a diff.")
+				return errors.New("you are on an empty stack; to use a stack, first save a diff")
 			}
 
 			ref := stack.First()
@@ -83,7 +83,7 @@ func NewCmdStackNext(f cmdutils.Factory, gr git.GitRunner) *cobra.Command {
 			}
 
 			if ref.IsLast() {
-				return fmt.Errorf("you are already at the last diff. Use `glab stack list` to see the complete list.")
+				return errors.New("you are already at the last diff; use `glab stack list` to see the complete list")
 			}
 
 			err = git.CheckoutBranch(stack.Refs[ref.Next].Branch, gr)
@@ -121,7 +121,7 @@ func NewCmdStackPrev(f cmdutils.Factory, gr git.GitRunner) *cobra.Command {
 			}
 
 			if ref.IsFirst() {
-				return fmt.Errorf("you are already at the first diff. Use `glab stack list` to see the complete list.")
+				return errors.New("you are already at the first diff; use `glab stack list` to see the complete list")
 			}
 
 			err = git.CheckoutBranch(stack.Refs[ref.Prev].Branch, gr)
@@ -154,7 +154,7 @@ func NewCmdStackLast(f cmdutils.Factory, gr git.GitRunner) *cobra.Command {
 			}
 
 			if stack.Empty() {
-				return errors.New("stack is empty until you save a diff.")
+				return errors.New("stack is empty until you save a diff")
 			}
 
 			ref := stack.Last()

@@ -170,7 +170,7 @@ func TestPrintJSON_JQFilterEmptyProducesNoOutput(t *testing.T) {
 
 	require.NoError(t, io.PrintJSON(map[string]string{"name": "alpha"}))
 
-	assert.Equal(t, "", buf.String())
+	assert.Empty(t, buf.String())
 }
 
 func TestPrintJSON_JQFilterRuntimeErrorIsWrapped(t *testing.T) {

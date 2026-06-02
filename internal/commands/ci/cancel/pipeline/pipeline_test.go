@@ -17,7 +17,7 @@ func TestCIPipelineCancelWithoutArgument(t *testing.T) {
 	exec := cmdtest.SetupCmdForTest(t, NewCmdCancel, false)
 
 	out, err := exec("")
-	assert.EqualError(t, err, "You must pass a pipeline ID.")
+	require.EqualError(t, err, "you must pass a pipeline ID")
 
 	assert.Empty(t, out.OutBuf.String())
 	assert.Empty(t, out.ErrBuf.String())

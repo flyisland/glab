@@ -42,7 +42,7 @@ func TestOptions_filterByAgents_empty(t *testing.T) {
 	}
 
 	filtered := agentutils.FilterByAgents(tokens, opts.agents)
-	require.Len(t, filtered, 0) // Should return no tokens when filter doesn't match
+	require.Empty(t, filtered) // Should return no tokens when filter doesn't match
 }
 
 func TestOptions_parseCacheID(t *testing.T) {
@@ -51,7 +51,7 @@ func TestOptions_parseCacheID(t *testing.T) {
 	cacheID := "aHR0cHM6Ly9naXRsYWIuY29t-123"
 
 	gitlabURL, agentID, err := agentutils.ParseCacheID(cacheID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "https://gitlab.com", gitlabURL)
 	assert.Equal(t, int64(123), agentID)
 }
@@ -59,7 +59,7 @@ func TestOptions_parseCacheID(t *testing.T) {
 func TestOptions_parseCacheID_invalid(t *testing.T) {
 	// Test invalid cache ID format
 	_, _, err := agentutils.ParseCacheID("invalid")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid cache ID format")
 }
 
@@ -71,11 +71,11 @@ func TestListNoTokens(t *testing.T) {
 
 	// WHEN
 	output, err := exec("--filesystem --keyring=false")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// THEN
 	assert.Equal(t, heredoc.Doc(`
 		No cached tokens found.
 	`), output.String())
-	assert.Equal(t, "", output.Stderr())
+	assert.Empty(t, output.Stderr())
 }

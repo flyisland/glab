@@ -10,6 +10,7 @@ import (
 
 	"git.sr.ht/~timofurrer/ugh"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
@@ -147,11 +148,11 @@ func TestGenerateMRTitleAndBody(t *testing.T) {
 			title, desc, err := GenerateMRTitleAndBody(tt.commits, tt.fallbackBranch, tt.fillCommitBody)
 
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.expectedTitle, title)
 			assert.Equal(t, tt.expectedDesc, desc)
 		})
@@ -215,7 +216,7 @@ func TestGenerateMRCommitListBody(t *testing.T) {
 				return
 			}
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.expectedOutput, output)
 		})
 	}
@@ -239,7 +240,7 @@ func Test_MRCheckErrors(t *testing.T) {
 			errOpts: MRCheckErrOptions{
 				Draft: true,
 			},
-			output: "this merge request is still a draft. Run `glab mr update 1 --ready` to mark it as ready for review.",
+			output: "this merge request is still a draft; run `glab mr update 1 --ready` to mark it as ready for review",
 		},
 		{
 			name: "pipeline",
@@ -255,7 +256,7 @@ func Test_MRCheckErrors(t *testing.T) {
 			errOpts: MRCheckErrOptions{
 				PipelineStatus: true,
 			},
-			output: "the pipeline for this merge request has failed. The pipeline must succeed before merging.",
+			output: "the pipeline for this merge request has failed; it must succeed before merging",
 		},
 		{
 			name: "merged",
@@ -268,7 +269,7 @@ func Test_MRCheckErrors(t *testing.T) {
 			errOpts: MRCheckErrOptions{
 				Merged: true,
 			},
-			output: "this merge request has already been merged.",
+			output: "this merge request has already been merged",
 		},
 		{
 			name: "closed",
@@ -281,7 +282,7 @@ func Test_MRCheckErrors(t *testing.T) {
 			errOpts: MRCheckErrOptions{
 				Closed: true,
 			},
-			output: "this merge request has been closed.",
+			output: "this merge request has been closed",
 		},
 		{
 			name: "opened",
@@ -294,7 +295,7 @@ func Test_MRCheckErrors(t *testing.T) {
 			errOpts: MRCheckErrOptions{
 				Opened: true,
 			},
-			output: "this merge request is already open.",
+			output: "this merge request is already open",
 		},
 		{
 			name: "subscribed",
@@ -307,7 +308,7 @@ func Test_MRCheckErrors(t *testing.T) {
 			errOpts: MRCheckErrOptions{
 				Subscribed: true,
 			},
-			output: "you are already subscribed to this merge request.",
+			output: "you are already subscribed to this merge request",
 		},
 		{
 			name: "unsubscribed",
@@ -320,7 +321,7 @@ func Test_MRCheckErrors(t *testing.T) {
 			errOpts: MRCheckErrOptions{
 				Unsubscribed: true,
 			},
-			output: "you are not subscribed to this merge request.",
+			output: "you are not subscribed to this merge request",
 		},
 		{
 			name: "merge-privilege",
@@ -335,7 +336,7 @@ func Test_MRCheckErrors(t *testing.T) {
 			errOpts: MRCheckErrOptions{
 				MergePrivilege: true,
 			},
-			output: "you do not have permission to merge this merge request.",
+			output: "you do not have permission to merge this merge request",
 		},
 		{
 			name: "conflicts",
@@ -348,7 +349,7 @@ func Test_MRCheckErrors(t *testing.T) {
 			errOpts: MRCheckErrOptions{
 				Conflict: true,
 			},
-			output: "merge conflicts exist. Resolve the conflicts and try again, or merge locally.",
+			output: "merge conflicts exist; resolve the conflicts and try again, or merge locally",
 		},
 	}
 	for _, tC := range testCases {
@@ -360,7 +361,7 @@ func Test_MRCheckErrors(t *testing.T) {
 
 	t.Run("nil", func(t *testing.T) {
 		err := MRCheckErrors(&gitlab.MergeRequest{}, MRCheckErrOptions{})
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 }
 
@@ -473,7 +474,7 @@ func Test_getMRForBranch(t *testing.T) {
 			}
 
 			got, err := GetMRForBranch(t.Context(), nil, &gitlab.Client{}, MrOptions{baseRepo, tC.input, "opened", true})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, tC.expect.IID, got.IID)
 			assert.Equal(t, tC.expect.Author.Username, got.Author.Username)
@@ -509,7 +510,7 @@ func Test_getMRForBranchPrompt(t *testing.T) {
 	t.Cleanup(cleanup)
 
 	got, err := GetMRForBranch(t.Context(), ios, &gitlab.Client{}, MrOptions{baseRepo, "foo", "opened", true})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), got.IID)
 	assert.Equal(t, "profclems", got.Author.Username)
@@ -543,7 +544,7 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 			}
 
 			gotMR, gotRepo, err := MRFromArgs(t.Context(), baseFactory, []string{"2"}, "")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, expectedRepo.FullName(), gotRepo.FullName())
 
@@ -576,7 +577,7 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 			}
 
 			gotMR, gotRepo, err := MRFromArgs(t.Context(), baseFactory, []string{"foo"}, "")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, expectedRepo.FullName(), gotRepo.FullName())
 
@@ -598,7 +599,7 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 			}
 
 			gotMR, gotRepo, err := MRFromArgs(t.Context(), baseFactory, []string{"https://gitlab.com/gitlab-org/cli/-/merge_requests/1234"}, "")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// The repository should be extracted from the URL
 			assert.Equal(t, "gitlab-org/cli", gotRepo.FullName())
@@ -627,7 +628,7 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 			)
 
 			gotMR, gotRepo, err := MRFromArgs(t.Context(), f, []string{"https://invent.kde.org/kde/krita/-/merge_requests/42"}, "")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// The repository should be extracted from the URL
 			assert.Equal(t, "kde/krita", gotRepo.FullName())
@@ -658,7 +659,7 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 			)
 
 			gotMR, gotRepo, err := MRFromArgs(t.Context(), f, []string{"https://invent.kde.org/kde/krita/-/merge_requests/42"}, "")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// The repository should be extracted from the URL (different from base repo)
 			assert.Equal(t, "kde/krita", gotRepo.FullName())
@@ -695,7 +696,7 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 			}
 
 			gotMR, gotRepo, err := MRFromArgs(t.Context(), f, []string{"https://custom.gitlab.com/user/repo/-/merge_requests/42"}, "")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// Verify that ApiClient was called with the correct hostname from URL
 			assert.Equal(t, "custom.gitlab.com", capturedHostname)
@@ -744,7 +745,7 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 			gotMR, gotRepo, err := MRFromArgs(t.Context(), baseFactory, []string{"0"}, "")
 			assert.Nil(t, gotMR)
 			assert.Nil(t, gotRepo)
-			assert.EqualError(t, err, "invalid merge request ID provided.")
+			assert.EqualError(t, err, "invalid merge request ID provided")
 		})
 		t.Run("invalid-name", func(t *testing.T) {
 			GetMRForBranch = func(_ context.Context, _ *iostreams.IOStreams, _ *gitlab.Client, mrOpts MrOptions) (*gitlab.BasicMergeRequest, error) {

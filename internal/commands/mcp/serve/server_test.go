@@ -683,7 +683,7 @@ func TestProcessOutput(t *testing.T) {
 			result := server.processOutput(tt.output, tt.config)
 
 			assert.Equal(t, tt.expectedText, result)
-			assert.Equal(t, tt.expectedLength, len([]rune(result)))
+			assert.Len(t, []rune(result), tt.expectedLength)
 		})
 	}
 }
@@ -897,7 +897,7 @@ func TestToolResultStructure(t *testing.T) {
 
 			assert.Equal(t, tt.wantError, tt.result.IsError)
 			assert.NotNil(t, tt.result.Content)
-			assert.Greater(t, len(tt.result.Content), 0)
+			assert.NotEmpty(t, tt.result.Content)
 		})
 	}
 }

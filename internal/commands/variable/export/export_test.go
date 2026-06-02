@@ -10,6 +10,7 @@ import (
 	"github.com/google/shlex"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
@@ -67,7 +68,7 @@ func Test_NewCmdExport(t *testing.T) {
 			f := cmdtest.NewTestFactory(io)
 
 			argv, err := shlex.Split(test.cli)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var gotOpts *options
 			cmd := NewCmdExport(f, func(opts *options) error {
@@ -84,7 +85,7 @@ func Test_NewCmdExport(t *testing.T) {
 				assert.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, test.wants.group, gotOpts.group)
 		})
@@ -244,7 +245,7 @@ func Test_exportRun_project(t *testing.T) {
 			)
 
 			out, err := exec(fmt.Sprintf("--page 1 --per-page 10 --format %s --scope %s", test.format, test.scope))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.expectedStderr, out.ErrBuf.String())
 			assert.Equal(t, test.expectedStdout, out.OutBuf.String())
 		})
@@ -404,7 +405,7 @@ func Test_exportRun_group(t *testing.T) {
 			)
 
 			out, err := exec(fmt.Sprintf("--page 1 --per-page 10 --group group --format %s --scope %s", test.format, test.scope))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, test.expectedStderr, out.ErrBuf.String())
 			assert.Equal(t, test.expectedStdout, out.OutBuf.String())
 		})

@@ -132,7 +132,7 @@ func TestSaveNewStack(t *testing.T) {
 
 			dir := git.InitGitRepoWithCommit(t)
 			err := git.SetLocalConfig("glab.currentstack", "cool-test-feature")
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			createTemporaryFiles(t, dir, tc.files)
 
@@ -141,15 +141,15 @@ func TestSaveNewStack(t *testing.T) {
 
 				gitCmd := git.GitCommand("add", ".")
 				_, err = run.PrepareCmd(gitCmd).Output()
-				require.Nil(t, err)
+				require.NoError(t, err)
 
 				gitCmd = git.GitCommand("commit", "-m", "initial tracked files")
 				_, err = run.PrepareCmd(gitCmd).Output()
-				require.Nil(t, err)
+				require.NoError(t, err)
 
 				for _, file := range tc.trackedFiles {
 					err = os.WriteFile(path.Join(dir, file), []byte("modified content"), 0o644)
-					require.Nil(t, err)
+					require.NoError(t, err)
 				}
 			}
 
@@ -170,7 +170,7 @@ func TestSaveNewStack(t *testing.T) {
 			if tc.wantErr {
 				require.Errorf(t, err, tc.expected)
 			} else {
-				require.Nil(t, err)
+				require.NoError(t, err)
 				require.Equal(t, tc.expected, output.String())
 			}
 		})
@@ -215,15 +215,15 @@ func TestSaveStack_WarningWhenNotOnLastEntry(t *testing.T) {
 			dir := git.InitGitRepoWithCommit(t)
 			stackTitle := "test-stack"
 			err := git.SetLocalConfig("glab.currentstack", stackTitle)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			err = git.AddStackRefFile(stackTitle, firstRef)
-			require.Nil(t, err)
+			require.NoError(t, err)
 			err = git.AddStackRefFile(stackTitle, secondRef)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			err = git.CheckoutNewBranch(tc.checkoutRef.Branch)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			createTemporaryFiles(t, dir, []string{"newfile"})
 
@@ -237,7 +237,7 @@ func TestSaveStack_WarningWhenNotOnLastEntry(t *testing.T) {
 			)
 
 			output, err := exec(". -m \"new changes\"")
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			if tc.expectWarning {
 				require.Contains(t, output.Stderr(), "warning: you are not on the last entry of the stack")
@@ -309,7 +309,7 @@ func Test_addFiles(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			dir := git.InitGitRepoWithCommit(t)
 			err := git.SetLocalConfig("glab.currentstack", "cool-test-feature")
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			createTemporaryFiles(t, dir, tc.expected)
 			createTemporaryFiles(t, dir, tc.untrackedFiles)
@@ -318,15 +318,15 @@ func Test_addFiles(t *testing.T) {
 			if tc.stageAll && len(tc.expected) > 0 {
 				gitCmd := git.GitCommand("add", tc.expected[0])
 				_, err := run.PrepareCmd(gitCmd).Output()
-				require.Nil(t, err)
+				require.NoError(t, err)
 
 				gitCmd = git.GitCommand("commit", "-m", "initial")
 				_, err = run.PrepareCmd(gitCmd).Output()
-				require.Nil(t, err)
+				require.NoError(t, err)
 
 				// Now modify the file so we have a tracked file change
 				err = os.WriteFile(path.Join(dir, tc.expected[0]), []byte("modified"), 0o644)
-				require.Nil(t, err)
+				require.NoError(t, err)
 			}
 
 			err = addFiles(tc.args, tc.stageAll)
@@ -339,11 +339,11 @@ func Test_addFiles(t *testing.T) {
 				return
 			}
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			gitCmd := git.GitCommand("status", "--short", "-u")
 			output, err := run.PrepareCmd(gitCmd).Output()
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			normalizedFiles := []string{}
 			for _, file := range tc.expected {
@@ -380,13 +380,13 @@ func Test_checkForChanges(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			dir := git.InitGitRepoWithCommit(t)
 			err := git.SetLocalConfig("glab.currentstack", "cool-test-feature")
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			createTemporaryFiles(t, dir, tc.args)
 
 			err = checkForChanges()
 			if tc.expected {
-				require.Nil(t, err)
+				require.NoError(t, err)
 			} else {
 				require.Error(t, err)
 			}
@@ -417,14 +417,14 @@ func Test_commitFiles(t *testing.T) {
 
 			createTemporaryFiles(t, dir, []string{"yo", "test"})
 			err := addFiles([]string{"."}, false)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			got, err := commitFiles(tt.message)
 
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
-				require.Nil(t, err)
+				require.NoError(t, err)
 				require.Contains(t, got, tt.want)
 			}
 		})
@@ -459,8 +459,8 @@ func Test_generateStackSha(t *testing.T) {
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
-				require.Nil(t, err)
-				require.Equal(t, got, tt.want)
+				require.NoError(t, err)
+				require.Equal(t, tt.want, got)
 			}
 		})
 	}
@@ -507,12 +507,12 @@ func Test_createShaBranch(t *testing.T) {
 			}
 
 			got, err := stackutils.CreateShaBranch(factory, tt.args.sha, tt.args.title)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
-				require.Nil(t, err)
+				require.NoError(t, err)
 				require.Equal(t, tt.want, got)
 			}
 		})
@@ -526,7 +526,7 @@ func createTemporaryFiles(t *testing.T, dir string, files []string) {
 		file = path.Join(dir, file)
 		_, err := os.Create(file)
 
-		require.Nil(t, err)
+		require.NoError(t, err)
 	}
 }
 

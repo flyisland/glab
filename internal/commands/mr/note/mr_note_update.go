@@ -140,7 +140,7 @@ func (o *updateOptions) complete(cmd *cobra.Command, args []string) error {
 
 func (o *updateOptions) validate() error {
 	if strings.TrimSpace(o.body) == "" {
-		return fmt.Errorf("aborted... Note has an empty message.")
+		return fmt.Errorf("aborted: note has an empty message")
 	}
 	return nil
 }

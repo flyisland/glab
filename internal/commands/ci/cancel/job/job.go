@@ -54,7 +54,7 @@ func NewCmdCancel(f cmdutils.Factory) *cobra.Command {
 		`),
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return fmt.Errorf("You must pass a job ID.")
+				return fmt.Errorf("you must pass a job ID")
 			}
 
 			return nil

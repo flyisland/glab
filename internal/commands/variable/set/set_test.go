@@ -174,7 +174,7 @@ func Test_NewCmdSet(t *testing.T) {
 			io.IsInTTY = tt.stdinTTY
 
 			argv, err := shlex.Split(tt.cli)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var gotOpts *options
 			cmd := NewCmdSet(f, func(opts *options) error {
@@ -188,10 +188,10 @@ func Test_NewCmdSet(t *testing.T) {
 
 			_, err = cmd.ExecuteC()
 			if tt.wantsErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, tt.wants.key, gotOpts.key)
 			assert.Equal(t, tt.wants.value, gotOpts.value)

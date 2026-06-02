@@ -175,7 +175,7 @@ func listAllProjectsForGroup(apiClient *gitlab.Client, opts options) ([]*gitlab.
 	group, resp, err := apiClient.Groups.GetGroup(opts.group, &gitlab.GetGroupOptions{})
 	if err != nil {
 		if errors.Is(err, gitlab.ErrNotFound) {
-			return nil, nil, fmt.Errorf("No group matching path %s", opts.group)
+			return nil, nil, fmt.Errorf("no group matching path %s", opts.group)
 		}
 		return nil, resp, err
 	}

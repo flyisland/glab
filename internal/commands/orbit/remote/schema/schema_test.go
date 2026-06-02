@@ -4,7 +4,6 @@ package schema
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"testing"
 
@@ -113,6 +112,6 @@ func TestSchema_Forbidden(t *testing.T) {
 	// THEN the error is mapped to ExitForbidden (exit code 4)
 	require.Error(t, err)
 	var exitErr *cmdutils.ExitError
-	require.True(t, errors.As(err, &exitErr))
+	require.ErrorAs(t, err, &exitErr)
 	assert.Equal(t, orbiterr.ExitForbidden, exitErr.Code)
 }

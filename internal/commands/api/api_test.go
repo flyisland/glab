@@ -5,6 +5,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -287,7 +288,7 @@ func Test_NewCmdApi(t *testing.T) {
 			})
 
 			argv, err := shlex.Split(tt.cli)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			cmd.SetArgs(argv)
 			cmd.SetIn(&bytes.Buffer{})
 			cmd.SetOut(&bytes.Buffer{})
@@ -490,7 +491,7 @@ func Test_apiRun(t *testing.T) {
 			}
 
 			err := tt.options.run(t.Context())
-			if err != tt.err {
+			if !errors.Is(err, tt.err) {
 				t.Errorf("expected error %v, got %v", tt.err, err)
 			}
 
@@ -551,10 +552,10 @@ func Test_apiRun_paginationREST(t *testing.T) {
 	}
 
 	err := options.run(t.Context())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, `{"page":1}{"page":2}{"page":3}`, stdout.String(), "stdout")
-	assert.Equal(t, "", stderr.String(), "stderr")
+	assert.Empty(t, stderr.String(), "stderr")
 
 	assert.Equal(t, "https://gitlab.com/api/v4/issues?per_page=100", responses[0].Request.URL.String())
 	assert.Equal(t, "https://gitlab.com/api/v4/projects/1227/issues?page=2", responses[1].Request.URL.String())
@@ -621,7 +622,7 @@ func Test_apiRun_paginationGraphQL(t *testing.T) {
 
 	assert.Contains(t, stdout.String(), `"page one"`)
 	assert.Contains(t, stdout.String(), `"page two"`)
-	assert.Equal(t, "", stderr.String(), "stderr")
+	assert.Empty(t, stderr.String(), "stderr")
 
 	var requestData struct {
 		Variables map[string]any
@@ -632,14 +633,14 @@ func Test_apiRun_paginationGraphQL(t *testing.T) {
 	err = json.Unmarshal(bb, &requestData)
 	require.NoError(t, err)
 	_, hasCursor := requestData.Variables["endCursor"].(string)
-	assert.Equal(t, false, hasCursor)
+	assert.False(t, hasCursor)
 
 	bb, err = io.ReadAll(responses[1].Request.Body)
 	require.NoError(t, err)
 	err = json.Unmarshal(bb, &requestData)
 	require.NoError(t, err)
 	endCursor, hasCursor := requestData.Variables["endCursor"].(string)
-	assert.Equal(t, true, hasCursor)
+	assert.True(t, hasCursor)
 	assert.Equal(t, "PAGE1_END", endCursor)
 }
 
@@ -722,7 +723,7 @@ func Test_apiRun_paginationGraphQL_bodyNotConsumedTwice(t *testing.T) {
 	output := stdout.String()
 	assert.Contains(t, output, "First issue")
 	assert.Contains(t, output, "Second issue")
-	assert.Equal(t, "", stderr.String(), "stderr should be empty")
+	assert.Empty(t, stderr.String(), "stderr should be empty")
 
 	// Verify exactly 2 requests were made (one per page)
 	assert.Equal(t, 2, requestCount, "expected 2 requests for pagination")
@@ -795,7 +796,7 @@ func Test_apiRun_paginationGraphQL_emptyResults(t *testing.T) {
 	// Verify empty nodes array is in output
 	output := stdout.String()
 	assert.Contains(t, output, "nodes")
-	assert.Equal(t, "", stderr.String(), "stderr should be empty")
+	assert.Empty(t, stderr.String(), "stderr should be empty")
 
 	// Should only make 1 request since hasNextPage is false
 	assert.Equal(t, 1, requestCount, "expected only 1 request for empty results")
@@ -877,7 +878,7 @@ func Test_apiRun_paginationGraphQL_withNDJSON(t *testing.T) {
 	// Verify both issues appear in the output
 	assert.Contains(t, output, "Issue 1")
 	assert.Contains(t, output, "Issue 2")
-	assert.Equal(t, "", stderr.String(), "stderr should be empty")
+	assert.Empty(t, stderr.String(), "stderr should be empty")
 
 	// Verify that both pages were fetched
 	assert.Equal(t, 2, requestCount, "should have made 2 requests for pagination")
@@ -914,18 +915,18 @@ func Test_apiRun_ndjson(t *testing.T) {
 
 	// NDJSON should output each element on a separate line
 	lines := strings.Split(strings.TrimSpace(stdout.String()), "\n")
-	assert.Equal(t, 2, len(lines), "should have 2 lines")
+	assert.Len(t, lines, 2, "should have 2 lines")
 
 	// Verify each line is valid JSON
 	var obj1, obj2 map[string]any
 	require.NoError(t, json.Unmarshal([]byte(lines[0]), &obj1))
 	require.NoError(t, json.Unmarshal([]byte(lines[1]), &obj2))
 
-	assert.Equal(t, float64(1), obj1["id"])
+	assert.InDelta(t, 1, obj1["id"], 0)
 	assert.Equal(t, "Issue 1", obj1["title"])
-	assert.Equal(t, float64(2), obj2["id"])
+	assert.InDelta(t, 2, obj2["id"], 0)
 	assert.Equal(t, "Issue 2", obj2["title"])
-	assert.Equal(t, "", stderr.String(), "stderr")
+	assert.Empty(t, stderr.String(), "stderr")
 }
 
 func Test_apiRun_ndjson_singleObject(t *testing.T) {
@@ -959,13 +960,13 @@ func Test_apiRun_ndjson_singleObject(t *testing.T) {
 
 	// Single object should be output as one line
 	output := strings.TrimSpace(stdout.String())
-	assert.Equal(t, 1, len(strings.Split(output, "\n")), "should have 1 line")
+	assert.Len(t, strings.Split(output, "\n"), 1, "should have 1 line")
 
 	var obj map[string]any
 	require.NoError(t, json.Unmarshal([]byte(output), &obj))
-	assert.Equal(t, float64(1), obj["id"])
+	assert.InDelta(t, 1, obj["id"], 0)
 	assert.Equal(t, "Single Issue", obj["title"])
-	assert.Equal(t, "", stderr.String(), "stderr")
+	assert.Empty(t, stderr.String(), "stderr")
 }
 
 func Test_apiRun_ndjson_pagination(t *testing.T) {
@@ -1017,15 +1018,15 @@ func Test_apiRun_ndjson_pagination(t *testing.T) {
 
 	// Should have 2 lines total (one from each page)
 	lines := strings.Split(strings.TrimSpace(stdout.String()), "\n")
-	assert.Equal(t, 2, len(lines), "should have 2 lines from 2 pages")
+	assert.Len(t, lines, 2, "should have 2 lines from 2 pages")
 
 	var obj1, obj2 map[string]any
 	require.NoError(t, json.Unmarshal([]byte(lines[0]), &obj1))
 	require.NoError(t, json.Unmarshal([]byte(lines[1]), &obj2))
 
-	assert.Equal(t, float64(1), obj1["id"])
-	assert.Equal(t, float64(2), obj2["id"])
-	assert.Equal(t, "", stderr.String(), "stderr")
+	assert.InDelta(t, 1, obj1["id"], 0)
+	assert.InDelta(t, 2, obj2["id"], 0)
+	assert.Empty(t, stderr.String(), "stderr")
 }
 
 func Test_apiRun_inputFile(t *testing.T) {
@@ -1100,7 +1101,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 			assert.Equal(t, http.MethodPost, resp.Request.Method)
 			assert.Equal(t, "/api/v4/hello?a=b&c=d", resp.Request.URL.RequestURI())
 			assert.Equal(t, tt.contentLength, resp.Request.ContentLength)
-			assert.Equal(t, "", resp.Request.Header.Get("Content-Type"))
+			assert.Empty(t, resp.Request.Header.Get("Content-Type"))
 			assert.Equal(t, tt.inputContents, bodyBytes)
 		})
 	}
@@ -1597,9 +1598,9 @@ func Test_processResponse_bodyConsumption(t *testing.T) {
 			endCursor, err := processResponse(tt.httpResponse, &tt.options, io.Discard)
 
 			if tt.expectError {
-				assert.Error(t, err, "expected error but got none")
+				require.Error(t, err, "expected error but got none")
 			} else {
-				assert.NoError(t, err, "unexpected error: %v", err)
+				require.NoError(t, err, "unexpected error: %v", err)
 			}
 
 			// Verify cursor extraction

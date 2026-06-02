@@ -242,7 +242,9 @@ func (s *IOStreams) StopPager() {
 		return
 	}
 
-	_ = s.StdOut.(io.WriteCloser).Close()
+	if closer, ok := s.StdOut.(io.WriteCloser); ok {
+		_ = closer.Close()
+	}
 	_, _ = s.pagerProcess.Wait()
 	s.StdOut = s.systemStdOut
 	s.pagerProcess = nil

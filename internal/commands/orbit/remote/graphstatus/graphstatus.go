@@ -128,7 +128,7 @@ func (o *options) run(ctx context.Context) error {
 		// error before falling through to the standard taxonomy.
 		if resp != nil && resp.StatusCode == http.StatusServiceUnavailable {
 			return cmdutils.WrapError(
-				errors.New("Knowledge Graph service unavailable"),
+				errors.New("knowledge graph service unavailable"),
 				"The Orbit API returned HTTP 503. The underlying GKG service is\n"+
 					"currently unreachable; retry shortly or check the GitLab status\n"+
 					"page.",

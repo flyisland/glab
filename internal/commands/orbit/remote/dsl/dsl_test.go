@@ -3,7 +3,6 @@
 package dsl
 
 import (
-	"errors"
 	"net/http"
 	"testing"
 
@@ -97,6 +96,6 @@ func TestDsl_RateLimited(t *testing.T) {
 	// THEN the error maps to ExitRateLimited (exit code 5)
 	require.Error(t, err)
 	var exitErr *cmdutils.ExitError
-	require.True(t, errors.As(err, &exitErr))
+	require.ErrorAs(t, err, &exitErr)
 	assert.Equal(t, orbiterr.ExitRateLimited, exitErr.Code)
 }

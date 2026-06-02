@@ -56,10 +56,10 @@ func NewCmdUpload(f cmdutils.Factory) *cobra.Command {
 		Args: func() cobra.PositionalArgs {
 			return func(cmd *cobra.Command, args []string) error {
 				if len(args) < 1 {
-					return &cmdutils.FlagError{Err: errors.New("no tag name provided.")}
+					return &cmdutils.FlagError{Err: errors.New("no tag name provided")}
 				}
 				if len(args) < 2 && opts.assetLinksAsJSON == "" {
-					return cmdutils.FlagError{Err: errors.New("no files specified.")}
+					return cmdutils.FlagError{Err: errors.New("no files specified")}
 				}
 				return nil
 			}
@@ -131,7 +131,7 @@ func (o *options) complete(flags *pflag.FlagSet, args []string) error {
 
 func (o *options) validate() error {
 	if o.assetFiles == nil && o.assetLinksAsJSON == "" {
-		return cmdutils.FlagError{Err: errors.New("no files specified.")}
+		return cmdutils.FlagError{Err: errors.New("no files specified")}
 	}
 
 	if o.assetLinksAsJSON != "" {

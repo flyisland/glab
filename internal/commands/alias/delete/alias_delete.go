@@ -63,7 +63,7 @@ func (o *options) run() error {
 
 	expansion, ok := aliasCfg.Get(o.name)
 	if !ok {
-		return fmt.Errorf("no such alias '%s'.", o.name)
+		return fmt.Errorf("no such alias %q", o.name)
 	}
 	err = aliasCfg.Delete(o.name)
 	if err != nil {

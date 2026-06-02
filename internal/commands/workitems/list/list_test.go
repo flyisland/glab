@@ -33,7 +33,7 @@ func TestWorkItemsList(t *testing.T) {
 					Do(gomock.Any(), gomock.Any(), gomock.Any()).
 					DoAndReturn(func(query gitlab.GraphQLQuery, response any, options ...gitlab.RequestOptionFunc) (*gitlab.Response, error) {
 						// Type assert to the exact structure used in api.go
-						resp := response.(*workitemsapi.WorkItemsResponse)
+						resp, _ := response.(*workitemsapi.WorkItemsResponse)
 
 						// Populate mock response with project work items
 						resp.Data.Project = &workitemsapi.ProjectWorkItems{
@@ -91,7 +91,7 @@ func TestWorkItemsList(t *testing.T) {
 				tc.MockGraphQL.EXPECT().
 					Do(gomock.Any(), gomock.Any(), gomock.Any()).
 					DoAndReturn(func(query gitlab.GraphQLQuery, response any, options ...gitlab.RequestOptionFunc) (*gitlab.Response, error) {
-						resp := response.(*workitemsapi.WorkItemsResponse)
+						resp, _ := response.(*workitemsapi.WorkItemsResponse)
 
 						// Populate mock response with group work items
 						resp.Data.Group = &workitemsapi.GroupWorkItems{
@@ -133,7 +133,7 @@ func TestWorkItemsList(t *testing.T) {
 				tc.MockGraphQL.EXPECT().
 					Do(gomock.Any(), gomock.Any(), gomock.Any()).
 					DoAndReturn(func(query gitlab.GraphQLQuery, response any, options ...gitlab.RequestOptionFunc) (*gitlab.Response, error) {
-						resp := response.(*workitemsapi.WorkItemsResponse)
+						resp, _ := response.(*workitemsapi.WorkItemsResponse)
 
 						resp.Data.Project = &workitemsapi.ProjectWorkItems{
 							WorkItems: workitemsapi.WorkItemsConnection{
@@ -160,7 +160,7 @@ func TestWorkItemsList(t *testing.T) {
 						require.True(t, ok)
 						assert.Equal(t, []string{"EPIC"}, types)
 
-						resp := response.(*workitemsapi.WorkItemsResponse)
+						resp, _ := response.(*workitemsapi.WorkItemsResponse)
 
 						resp.Data.Project = &workitemsapi.ProjectWorkItems{
 							WorkItems: workitemsapi.WorkItemsConnection{
@@ -200,7 +200,7 @@ func TestWorkItemsList(t *testing.T) {
 				tc.MockGraphQL.EXPECT().
 					Do(gomock.Any(), gomock.Any(), gomock.Any()).
 					DoAndReturn(func(query gitlab.GraphQLQuery, response any, options ...gitlab.RequestOptionFunc) (*gitlab.Response, error) {
-						resp := response.(*workitemsapi.WorkItemsResponse)
+						resp, _ := response.(*workitemsapi.WorkItemsResponse)
 
 						resp.Data.Project = &workitemsapi.ProjectWorkItems{
 							WorkItems: workitemsapi.WorkItemsConnection{
@@ -243,7 +243,7 @@ func TestWorkItemsList(t *testing.T) {
 						// verify cursor was passed
 						assert.Equal(t, "cursor123", query.Variables["after"])
 
-						resp := response.(*workitemsapi.WorkItemsResponse)
+						resp, _ := response.(*workitemsapi.WorkItemsResponse)
 						resp.Data.Project = &workitemsapi.ProjectWorkItems{
 							WorkItems: workitemsapi.WorkItemsConnection{
 								Nodes: []workitemsapi.WorkItem{
@@ -286,7 +286,7 @@ func TestWorkItemsList(t *testing.T) {
 						assert.Contains(t, query.Variables, "state")
 						assert.Equal(t, "closed", query.Variables["state"])
 
-						resp := response.(*workitemsapi.WorkItemsResponse)
+						resp, _ := response.(*workitemsapi.WorkItemsResponse)
 
 						resp.Data.Project = &workitemsapi.ProjectWorkItems{
 							WorkItems: workitemsapi.WorkItemsConnection{
@@ -327,7 +327,7 @@ func TestWorkItemsList(t *testing.T) {
 						// Verify state filter is NOT passed when state is "all"
 						assert.NotContains(t, query.Variables, "state")
 
-						resp := response.(*workitemsapi.WorkItemsResponse)
+						resp, _ := response.(*workitemsapi.WorkItemsResponse)
 
 						resp.Data.Project = &workitemsapi.ProjectWorkItems{
 							WorkItems: workitemsapi.WorkItemsConnection{
@@ -385,7 +385,7 @@ func TestWorkItemsList(t *testing.T) {
 						assert.Contains(t, query.Variables, "state")
 						assert.Equal(t, "opened", query.Variables["state"])
 
-						resp := response.(*workitemsapi.WorkItemsResponse)
+						resp, _ := response.(*workitemsapi.WorkItemsResponse)
 
 						resp.Data.Project = &workitemsapi.ProjectWorkItems{
 							WorkItems: workitemsapi.WorkItemsConnection{
@@ -434,7 +434,7 @@ func TestWorkItemsList(t *testing.T) {
 				tc.MockGraphQL.EXPECT().
 					Do(gomock.Any(), gomock.Any(), gomock.Any()).
 					DoAndReturn(func(query gitlab.GraphQLQuery, response any, options ...gitlab.RequestOptionFunc) (*gitlab.Response, error) {
-						resp := response.(*workitemsapi.WorkItemsResponse)
+						resp, _ := response.(*workitemsapi.WorkItemsResponse)
 
 						// Return nil project to trigger "project not found" error
 						resp.Data.Project = nil

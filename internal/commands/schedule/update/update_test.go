@@ -79,14 +79,14 @@ func Test_ScheduleEdit(t *testing.T) {
 			name:       "Schedule updated with invalid variable format - create",
 			cli:        "1 --create-variable 'foo:bar' --create-variable 'foo'",
 			wantErr:    true,
-			wantStderr: "Invalid format for --create-variable: foo",
+			wantStderr: "invalid format for --create-variable: foo",
 			setupMock:  func(tc *gitlabtesting.TestClient) {},
 		},
 		{
 			name:       "Schedule updated with invalid variable format - update",
 			cli:        "1 --update-variable 'foo:bar' --update-variable 'foo'",
 			wantErr:    true,
-			wantStderr: "Invalid format for --update-variable: foo",
+			wantStderr: "invalid format for --update-variable: foo",
 			setupMock:  func(tc *gitlabtesting.TestClient) {},
 		},
 		{
