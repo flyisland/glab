@@ -241,12 +241,12 @@ func (o *options) complete(cmd *cobra.Command, args []string) {
 func (o *options) validate(cmd *cobra.Command) error {
 	if cmd.Flags().Changed("hostname") {
 		if err := glinstance.HostnameValidator(o.hostname); err != nil {
-			return &cmdutils.FlagError{Err: fmt.Errorf("error parsing --hostname: %w.", err)}
+			return &cmdutils.FlagError{Err: fmt.Errorf("error parsing --hostname: %w", err)}
 		}
 	}
 
 	if o.paginate && !strings.EqualFold(o.requestMethod, http.MethodGet) && o.requestPath != "graphql" {
-		return &cmdutils.FlagError{Err: errors.New(`the '--paginate' option is not supported for non-GET requests.`)}
+		return &cmdutils.FlagError{Err: errors.New("the '--paginate' option is not supported for non-GET requests")}
 	}
 
 	if o.outputFormat != "json" && o.outputFormat != "ndjson" {
@@ -260,7 +260,7 @@ func (o *options) validate(cmd *cobra.Command) error {
 		}
 	}
 	if stdinCount > 1 {
-		return &cmdutils.FlagError{Err: errors.New("'@-' (stdin) can only be used once across all --form fields.")}
+		return &cmdutils.FlagError{Err: errors.New("'@-' (stdin) can only be used once across all --form fields")}
 	}
 
 	return nil
@@ -345,6 +345,7 @@ func (o *options) run(ctx context.Context) error {
 		}
 
 		endCursor, err := processResponse(resp, o, headersOutputStream)
+		_ = resp.Body.Close()
 		if err != nil {
 			return err
 		}
@@ -442,7 +443,7 @@ func streamNDJSON(body io.Reader, out io.Writer) error {
 	// Peek at the first token to determine if it's an array or object
 	token, err := dec.Token()
 	if err != nil {
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			return nil
 		}
 		return err
@@ -626,7 +627,7 @@ func parseFields(opts *options) (map[string]any, error) {
 func parseField(f string) (string, string, error) {
 	idx := strings.IndexRune(f, '=')
 	if idx == -1 {
-		return f, "", fmt.Errorf("field %q requires a value separated by an '=' sign.", f)
+		return f, "", fmt.Errorf("field %q requires a value separated by an '=' sign", f)
 	}
 	return f[0:idx], f[idx+1:], nil
 }

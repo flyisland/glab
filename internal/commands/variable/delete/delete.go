@@ -69,11 +69,11 @@ func (o *options) complete(args []string) {
 
 func (o *options) validate(cmd *cobra.Command) error {
 	if !variableutils.IsValidKey(o.key) {
-		return cmdutils.FlagError{Err: fmt.Errorf("invalid key provided.\n%s", variableutils.ValidKeyMsg)}
+		return cmdutils.FlagError{Err: fmt.Errorf("invalid key provided: %s", variableutils.ValidKeyMsg)}
 	}
 
 	if cmd.Flags().Changed("scope") && o.group != "" {
-		return cmdutils.FlagError{Err: errors.New("scope is not required for group variables.")}
+		return cmdutils.FlagError{Err: errors.New("scope is not required for group variables")}
 	}
 
 	return nil

@@ -176,7 +176,7 @@ func TestMRView(t *testing.T) {
 		outErr := stripansi.Strip(result.Stderr())
 
 		require.Contains(t, out, "mrTitle !13")
-		require.Equal(t, outErr, "")
+		require.Empty(t, outErr)
 		assert.Contains(t, out, "https://gitlab.com/cli-automated-testing/test/-/merge_requests/13")
 		assert.Contains(t, out, "johnwick Marked MR as ready")
 	})
@@ -211,7 +211,7 @@ func TestMRView(t *testing.T) {
 			`mrBody`,
 		}
 
-		assert.Equal(t, "", outErr)
+		assert.Empty(t, outErr)
 		t.Helper()
 		var r *regexp.Regexp
 		for _, l := range expectedOutputs {

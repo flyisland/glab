@@ -217,7 +217,7 @@ func Test_mrNoteCreate_prompt(t *testing.T) {
 
 		_, err := exec(`1`)
 		require.Error(t, err)
-		assert.Equal(t, "aborted... Note has an empty message.", err.Error())
+		assert.Equal(t, "aborted: note has an empty message", err.Error())
 	})
 }
 

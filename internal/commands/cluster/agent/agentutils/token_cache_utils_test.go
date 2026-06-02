@@ -62,5 +62,5 @@ func TestFilterByAgents_NoFilter(t *testing.T) {
 func TestFilterByAgents_EmptyTokens(t *testing.T) {
 	var tokens []CachedToken
 	filtered := FilterByAgents(tokens, []int64{1})
-	require.Len(t, filtered, 0)
+	require.Empty(t, filtered)
 }

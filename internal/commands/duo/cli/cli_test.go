@@ -73,8 +73,8 @@ func TestDuoNormalizeArch(t *testing.T) {
 			t.Parallel()
 			got, err := duoNormalizeArch(tc.goos, tc.goarch)
 			if tc.expectError {
-				assert.Error(t, err)
-				assert.True(t, errors.Is(err, binarymgr.ErrUnsupportedPlatform))
+				require.Error(t, err)
+				require.ErrorIs(t, err, binarymgr.ErrUnsupportedPlatform)
 			} else {
 				require.NoError(t, err)
 				assert.Equal(t, tc.want, got)

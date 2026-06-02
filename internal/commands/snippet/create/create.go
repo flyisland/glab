@@ -202,7 +202,7 @@ func (o *options) run(ctx context.Context) error {
 func readFromSTDIN(ioStream *iostreams.IOStreams) (string, error) {
 	content, err := io.ReadAll(ioStream.In)
 	if err != nil {
-		return "", fmt.Errorf("Failed to read snippet from STDIN. %w", err)
+		return "", fmt.Errorf("failed to read snippet from STDIN: %w", err)
 	}
 	return string(content), nil
 }
@@ -210,7 +210,7 @@ func readFromSTDIN(ioStream *iostreams.IOStreams) (string, error) {
 func readFromFile(filename string) (string, error) {
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		return "", fmt.Errorf("Failed to read snippet from file '%s'. %w", filename, err)
+		return "", fmt.Errorf("failed to read snippet from file %q: %w", filename, err)
 	}
 	return string(content), nil
 }

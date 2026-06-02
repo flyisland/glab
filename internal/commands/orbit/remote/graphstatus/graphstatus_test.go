@@ -4,7 +4,6 @@ package graphstatus
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"testing"
 
@@ -218,7 +217,7 @@ func TestGraphStatus_FeatureFlagOff(t *testing.T) {
 	// THEN the error maps to ExitOrbitUnavailable (exit code 2)
 	require.Error(t, err)
 	var exitErr *cmdutils.ExitError
-	require.True(t, errors.As(err, &exitErr))
+	require.ErrorAs(t, err, &exitErr)
 	assert.Equal(t, orbiterr.ExitOrbitUnavailable, exitErr.Code)
 }
 
@@ -249,7 +248,7 @@ func TestGraphStatus_GKGServiceUnavailable(t *testing.T) {
 	// message — the shared translator does not handle 503.
 	require.Error(t, err)
 	var exitErr *cmdutils.ExitError
-	require.True(t, errors.As(err, &exitErr))
+	require.ErrorAs(t, err, &exitErr)
 	assert.Equal(t, 1, exitErr.Code)
 	assert.Contains(t, err.Error(), "service unavailable")
 }

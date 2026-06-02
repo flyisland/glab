@@ -59,7 +59,7 @@ func Test_ScheduleList(t *testing.T) {
 		out := stripansi.Strip(stdout.String())
 
 		assert.Contains(t, out, "1\tfoo\t* * * * *\tbar\ttrue")
-		assert.Equal(t, "", stderr.String())
+		assert.Empty(t, stderr.String())
 	})
 }
 
@@ -93,7 +93,7 @@ func Test_NoScheduleList(t *testing.T) {
 		out := stripansi.Strip(stdout.String())
 
 		assert.Contains(t, out, "No schedules available on")
-		assert.Equal(t, "", stderr.String())
+		assert.Empty(t, stderr.String())
 	})
 }
 
@@ -138,5 +138,5 @@ func TestScheduleList_JSON(t *testing.T) {
 	assert.Contains(t, out, `"description":"foo"`)
 	assert.Contains(t, out, `"cron":"* * * * *"`)
 	assert.Contains(t, out, `"active":true`)
-	assert.Equal(t, "", stderr.String())
+	assert.Empty(t, stderr.String())
 }

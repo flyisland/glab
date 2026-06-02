@@ -81,7 +81,7 @@ func NewCmdRemove(f cmdutils.Factory) *cobra.Command {
 func (o *options) complete(args []string) error {
 	fileID, err := strconv.Atoi(args[0])
 	if err != nil {
-		return fmt.Errorf("Secure file ID must be an integer: %s", args[0])
+		return fmt.Errorf("secure file ID must be an integer: %s", args[0])
 	}
 	o.fileID = int64(fileID)
 
@@ -90,7 +90,7 @@ func (o *options) complete(args []string) error {
 
 func (o *options) validate() error {
 	if !o.forceDelete && !o.io.PromptEnabled() {
-		return &cmdutils.FlagError{Err: fmt.Errorf("--yes or -y flag is required when not running interactively.")}
+		return &cmdutils.FlagError{Err: fmt.Errorf("--yes or -y flag is required when not running interactively")}
 	}
 
 	return nil
@@ -127,7 +127,7 @@ func (o *options) run(ctx context.Context) error {
 
 	_, err = client.SecureFiles.RemoveSecureFile(repo.FullName(), o.fileID)
 	if err != nil {
-		return fmt.Errorf("Error removing secure file: %v", err)
+		return fmt.Errorf("error removing secure file: %w", err)
 	}
 
 	o.io.LogInfof(color.Bold("%s Secure file %d deleted.\n"), color.RedCheck(), o.fileID)

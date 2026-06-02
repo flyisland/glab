@@ -53,7 +53,7 @@ func TestOptions_parseCacheID(t *testing.T) {
 	cacheID := "aHR0cHM6Ly9naXRsYWIuY29t-123"
 
 	gitlabURL, agentID, err := agentutils.ParseCacheID(cacheID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "https://gitlab.com", gitlabURL)
 	assert.Equal(t, int64(123), agentID)
 }
@@ -61,7 +61,7 @@ func TestOptions_parseCacheID(t *testing.T) {
 func TestOptions_parseCacheID_invalid(t *testing.T) {
 	// Test invalid cache ID format
 	_, _, err := agentutils.ParseCacheID("invalid")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid cache ID format")
 }
 
@@ -73,13 +73,13 @@ func TestClearNoTokens(t *testing.T) {
 
 	// WHEN
 	output, err := exec("--filesystem --keyring=false")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// THEN
 	assert.Equal(t, heredoc.Doc(`
 		No cached tokens found to clear.
 	`), output.String())
-	assert.Equal(t, "", output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestClearValidation_NoSources(t *testing.T) {
@@ -92,6 +92,6 @@ func TestClearValidation_NoSources(t *testing.T) {
 	_, err := exec("--filesystem=false --keyring=false")
 
 	// THEN
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "at least one cache source must be enabled")
 }

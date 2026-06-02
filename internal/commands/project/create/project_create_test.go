@@ -9,6 +9,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/acarl005/stripansi"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
@@ -255,9 +256,9 @@ func Test_projectCreateCmd(t *testing.T) {
 			_, err := cmd.ExecuteC()
 
 			if tc.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 
 			out := stripansi.Strip(stdout.String())
@@ -436,9 +437,9 @@ func Test_projectCreateCmd_InCurrentDirectory(t *testing.T) {
 			_, err := cmd.ExecuteC()
 
 			if tc.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 
 			out := stripansi.Strip(stdout.String())

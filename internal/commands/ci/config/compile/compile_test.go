@@ -42,7 +42,7 @@ func Test_compileRun(t *testing.T) {
 			testFile:         ".gitlab.ci.yml",
 			StdOut:           "",
 			wantErr:          true,
-			errMsg:           "You must be in a GitLab project repository for this action: no base repository present",
+			errMsg:           "you must be in a GitLab project repository for this action: no base repository present",
 			showHaveBaseRepo: false,
 		},
 		{

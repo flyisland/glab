@@ -56,7 +56,7 @@ func Test_promptForReorder(t *testing.T) {
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
-				require.Nil(t, err)
+				require.NoError(t, err)
 				require.Equal(t, tt.want, got)
 			}
 		})
@@ -137,7 +137,7 @@ func Test_parseReorderFile(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-			require.Equal(t, gotBranches, tt.wantBranches)
+			require.Equal(t, tt.wantBranches, gotBranches)
 		})
 	}
 }

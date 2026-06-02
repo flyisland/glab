@@ -101,7 +101,7 @@ func Translate(err error) error {
 	}
 
 	return cmdutils.WrapError(
-		fmt.Errorf("Orbit API error (HTTP %d)%s",
+		fmt.Errorf("orbit API error (HTTP %d)%s",
 			errResp.Response.StatusCode, suffix(body)),
 		"",
 	)

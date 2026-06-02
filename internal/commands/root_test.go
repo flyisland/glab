@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/cli/internal/api"
 	"gitlab.com/gitlab-org/cli/internal/cmdutils"
@@ -22,8 +23,8 @@ func TestRootVersion(t *testing.T) {
 	ios, _, stdout, _ := cmdtest.TestIOStreams()
 	rootCmd := NewCmdRoot(cmdutils.NewFactory(ios, false, config.NewBlankConfig(), api.BuildInfo{Version: "v1.0.0", Commit: "abcdefgh"}))
 	rootCmd.SetOut(stdout)
-	assert.Nil(t, rootCmd.Flag("version").Value.Set("true"))
-	assert.Nil(t, rootCmd.Execute())
+	assert.NoError(t, rootCmd.Flag("version").Value.Set("true"))
+	require.NoError(t, rootCmd.Execute())
 
 	assert.Equal(t, "glab 1.0.0 (abcdefgh)\n", stdout.String())
 }
@@ -33,7 +34,7 @@ func TestRootNoArg(t *testing.T) {
 	ios, _, _, _ := cmdtest.TestIOStreams()
 	rootCmd := NewCmdRoot(cmdutils.NewFactory(ios, false, config.NewBlankConfig(), api.BuildInfo{Version: "v1.0.0", Commit: "abcdefgh"}))
 	rootCmd.SetOut(&buf)
-	assert.Nil(t, rootCmd.Execute())
+	require.NoError(t, rootCmd.Execute())
 
 	assert.Contains(t, buf.String(), "GLab is an open source GitLab CLI tool that brings GitLab to your command line.\n")
 	assert.Contains(t, buf.String(), `USAGE

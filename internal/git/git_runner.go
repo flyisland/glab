@@ -136,19 +136,19 @@ func (g *StandardGitRunner) CurrentBranch() (string, error) {
 			return "", ErrNotOnAnyBranch // Detached HEAD error
 		}
 	}
-	return "", fmt.Errorf("unknown error getting current branch: %v - %s", err, stderr)
+	return "", fmt.Errorf("unknown error getting current branch: %w - %s", err, stderr)
 }
 
 // DefaultBranch gets the default branch for a remote
 func (g *StandardGitRunner) DefaultBranch(remote string) (string, error) {
 	stdout, stderr, err := g.runGitCommand("remote", "show", remote)
 	if err != nil {
-		return DefaultBranchName, fmt.Errorf("could not get default branch for remote %s: %v - %s", remote, err, stderr)
+		return DefaultBranchName, fmt.Errorf("could not get default branch for remote %s: %w - %s", remote, err, stderr)
 	}
 
 	defaultBranch, err := parseDefaultBranch(stdout)
 	if err != nil {
-		return DefaultBranchName, fmt.Errorf("could not parse default branch for remote %s: %v", remote, err)
+		return DefaultBranchName, fmt.Errorf("could not parse default branch for remote %s: %w", remote, err)
 	}
 
 	return defaultBranch, nil
@@ -158,7 +158,7 @@ func (g *StandardGitRunner) DefaultBranch(remote string) (string, error) {
 func (g *StandardGitRunner) DeleteLocalBranch(branch string) error {
 	_, stderr, err := g.runGitCommand("branch", "-D", branch)
 	if err != nil {
-		return fmt.Errorf("could not delete local branch %s: %v - %s", branch, err, stderr)
+		return fmt.Errorf("could not delete local branch %s: %w - %s", branch, err, stderr)
 	}
 	return nil
 }
@@ -167,7 +167,7 @@ func (g *StandardGitRunner) DeleteLocalBranch(branch string) error {
 func (g *StandardGitRunner) CheckoutBranch(branch string) error {
 	_, stderr, err := g.runGitCommand("checkout", branch)
 	if err != nil {
-		return fmt.Errorf("could not checkout branch %s: %v - %s", branch, err, stderr)
+		return fmt.Errorf("could not checkout branch %s: %w - %s", branch, err, stderr)
 	}
 	return nil
 }
@@ -182,7 +182,7 @@ func (g *StandardGitRunner) RemoteBranchExists(remote string, branch string) (bo
 func (g *StandardGitRunner) CheckoutNewBranch(branch string) error {
 	_, stderr, err := g.runGitCommand("checkout", "-b", branch)
 	if err != nil {
-		return fmt.Errorf("could not create new branch: %v - %s", err, stderr)
+		return fmt.Errorf("could not create new branch: %w - %s", err, stderr)
 	}
 	return nil
 }
@@ -191,7 +191,7 @@ func (g *StandardGitRunner) CheckoutNewBranch(branch string) error {
 func (g *StandardGitRunner) UncommittedChangeCount() (int, error) {
 	stdout, stderr, err := g.runGitCommand("status", "--porcelain")
 	if err != nil {
-		return 0, fmt.Errorf("could not get status: %v - %s", err, stderr)
+		return 0, fmt.Errorf("could not get status: %w - %s", err, stderr)
 	}
 
 	lines := strings.Split(string(stdout), "\n")
@@ -208,7 +208,7 @@ func (g *StandardGitRunner) UncommittedChangeCount() (int, error) {
 func (g *StandardGitRunner) UserName() (string, error) {
 	stdout, stderr, err := g.runGitCommand("config", "user.name")
 	if err != nil {
-		return "", fmt.Errorf("could not get user name: %v - %s", err, stderr)
+		return "", fmt.Errorf("could not get user name: %w - %s", err, stderr)
 	}
 	return string(stdout), nil
 }
@@ -217,7 +217,7 @@ func (g *StandardGitRunner) UserName() (string, error) {
 func (g *StandardGitRunner) LatestCommit(ref string) (*Commit, error) {
 	stdout, stderr, err := g.runGitCommand("show", "-s", "--format=%h %s", ref)
 	if err != nil {
-		return &Commit{}, fmt.Errorf("could not get latest commit: %v - %s", err, stderr)
+		return &Commit{}, fmt.Errorf("could not get latest commit: %w - %s", err, stderr)
 	}
 
 	split := strings.Fields(string(stdout))
@@ -239,7 +239,7 @@ func (g *StandardGitRunner) Commits(baseRef, headRef string) ([]*Commit, error) 
 		"log", "--pretty=format:%H,%s",
 		"--cherry", fmt.Sprintf("%s...%s", baseRef, headRef))
 	if err != nil {
-		return nil, fmt.Errorf("could not get commits: %v - %s", err, stderr)
+		return nil, fmt.Errorf("could not get commits: %w - %s", err, stderr)
 	}
 
 	var commits []*Commit
@@ -255,7 +255,7 @@ func (g *StandardGitRunner) Commits(baseRef, headRef string) ([]*Commit, error) 
 	}
 
 	if len(commits) == 0 {
-		return commits, fmt.Errorf("could not find any commits between %s and %s.", baseRef, headRef)
+		return commits, fmt.Errorf("could not find any commits between %s and %s", baseRef, headRef)
 	}
 
 	return commits, nil
@@ -265,7 +265,7 @@ func (g *StandardGitRunner) Commits(baseRef, headRef string) ([]*Commit, error) 
 func (g *StandardGitRunner) CommitBody(sha string) (string, error) {
 	stdout, stderr, err := g.runGitCommand("-c", "log.ShowSignature=false", "show", "-s", "--pretty=format:%b", sha)
 	if err != nil {
-		return "", fmt.Errorf("could not get commit body: %v - %s", err, stderr)
+		return "", fmt.Errorf("could not get commit body: %w - %s", err, stderr)
 	}
 	return string(stdout), nil
 }
@@ -274,7 +274,7 @@ func (g *StandardGitRunner) CommitBody(sha string) (string, error) {
 func (g *StandardGitRunner) Push(remote string, ref string) error {
 	_, stderr, err := g.runGitCommand("push", remote, ref)
 	if err != nil {
-		return fmt.Errorf("could not push: %v - %s", err, stderr)
+		return fmt.Errorf("could not push: %w - %s", err, stderr)
 	}
 	return nil
 }
@@ -298,7 +298,7 @@ func (g *StandardGitRunner) HasLocalBranch(branch string) (bool, error) {
 	}
 
 	// otherwise, this is an actual error
-	return false, fmt.Errorf("failed to check if branch %s exists: %v - %s", branch, err, stderr)
+	return false, fmt.Errorf("failed to check if branch %s exists: %w - %s", branch, err, stderr)
 }
 
 // runGitCommand executes a git command with proper environment setup and returns stdout/stderr
@@ -331,7 +331,7 @@ func parseDefaultBranch(output []byte) (string, error) {
 
 	// if scanner encountered an error
 	if err := scanner.Err(); err != nil {
-		return "", fmt.Errorf("error scanning output: %v", err)
+		return "", fmt.Errorf("error scanning output: %w", err)
 	}
 
 	// reset scanner to look for branch marked with (HEAD)

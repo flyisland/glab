@@ -57,14 +57,14 @@ func Test_SecurefileCreate(t *testing.T) {
 					Return(nil, nil, fmt.Errorf("POST https://gitlab.com/api/v4/projects/OWNER%%2FREPO/secure_files: 400"))
 			},
 			wantErr:    true,
-			wantStderr: "Error creating secure file: POST https://gitlab.com/api/v4/projects/OWNER%2FREPO/secure_files: 400",
+			wantStderr: "error creating secure file: POST https://gitlab.com/api/v4/projects/OWNER%2FREPO/secure_files: 400",
 		},
 		{
 			name:       "Get a securefile with invalid file path",
 			cli:        "newfile.txt testdata/missingfile.txt",
 			setupMock:  func(tc *gitlabtesting.TestClient) {},
 			wantErr:    true,
-			wantStderr: "Unable to read file at testdata/missingfile.txt: open testdata/missingfile.txt: no such file or directory",
+			wantStderr: "unable to read file at testdata/missingfile.txt: open testdata/missingfile.txt: no such file or directory",
 		},
 	}
 

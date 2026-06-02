@@ -112,11 +112,11 @@ func (o *options) run() error {
 	isShell = strings.HasPrefix(expansion, "!")
 
 	if validCommand(o.rootCmd, o.name) {
-		return fmt.Errorf("could not create alias: %q is already a glab command.", o.name)
+		return fmt.Errorf("could not create alias: %q is already a glab command", o.name)
 	}
 
 	if !isShell && !validCommand(o.rootCmd, expansion) {
-		return fmt.Errorf("could not create alias: %s does not correspond to a glab command.", expansion)
+		return fmt.Errorf("could not create alias: %s does not correspond to a glab command", expansion)
 	}
 
 	successMsg := fmt.Sprintf("%s Added alias.", c.Green("✓"))
@@ -131,7 +131,7 @@ func (o *options) run() error {
 
 	err = aliasCfg.Set(o.name, expansion)
 	if err != nil {
-		return fmt.Errorf("could not create alias: %s", err)
+		return fmt.Errorf("could not create alias: %w", err)
 	}
 
 	fmt.Fprintln(o.io.StdErr, successMsg)

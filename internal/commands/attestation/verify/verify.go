@@ -148,7 +148,7 @@ func (o *options) retrieveProvenanceMetadata(client *gitlab.Client, subjectDiges
 		}
 	}
 
-	return nil, fmt.Errorf("Unable to find a provenance statement for %s", subjectDigest)
+	return nil, fmt.Errorf("unable to find a provenance statement for %s", subjectDigest)
 }
 
 func (o *options) downloadBundle(client *gitlab.Client, attestationIID int64) ([]byte, error) {
@@ -185,7 +185,7 @@ func (o *options) bundleTempFile(bundleBytes []byte) (filename string, err error
 func (o *options) verify(ctx context.Context, filename string, repoPath string, bundleBytes []byte) (err error) {
 	cosignPath, err := o.exec.LookPath(cosign)
 	if err != nil {
-		return fmt.Errorf("Unable to locate the `%s` binary. Please install following these instructions: %s", cosign, installationUrl)
+		return fmt.Errorf("unable to locate the `%s` binary; please install following these instructions: %s", cosign, installationUrl)
 	}
 
 	bundlePath, err := o.bundleTempFile(bundleBytes)
@@ -218,7 +218,7 @@ func (o *options) verify(ctx context.Context, filename string, repoPath string, 
 
 	out, err := o.exec.ExecWithCombinedOutput(ctx, cosignPath, args, nil)
 	if err != nil {
-		return fmt.Errorf("%w: %s\n", err, out)
+		return fmt.Errorf("%w: %s", err, out)
 	}
 
 	return

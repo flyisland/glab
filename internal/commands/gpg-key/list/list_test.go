@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 	gitlabtesting "gitlab.com/gitlab-org/api/client-go/v2/testing"
@@ -71,7 +72,7 @@ func TestGPGKeyList(t *testing.T) {
 			out, err := exec(tc.cli)
 
 			// THEN
-			assert.NoErrorf(t, err, "error running command `gpg-key list %s`: %v", tc.cli, err)
+			require.NoErrorf(t, err, "error running command `gpg-key list %s`: %v", tc.cli, err)
 			output := out.OutBuf.String()
 			assert.Equal(t, tc.expectedOut, output)
 			assert.Empty(t, out.ErrBuf.String())
@@ -101,7 +102,7 @@ func TestGpgKeyList_JSON(t *testing.T) {
 	)
 
 	out, err := exec("--output json")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Contains(t, out.String(), `"id":1`)
 	assert.Contains(t, out.String(), `"key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmQINBF..."`)

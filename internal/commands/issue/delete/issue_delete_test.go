@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
@@ -92,10 +93,10 @@ func TestNewCmdDelete(t *testing.T) {
 			t.Log(cli)
 			cmdOut, err := exec(cli)
 			if !tt.wantErr {
-				assert.Nil(t, err)
+				require.NoError(t, err)
 				tt.assertFunc(t, cmdOut.OutBuf.String(), cmdOut.ErrBuf.String())
 			} else {
-				assert.NotNil(t, err)
+				require.Error(t, err)
 			}
 		})
 	}

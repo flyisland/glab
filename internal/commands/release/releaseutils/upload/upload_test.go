@@ -49,7 +49,7 @@ func TestReleaseUtilsUpload_AliasFilePathToAssetDirectPath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			aliased, err := aliasFilePathToDirectAssetPath(tt.givenReleaseAsset)
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.expectedAliased, aliased)
 			assert.Equal(t, tt.expectedReleaseAsset, tt.givenReleaseAsset)
 		})
@@ -65,7 +65,7 @@ func TestReleaseUtilsUpload_AliasFilePathToAssetDirectPath_Conflict(t *testing.T
 	aliased, err := aliasFilePathToDirectAssetPath(asset)
 
 	target := &ConflictDirectAssetPathError{}
-	assert.ErrorAs(t, err, &target)
+	require.ErrorAs(t, err, &target)
 	assert.False(t, aliased)
 }
 
@@ -92,7 +92,7 @@ func TestReleaseUtilsUpload_UploadFiles_ProjectMarkdownFiles(t *testing.T) {
 		AssetsLinks: []*ReleaseAsset{},
 	}
 
-	// setup mock expections
+	// setup mock exceptions
 	gomock.InOrder(
 		tc.MockProjectMarkdownUploads.EXPECT().
 			UploadProjectMarkdown("any-project", gomock.Any(), "test-release-file.txt", gomock.Any()).
@@ -130,7 +130,7 @@ func TestReleaseUtilsUpload_UploadFiles_GenericPackageRegistry(t *testing.T) {
 		AssetsLinks: []*ReleaseAsset{},
 	}
 
-	// setup mock expections
+	// setup mock exceptions
 	gomock.InOrder(
 		tc.MockGenericPackages.EXPECT().
 			PublishPackageFile("any-project", DefaultReleasePackageName, "42.0.0", "test-release-file.txt", gomock.Any(), nil),

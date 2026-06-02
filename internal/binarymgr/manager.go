@@ -224,7 +224,7 @@ func (m *Manager) promptDownload(ctx context.Context, autoDownload string) (bool
 
 	var always bool
 	if err := m.io.Confirm(ctx, &always, "Always download updates automatically?"); err != nil {
-		return true, "", nil
+		return true, "", nil //nolint:nilerr // proceed with download even if the secondary "always" prompt fails (e.g. non-interactive)
 	}
 	if always {
 		return true, "true", nil

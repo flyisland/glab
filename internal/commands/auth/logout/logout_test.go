@@ -10,6 +10,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/cli/internal/config"
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
@@ -65,9 +66,9 @@ func Test_NewCmdLogout(t *testing.T) {
 			output, err := exec(fmt.Sprintf("--hostname %s", tt.hostname))
 
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				logoutMessage := fmt.Sprintf("Successfully logged out of %s\n", tt.hostname)
 				assert.Equal(t, logoutMessage, output.String())
 
@@ -76,19 +77,19 @@ func Test_NewCmdLogout(t *testing.T) {
 				assert.Equal(t, token, gitlabToken)
 
 				exampleToken, _ := cfg.Get(tt.hostname, "token")
-				assert.Equal(t, "", exampleToken)
+				assert.Empty(t, exampleToken)
 
 				exampleJobToken, _ := cfg.Get(tt.hostname, "job_token")
-				assert.Equal(t, "", exampleJobToken)
+				assert.Empty(t, exampleJobToken)
 
 				exampleIsOauth2, _ := cfg.Get(tt.hostname, "is_oauth2")
-				assert.Equal(t, "", exampleIsOauth2)
+				assert.Empty(t, exampleIsOauth2)
 
 				exampleOauth2RefreshToken, _ := cfg.Get(tt.hostname, "oauth2_refresh_token")
-				assert.Equal(t, "", exampleOauth2RefreshToken)
+				assert.Empty(t, exampleOauth2RefreshToken)
 
 				exampleOauth2ExpiryDate, _ := cfg.Get(tt.hostname, "oauth2_expiry_date")
-				assert.Equal(t, "", exampleOauth2ExpiryDate)
+				assert.Empty(t, exampleOauth2ExpiryDate)
 			}
 		})
 	}

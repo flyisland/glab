@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
@@ -24,7 +25,7 @@ func TestNewCmdCI(t *testing.T) {
 
 	_, err := cmd.ExecuteC()
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Contains(t, stdout.String(), "Work with GitLab CI/CD pipelines and jobs.\n")
 	assert.Contains(t, stderr.String(), "")

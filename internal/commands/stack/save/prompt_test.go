@@ -98,7 +98,7 @@ func Test_promptForCommit(t *testing.T) {
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
-				require.Nil(t, err)
+				require.NoError(t, err)
 				require.Equal(t, tt.want, got)
 			}
 		})

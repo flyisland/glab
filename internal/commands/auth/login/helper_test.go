@@ -14,6 +14,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
@@ -424,9 +425,9 @@ func Test_helperRun(t *testing.T) {
 
 			validateErr := opts.validate()
 			if tt.wantValidateErr {
-				assert.Error(t, validateErr)
+				require.Error(t, validateErr)
 			} else {
-				assert.NoError(t, validateErr)
+				require.NoError(t, validateErr)
 			}
 
 			// No need to run if validate error is expected
@@ -436,9 +437,9 @@ func Test_helperRun(t *testing.T) {
 
 			runErr := opts.run()
 			if tt.wantErr {
-				assert.Error(t, runErr)
+				require.Error(t, runErr)
 			} else {
-				assert.NoError(t, runErr)
+				require.NoError(t, runErr)
 			}
 
 			if tt.wantStdout != nil {

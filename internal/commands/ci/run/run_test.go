@@ -240,7 +240,7 @@ func TestCIRun(t *testing.T) {
 			out, err := execFunc(tc.cli)
 
 			// THEN
-			assert.NoErrorf(t, err, "error running command `ci run %s`: %v", tc.cli, err)
+			require.NoErrorf(t, err, "error running command `ci run %s`: %v", tc.cli, err)
 
 			assert.Equal(t, tc.expectedOut, out.OutBuf.String())
 			assert.Equal(t, tc.expectedErr, out.ErrBuf.String())
@@ -379,12 +379,12 @@ func TestCIRunMrPipeline(t *testing.T) {
 
 			// THEN
 			if tc.expectedErr == "" {
-				assert.NoErrorf(t, err, "error running command `ci run %s`: %v", tc.cli, err)
+				require.NoErrorf(t, err, "error running command `ci run %s`: %v", tc.cli, err)
 
 				assert.Contains(t, out.OutBuf.String(), tc.expectedOut)
 				assert.Equal(t, tc.expectedErr, out.ErrBuf.String())
 			} else {
-				assert.ErrorContains(t, err, tc.expectedErr)
+				require.ErrorContains(t, err, tc.expectedErr)
 			}
 		})
 	}

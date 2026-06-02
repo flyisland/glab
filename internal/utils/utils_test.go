@@ -34,7 +34,7 @@ func Test_PrettyTimeAgo(t *testing.T) {
 		}
 
 		fuzzy := PrettyTimeAgo(d)
-		require.Equal(t, fuzzy, expected, "unexpected fuzzy duration value: %s for %s")
+		require.Equal(t, expected, fuzzy, "unexpected fuzzy duration value: %s for %s")
 	}
 }
 
@@ -61,7 +61,7 @@ func Test_Pluralize(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.name, func(t *testing.T) {
 			got := Pluralize(tC.amount, tC.word)
-			require.Equal(t, got, tC.want, "Pluralize() got = %s, want = %s")
+			require.Equal(t, tC.want, got, "Pluralize() got = %s, want = %s")
 		})
 	}
 }
@@ -79,7 +79,7 @@ func Test_PresentInStringSlice(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.name, func(t *testing.T) {
 			got := PresentInStringSlice(tC.hay, tC.needle)
-			require.Equal(t, got, tC.want, "PresentInStringSlice() got = %t, want = %t")
+			require.Equal(t, tC.want, got, "PresentInStringSlice() got = %t, want = %t")
 		})
 	}
 }
@@ -142,7 +142,7 @@ func Test_CommonElementsInStringSlice(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.name, func(t *testing.T) {
 			got := CommonElementsInStringSlice(tC.array1, tC.array2)
-			require.Equal(t, len(got), len(tC.want), "CommonElementsInStringSlice() size of got (%d) and wanted (%d) arrays differ")
+			require.Len(t, tC.want, len(got), "CommonElementsInStringSlice() size of got (%d) and wanted (%d) arrays differ")
 			for i := range got {
 				require.Equal(t, got[i], tC.want[i], "CommonElementsInStringSlice() got = %s, want = %s")
 			}
@@ -172,7 +172,7 @@ func Test_Map(t *testing.T) {
 		{
 			"list of structs",
 			[]any{SomeType{"foo"}, SomeType{"bar"}, SomeType{"baz"}},
-			func(e any) any { return e.(SomeType).name },
+			func(e any) any { s, _ := e.(SomeType); return s.name },
 			[]any{"foo", "bar", "baz"},
 		},
 		{
@@ -186,7 +186,7 @@ func Test_Map(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := Map(tt.slice, tt.fn)
-			require.Equal(t, got, tt.want, "Test_Map() want %v; but got %v")
+			require.Equal(t, tt.want, got, "Test_Map() want %v; but got %v")
 		})
 	}
 }

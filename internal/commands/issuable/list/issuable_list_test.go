@@ -42,12 +42,12 @@ func TestNewCmdList(t *testing.T) {
 			return nil
 		}, issuable.TypeIssue).Execute()
 
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, factory.IO(), gotOpts.IO)
 
 		gotBaseRepo, _ := gotOpts.BaseRepo()
 		expectedBaseRepo, _ := factory.BaseRepo()
-		assert.Equal(t, gotBaseRepo, expectedBaseRepo)
+		assert.Equal(t, expectedBaseRepo, gotBaseRepo)
 	})
 }
 
@@ -148,7 +148,7 @@ func TestIssueList_tty(t *testing.T) {
 		#8	Incident 	(foo, baz) 	about X years ago
 
 	`), out)
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestIssueList_ids(t *testing.T) {
@@ -215,7 +215,7 @@ func TestIssueList_ids(t *testing.T) {
 	}
 
 	assert.Equal(t, "6\n7\n8\n", output.String())
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestIssueList_urls(t *testing.T) {
@@ -286,7 +286,7 @@ func TestIssueList_urls(t *testing.T) {
 		http://gitlab.com/OWNER/REPO/issues/7
 		http://gitlab.com/OWNER/REPO/issues/8
 	`), output.String())
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestIssueList_tty_withFlags(t *testing.T) {
@@ -334,7 +334,7 @@ func TestIssueList_tty_withFlags(t *testing.T) {
 		output, err := exec("--opened -P1 -p100 --confidential -a someuser -l bug -m1")
 		require.NoError(t, err)
 
-		assert.Equal(t, "", output.Stderr())
+		assert.Empty(t, output.Stderr())
 		assert.Equal(t, `No open issues match your search in OWNER/REPO.
 
 
@@ -365,7 +365,7 @@ func TestIssueList_tty_withFlags(t *testing.T) {
 		output, err := exec("--group GROUP")
 		require.NoError(t, err)
 
-		assert.Equal(t, "", output.Stderr())
+		assert.Empty(t, output.Stderr())
 		assert.Equal(t, `No open issues match your search in GROUP.
 
 
@@ -402,7 +402,7 @@ func TestIssueList_filterByIteration(t *testing.T) {
 	output, err := exec("--iteration 9")
 	require.NoError(t, err)
 
-	assert.Equal(t, "", output.Stderr())
+	assert.Empty(t, output.Stderr())
 	assert.Equal(t, `No open issues match your search in OWNER/REPO.
 
 
@@ -468,7 +468,7 @@ func TestIssueList_tty_withIssueType(t *testing.T) {
 
 	assert.Contains(t, out, "Showing 1 open incident in OWNER/REPO that match your search. (Page 1)")
 	assert.Contains(t, out, "#8\tIncident\t(foo, baz)\tabout X years ago")
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestIncidentList_tty_withIssueType(t *testing.T) {
@@ -485,8 +485,8 @@ func TestIncidentList_tty_withIssueType(t *testing.T) {
 		t.Error("expected an `unknown flag: --issue-type` error, but got nothing")
 	}
 
-	assert.Equal(t, ``, output.String())
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.String())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestIssueList_tty_mine(t *testing.T) {
@@ -523,7 +523,7 @@ func TestIssueList_tty_mine(t *testing.T) {
 		output, err := exec("--mine -A")
 		require.NoError(t, err)
 
-		assert.Equal(t, "", output.Stderr(), "")
+		assert.Empty(t, output.Stderr())
 		assert.Equal(t, `No issues match your search in OWNER/REPO.
 
 
@@ -555,10 +555,10 @@ func TestIssueList_tty_mine(t *testing.T) {
 		)
 
 		output, err := exec("--mine -A")
-		assert.NotNil(t, err)
+		require.Error(t, err)
 
-		assert.Equal(t, "", output.Stderr())
-		assert.Equal(t, "", output.String())
+		assert.Empty(t, output.Stderr())
+		assert.Empty(t, output.String())
 	})
 }
 
@@ -715,7 +715,7 @@ func TestIssueList_hyperlinks(t *testing.T) {
 				gotCells := strings.Split(line, "\t")
 				expectedCells := tc.expectedCells[lineNum]
 
-				assert.Equal(t, len(expectedCells), len(gotCells))
+				assert.Len(t, gotCells, len(expectedCells))
 
 				for cellNum, gotCell := range gotCells {
 					expectedCell := expectedCells[cellNum]
@@ -796,7 +796,7 @@ func TestIssueListMutualOutputFlags(t *testing.T) {
 
 	_, err := exec("--output json --output-format ids")
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.EqualError(t, err, "if any flags in the group [output output-format] are set none of the others can be; [output output-format] were all set")
 }
 
@@ -977,13 +977,13 @@ func TestIssueList_epicIssues(t *testing.T) {
 
 			output, err := exec(tt.commandLine + ` --output-format ids`)
 			if tt.wantErr != "" {
-				assert.ErrorContains(t, err, tt.wantErr)
+				require.ErrorContains(t, err, tt.wantErr)
 			}
 			if err != nil {
 				return
 			}
 
-			assert.Equal(t, "", output.Stderr())
+			assert.Empty(t, output.Stderr())
 
 			gotIDs, err := strToIntSlice(output.String())
 			if err != nil {

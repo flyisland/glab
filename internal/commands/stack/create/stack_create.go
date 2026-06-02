@@ -45,7 +45,7 @@ func NewCmdCreateStack(f cmdutils.Factory, gr git.GitRunner) *cobra.Command {
 					return nil
 				})
 				if err != nil {
-					return fmt.Errorf("error prompting for title: %v", err)
+					return fmt.Errorf("error prompting for title: %w", err)
 				}
 			} else {
 				titleString = strings.Join(args[:], "-")
@@ -63,12 +63,12 @@ func NewCmdCreateStack(f cmdutils.Factory, gr git.GitRunner) *cobra.Command {
 
 			err := git.SetLocalConfig("glab.currentstack", title)
 			if err != nil {
-				return fmt.Errorf("error setting local Git config: %v", err)
+				return fmt.Errorf("error setting local Git config: %w", err)
 			}
 
 			_, err = git.AddStackRefDir(title)
 			if err != nil {
-				return fmt.Errorf("error adding stack metadata directory: %v", err)
+				return fmt.Errorf("error adding stack metadata directory: %w", err)
 			}
 
 			currentBranch, err := gr.Git("symbolic-ref", "--quiet", "--short", "HEAD")

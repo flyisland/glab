@@ -200,7 +200,7 @@ func Test_VerifyAssignees(t *testing.T) {
 				ToRemove:  []string{},
 				ToReplace: []string{"foo"},
 			},
-			want: "mixing relative (+,!,-) and absolute assignments is forbidden.",
+			want: "mixing relative (+,!,-) and absolute assignments is forbidden",
 		},
 		{
 			name: "replace with remove, error",
@@ -209,7 +209,7 @@ func Test_VerifyAssignees(t *testing.T) {
 				ToRemove:  []string{"baz"},
 				ToReplace: []string{"foo"},
 			},
-			want: "mixing relative (+,!,-) and absolute assignments is forbidden.",
+			want: "mixing relative (+,!,-) and absolute assignments is forbidden",
 		},
 		{
 			name: "overlapping add and removal element, error",
@@ -218,7 +218,7 @@ func Test_VerifyAssignees(t *testing.T) {
 				ToRemove:  []string{"foo"},
 				ToReplace: []string{},
 			},
-			want: `1 element "foo" present in both add and remove, which is forbidden.`,
+			want: `1 element "foo" present in both add and remove, which is forbidden`,
 		},
 		{
 			name: "overlapping add and removal elements, error",
@@ -227,7 +227,7 @@ func Test_VerifyAssignees(t *testing.T) {
 				ToRemove:  []string{"foo", "baz"},
 				ToReplace: []string{},
 			},
-			want: `2 elements "foo baz" present in both add and remove, which is forbidden.`,
+			want: `2 elements "foo baz" present in both add and remove, which is forbidden`,
 		},
 	}
 	for _, tC := range testCases {
@@ -505,7 +505,7 @@ func Test_UsersFromAddRemove(t *testing.T) {
 					Username: "bar",
 				},
 			},
-			wantErr: "issueAssignees and mergeRequestAssignees can't both be set.",
+			wantErr: "issueAssignees and mergeRequestAssignees can't both be set",
 		},
 	}
 	for _, tC := range testCases {
@@ -674,7 +674,7 @@ func Test_PickMetadata(t *testing.T) {
 
 		got, err := PickMetadata(ctx, ios)
 		assert.Nil(t, got)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "could not prompt")
 	})
 }
@@ -792,9 +792,9 @@ func Test_UsersPrompt(t *testing.T) {
 
 				err := UsersPrompt(t.Context(), &got, &gitlab.Client{}, repoRemote, io, tC.minimumAccessLevel, "some users")
 				if tC.expectedError != "" {
-					assert.EqualError(t, err, tC.expectedError)
+					require.EqualError(t, err, tC.expectedError)
 				} else {
-					assert.NoError(t, err)
+					require.NoError(t, err)
 				}
 				if tC.expectedStdErr != "" {
 					outErr := stripansi.Strip(stderr.String())
@@ -815,12 +815,14 @@ func Test_UsersPrompt(t *testing.T) {
 
 			err := UsersPrompt(ctx, &got, &gitlab.Client{}, repoRemote, io, tC.minimumAccessLevel, "some users")
 			if tC.expectedError != "" {
-				assert.EqualError(t, err, tC.expectedError)
+				require.EqualError(t, err, tC.expectedError)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 			if tC.expectedStdErr != "" {
-				outErr := stripansi.Strip(io.StdErr.(*bytes.Buffer).String())
+				stderrBuf, ok := io.StdErr.(*bytes.Buffer)
+				require.True(t, ok, "test setup wires StdErr to a *bytes.Buffer")
+				outErr := stripansi.Strip(stderrBuf.String())
 				assert.Equal(t, tC.expectedStdErr, outErr)
 			}
 			assert.ElementsMatch(t, got, tC.output)
@@ -869,7 +871,7 @@ func Test_UsersPrompt(t *testing.T) {
 		defer ctxCancel()
 
 		err := UsersPrompt(ctx, &got, &gitlab.Client{}, repoRemote, io, 20, "assignees")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{"foo", "bar"}, got)
 	})
 }
@@ -1178,7 +1180,7 @@ func Test_LabelsPromptMultiSelect(t *testing.T) {
 			defer ctxCancel()
 
 			err := LabelsPrompt(ctx, ios, &tC.labels, &gitlab.Client{}, repoRemote)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.ElementsMatch(t, tC.labels, tC.expected)
 		})
 	}
@@ -1238,7 +1240,7 @@ func Test_LabelsPromptAskQuestionWithInput(t *testing.T) {
 			defer ctxCancel()
 
 			err := LabelsPrompt(ctx, ios, &tC.labels, &gitlab.Client{}, repoRemote)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.ElementsMatch(t, tC.labels, tC.expected)
 		})
 	}
@@ -1290,7 +1292,7 @@ func Test_ConfirmSubmission(t *testing.T) {
 				t.Cleanup(cleanup)
 
 				got, err := ConfirmSubmission(t.Context(), ios, tC.allowAddMetadata)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tC.output, got)
 			})
 		}
@@ -1321,7 +1323,7 @@ func TestListGitLabTemplates(t *testing.T) {
 			git.ToplevelDir = func() (string, error) { return "../../test/testdata", nil }
 			gotTemplates, gotErr := ListGitLabTemplates(test.give)
 			require.Equal(t, test.wantErr, (gotErr != nil))
-			assert.EqualValues(t, test.wantTemplates, gotTemplates, "Templates got didn't match")
+			assert.Equal(t, test.wantTemplates, gotTemplates, "Templates got didn't match")
 		})
 	}
 }

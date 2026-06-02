@@ -29,7 +29,7 @@ func TestNewCmdClone(t *testing.T) {
 		{
 			name:    "no arguments",
 			args:    "",
-			wantErr: "Specify repository argument, or use the --group flag to specify a group to clone all repos from the group.",
+			wantErr: "specify repository argument, or use the --group flag to specify a group to clone all repos from the group",
 		},
 		{
 			name: "repo argument",
@@ -126,7 +126,7 @@ func TestNewCmdClone(t *testing.T) {
 		{
 			name:    "unknown argument",
 			args:    "NAMESPACE/REPO --depth 1",
-			wantErr: "unknown flag: --depth\nSeparate Git clone flags with '--'.",
+			wantErr: "unknown flag: --depth\nseparate Git clone flags with '--'",
 		},
 		{
 			name: "group clone with active=true",
@@ -199,8 +199,8 @@ func TestNewCmdClone(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			assert.Equal(t, "", stdout.String())
-			assert.Equal(t, "", stderr.String())
+			assert.Empty(t, stdout.String())
+			assert.Empty(t, stderr.String())
 
 			assert.Equal(t, tt.wantCtxOpts.Repo, ctxOpts.Repo)
 			assert.Equal(t, tt.wantOpts.gitFlags, opts.gitFlags)

@@ -38,7 +38,7 @@ func TestGenerateIssueWebURL(t *testing.T) {
 		"issue%5Bdescription%5D=%0A%2Flabel+~%22backend%22+~%22frontend%22%0A%2Fassign+johndoe%2C+janedoe%0A%2Fmilestone+%2515%0A%2Fweight+3%0A%2Fconfidential&" +
 		"issue%5Btitle%5D=Autofill+tests+%7C+for+this+%40project"
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedUrl, u)
 }
 
@@ -178,7 +178,7 @@ func TestIssueCreateWhenIssuesDisabled(t *testing.T) {
 	output, err := exec(cli)
 
 	// THEN
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Empty(t, output.String())
 	assert.Equal(t, "Issues are disabled for project \"OWNER/REPO\" or require project membership. "+
 		"Make sure issues are enabled for the \"OWNER/REPO\" project, and if required, you are a member of the project.\n",

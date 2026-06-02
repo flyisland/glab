@@ -130,7 +130,7 @@ func Test_matchBranchesToStack(t *testing.T) {
 			git.InitGitRepo(t)
 
 			err := git.CreateRefFiles(tt.args.stack.Refs, "cool stack")
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			git.CreateBranches(t, tt.args.branches)
 
@@ -143,7 +143,7 @@ func Test_matchBranchesToStack(t *testing.T) {
 					require.Equal(t, newStack.Refs[k], ref)
 				}
 
-				require.Equal(t, len(tt.args.branches), len(newStack.Refs))
+				require.Len(t, newStack.Refs, len(tt.args.branches))
 			}
 		})
 	}

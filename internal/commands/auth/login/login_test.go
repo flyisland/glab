@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/zalando/go-keyring"
 
 	"gitlab.com/gitlab-org/cli/internal/iostreams"
@@ -303,7 +304,7 @@ func Test_NewCmdLogin(t *testing.T) {
 			}
 
 			argv, err := shlex.Split(tt.cli)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			cmd := NewCmdLogin(f)
 			// TODO cobra hack-around
@@ -317,11 +318,11 @@ func Test_NewCmdLogin(t *testing.T) {
 			_, err = cmd.ExecuteC()
 
 			if tt.wantsErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Contains(t, err.Error(), tt.err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, tt.wants.Token, opts.Token)
 			assert.Equal(t, tt.wants.JobToken, opts.JobToken)
@@ -430,8 +431,8 @@ func Test_keyringLogin(t *testing.T) {
 	t.Setenv("GLAB_CONFIG_DIR", d)
 
 	token, err := keyring.Get("glab:gitlab.com:token", "")
-	assert.Error(t, err)
-	assert.Equal(t, "", token)
+	require.Error(t, err)
+	assert.Empty(t, token)
 
 	io, _, _, _ := cmdtest.TestIOStreams()
 	f := cmdtest.NewTestFactory(io)
@@ -441,9 +442,9 @@ func Test_keyringLogin(t *testing.T) {
 	cmd.SetArgs([]string{"--use-keyring", "--token", "glpat-1234"})
 
 	_, err = cmd.ExecuteC()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	token, err = keyring.Get("glab:gitlab.com:token", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "glpat-1234", token)
 }

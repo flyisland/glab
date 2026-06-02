@@ -45,20 +45,20 @@ func NewCmdSaveStack(f cmdutils.Factory, gr git.GitRunner, getText cmdutils.GetT
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if cmd.Flags().Changed("message") && cmd.Flags().Changed("description") {
-				return &cmdutils.FlagError{Err: errors.New("specify either of --message or --description.")}
+				return &cmdutils.FlagError{Err: errors.New("specify either of --message or --description")}
 			}
 
 			// check if there are even any changes before we start
 			err := checkForChanges()
 			if err != nil {
-				return fmt.Errorf("could not save: %v", err)
+				return fmt.Errorf("could not save: %w", err)
 			}
 
 			// a description is required, so ask if one is not provided
 			if description == "" {
 				description, err = promptForCommit(cmd.Context(), f, getText, "")
 				if err != nil {
-					return fmt.Errorf("error getting commit message: %v", err)
+					return fmt.Errorf("error getting commit message: %w", err)
 				}
 			}
 
@@ -67,18 +67,18 @@ func NewCmdSaveStack(f cmdutils.Factory, gr git.GitRunner, getText cmdutils.GetT
 			// git add files
 			err = addFiles(args[0:], stageAll)
 			if err != nil {
-				return fmt.Errorf("error adding files: %v", err)
+				return fmt.Errorf("error adding files: %w", err)
 			}
 
 			// get stack title
 			title, err := git.GetCurrentStackTitle()
 			if err != nil {
-				return fmt.Errorf("error running Git command: %v", err)
+				return fmt.Errorf("error running Git command: %w", err)
 			}
 
 			stack, err := git.GatherStackRefs(title)
 			if err != nil {
-				return fmt.Errorf("error getting refs from file system: %v", err)
+				return fmt.Errorf("error getting refs from file system: %w", err)
 			}
 
 			if !stack.Empty() {
@@ -91,31 +91,31 @@ func NewCmdSaveStack(f cmdutils.Factory, gr git.GitRunner, getText cmdutils.GetT
 
 			author, err := git.GitUserName()
 			if err != nil {
-				return fmt.Errorf("error getting Git author: %v", err)
+				return fmt.Errorf("error getting Git author: %w", err)
 			}
 
 			// generate a SHA based on: commit message, stack title, Git author name
 			sha, err := stackutils.GenerateStackSha(description, title, string(author), time.Now())
 			if err != nil {
-				return fmt.Errorf("error generating hash for stack branch name: %v", err)
+				return fmt.Errorf("error generating hash for stack branch name: %w", err)
 			}
 
 			// create branch name from SHA
 			branch, err := stackutils.CreateShaBranch(f, sha, title)
 			if err != nil {
-				return fmt.Errorf("error creating branch name: %v", err)
+				return fmt.Errorf("error creating branch name: %w", err)
 			}
 
 			// create the branch prefix-stack_title-SHA
 			err = git.CheckoutNewBranch(branch)
 			if err != nil {
-				return fmt.Errorf("error running branch checkout: %v", err)
+				return fmt.Errorf("error running branch checkout: %w", err)
 			}
 
 			// commit files to branch
 			_, err = commitFiles(description)
 			if err != nil {
-				return fmt.Errorf("error committing files: %v", err)
+				return fmt.Errorf("error committing files: %w", err)
 			}
 
 			var stackRef git.StackRef
@@ -132,7 +132,7 @@ func NewCmdSaveStack(f cmdutils.Factory, gr git.GitRunner, getText cmdutils.GetT
 					Next:        sha,
 				})
 				if err != nil {
-					return fmt.Errorf("error updating old ref: %v", err)
+					return fmt.Errorf("error updating old ref: %w", err)
 				}
 
 				stackRef = git.StackRef{Prev: lastRef.SHA, SHA: sha, Branch: branch, Description: description}
@@ -142,7 +142,7 @@ func NewCmdSaveStack(f cmdutils.Factory, gr git.GitRunner, getText cmdutils.GetT
 
 			err = git.AddStackRefFile(title, stackRef)
 			if err != nil {
-				return fmt.Errorf("error creating stack file: %v", err)
+				return fmt.Errorf("error creating stack file: %w", err)
 			}
 
 			if f.IO().IsOutputTTY() {
@@ -173,11 +173,11 @@ func checkForChanges() error {
 	gitCmd := git.GitCommand("status", "--porcelain")
 	output, err := run.PrepareCmd(gitCmd).Output()
 	if err != nil {
-		return fmt.Errorf("error running Git status: %v", err)
+		return fmt.Errorf("error running Git status: %w", err)
 	}
 
 	if string(output) == "" {
-		return fmt.Errorf("no changes to save.")
+		return fmt.Errorf("no changes to save")
 	}
 
 	return nil
@@ -187,7 +187,7 @@ func checkForStagedChanges() (bool, error) {
 	gitCmd := git.GitCommand("diff", "--cached", "--name-only")
 	output, err := run.PrepareCmd(gitCmd).Output()
 	if err != nil {
-		return false, fmt.Errorf("error checking for staged changes: %v", err)
+		return false, fmt.Errorf("error checking for staged changes: %w", err)
 	}
 
 	return strings.TrimSpace(string(output)) != "", nil
@@ -200,7 +200,7 @@ func addFiles(args []string, stageAll bool) error {
 		gitCmd := git.GitCommand("add", "--update")
 		_, err := run.PrepareCmd(gitCmd).Output()
 		if err != nil {
-			return fmt.Errorf("error running Git add --update: %v", err)
+			return fmt.Errorf("error running Git add --update: %w", err)
 		}
 		hasStagedChanges, err := checkForStagedChanges()
 		if err != nil {
@@ -226,7 +226,7 @@ func addFiles(args []string, stageAll bool) error {
 
 		_, err := run.PrepareCmd(gitCmd).Output()
 		if err != nil {
-			return fmt.Errorf("error running Git add: %v", err)
+			return fmt.Errorf("error running Git add: %w", err)
 		}
 
 		return nil
@@ -250,7 +250,7 @@ func commitFiles(message string) (string, error) {
 	commitCmd := git.GitCommand("commit", "-m", message)
 	output, err := run.PrepareCmd(commitCmd).Output()
 	if err != nil {
-		return "", fmt.Errorf("error running Git command: %v", err)
+		return "", fmt.Errorf("error running Git command: %w", err)
 	}
 
 	return string(output), nil

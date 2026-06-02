@@ -178,7 +178,7 @@ func Test_AddStackRefFile(t *testing.T) {
 			InitGitRepoOrWorktree(t, tt.worktree)
 
 			err := AddStackRefFile(tt.args.title, tt.args.stackRef)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			stackLoc, locErr := StackLocation()
 			require.NoError(t, locErr)
@@ -187,10 +187,10 @@ func Test_AddStackRefFile(t *testing.T) {
 
 			stackRef := StackRef{}
 			readData, err := os.ReadFile(file)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			err = json.Unmarshal(readData, &stackRef)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			require.Equal(t, stackRef, tt.args.stackRef)
 		})
@@ -249,11 +249,11 @@ func Test_UpdateStackRefFile(t *testing.T) {
 			// add the initial data
 			initial := StackRef{Prev: "123", Branch: "gmh"}
 			err := AddStackRefFile(tt.args.title, initial)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			err = UpdateStackRefFile(tt.args.title, tt.args.stackRef)
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			stackLoc, locErr := StackLocation()
 			require.NoError(t, locErr)
@@ -262,10 +262,10 @@ func Test_UpdateStackRefFile(t *testing.T) {
 
 			stackRef := StackRef{}
 			readData, err := os.ReadFile(file)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			err = json.Unmarshal(readData, &stackRef)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			require.Equal(t, stackRef, tt.args.stackRef)
 		})
@@ -304,19 +304,19 @@ func Test_GetStacks(t *testing.T) {
 			for _, v := range stacks {
 				for _, ref := range v.Refs {
 					err := AddStackRefFile(v.Title, ref)
-					require.Nil(t, err)
+					require.NoError(t, err)
 				}
 				want = append(want, Stack{Title: v.Title})
 			}
 			got, err := GetStacks()
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.Equal(t, want, got)
 		})
 		t.Run("no stacks"+suffix, func(t *testing.T) {
 			InitGitRepoOrWorktree(t, worktree)
 			got, err := GetStacks()
 			var want []Stack = nil
-			require.NotNil(t, err)
+			require.Error(t, err)
 			require.Equal(t, want, got)
 		})
 	}

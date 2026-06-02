@@ -115,13 +115,13 @@ func NewCmdCreate(f cmdutils.Factory) *cobra.Command {
 			opts.needsPrompt = !(hasTitle && (hasDescription || hasTemplate))
 
 			if opts.needsPrompt && !opts.io.IsInteractive() {
-				return &cmdutils.FlagError{Err: errors.New("'--title' and '--description' (or '--template') required for non-interactive mode.")}
+				return &cmdutils.FlagError{Err: errors.New("'--title' and '--description' (or '--template') required for non-interactive mode")}
 			}
 
 			// Remove this once --yes does more than just skip the prompts that --web happen to skip
 			// by design
 			if opts.yes && opts.web {
-				return &cmdutils.FlagError{Err: errors.New("'--web' already skips all prompts currently skipped by '--yes'.")}
+				return &cmdutils.FlagError{Err: errors.New("'--web' already skips all prompts currently skipped by '--yes'")}
 			}
 
 			opts.baseProject, err = api.GetProject(client, repo.FullName())

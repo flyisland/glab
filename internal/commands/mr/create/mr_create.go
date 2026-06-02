@@ -217,26 +217,26 @@ func (o *options) validate(cmd *cobra.Command) error {
 
 	if hasTitle && hasDescription && o.Autofill {
 		return &cmdutils.FlagError{
-			Err: errors.New("usage of --title and --description overrides --fill."),
+			Err: errors.New("usage of --title and --description overrides --fill"),
 		}
 	}
 	if o.needsPrompt && !o.io.IsInteractive() && !o.Autofill {
-		return &cmdutils.FlagError{Err: errors.New("--title or --fill required for non-interactive mode.")}
+		return &cmdutils.FlagError{Err: errors.New("--title or --fill required for non-interactive mode")}
 	}
 	if cmd.Flags().Changed("wip") && cmd.Flags().Changed("draft") {
-		return &cmdutils.FlagError{Err: errors.New("specify --draft.")}
+		return &cmdutils.FlagError{Err: errors.New("specify --draft")}
 	}
 	if !o.Autofill && o.FillCommitBody {
-		return &cmdutils.FlagError{Err: errors.New("--fill-commit-body should be used with --fill.")}
+		return &cmdutils.FlagError{Err: errors.New("--fill-commit-body should be used with --fill")}
 	}
 	// Remove this once --yes does more than just skip the prompts that --web happen to skip
 	// by design
 	if o.yes && o.web {
-		return &cmdutils.FlagError{Err: errors.New("--web already skips all prompts currently skipped by --yes.")}
+		return &cmdutils.FlagError{Err: errors.New("--web already skips all prompts currently skipped by --yes")}
 	}
 
 	if o.CopyIssueLabels && o.RelatedIssue == "" {
-		return &cmdutils.FlagError{Err: errors.New("--copy-issue-labels can only be used with --related-issue.")}
+		return &cmdutils.FlagError{Err: errors.New("--copy-issue-labels can only be used with --related-issue")}
 	}
 
 	return nil
@@ -571,7 +571,7 @@ func (o *options) run(ctx context.Context) error {
 	}
 
 	if o.Title == "" {
-		return fmt.Errorf("title can't be blank.")
+		return fmt.Errorf("title can't be blank")
 	}
 
 	if o.IsDraft || o.IsWIP {
@@ -758,7 +758,7 @@ func (o *options) run(ctx context.Context) error {
 		return nil
 	}
 
-	return errors.New("expected to cancel, preview in browser, or submit.")
+	return errors.New("expected to cancel, preview in browser, or submit")
 }
 
 func mrBodyAndTitle(opts *options) error {

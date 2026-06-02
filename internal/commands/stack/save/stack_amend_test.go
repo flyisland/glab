@@ -72,7 +72,7 @@ func Test_stackAmendCmd(t *testing.T) {
 
 			dir := git.InitGitRepoWithCommit(t)
 			err := git.SetLocalConfig("glab.currentstack", "cool-test-feature")
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			createTemporaryFiles(t, dir, tc.files)
 
@@ -92,14 +92,14 @@ func Test_stackAmendCmd(t *testing.T) {
 				cmdtest.WithGitLabClient(cmdtest.NewTestApiClient(t, nil, "", "gitlab.com").Lab()),
 			)
 			_, err = exec(strings.Join(saveArgs, " "))
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			createTemporaryFiles(t, dir, tc.amendedFiles)
 			if tc.desc == "not on a stack branch" {
 				checkout := git.GitCommand("checkout", "-b", "randobranch")
 				_, err := run.PrepareCmd(checkout).Output()
 
-				require.Nil(t, err)
+				require.NoError(t, err)
 			}
 
 			output, err := amendFunc(t.Context(), f, tc.args, getText, tc.description, false)
@@ -107,7 +107,7 @@ func Test_stackAmendCmd(t *testing.T) {
 			if tc.wantErr {
 				require.ErrorContains(t, err, tc.expected)
 			} else {
-				require.Nil(t, err)
+				require.NoError(t, err)
 				require.Equal(t, tc.expected, output)
 			}
 		})

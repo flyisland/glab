@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
@@ -15,7 +16,7 @@ func TestNewCmdCluster(t *testing.T) {
 	cmd := NewCmdCluster(cmdtest.NewTestFactory(ios))
 	cmd.SetOut(stdout)
 
-	assert.Nil(t, cmd.Execute())
+	require.NoError(t, cmd.Execute())
 
 	assert.Contains(t, stdout.String(), "Agents connect your cluster to GitLab")
 }

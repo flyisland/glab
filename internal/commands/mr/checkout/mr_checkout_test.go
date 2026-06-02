@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
@@ -96,7 +97,7 @@ func TestMrCheckout(t *testing.T) {
 		exec := setupTest(t, testClient, cmdtest.WithGitRunner(mockGit))
 		output, err := exec("123")
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, output.Stderr(), "Counting objects")
 		assert.Contains(t, output.Stderr(), "[new branch] refs/heads/feat-new-mr:feat-new-mr")
 		assert.Contains(t, output.Stderr(), "Switched to a new branch 'feat-new-mr'")
@@ -145,7 +146,7 @@ func TestMrCheckout(t *testing.T) {
 		exec := setupTest(t, testClient, cmdtest.WithGitRunner(mockGit))
 		output, err := exec("123")
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, output.Stderr(), "[new branch] refs/merge-requests/123/head:feat-new-mr")
 		assert.Contains(t, output.Stderr(), "Switched to a new branch 'feat-new-mr'")
 	})
@@ -189,7 +190,7 @@ func TestMrCheckout(t *testing.T) {
 		exec := setupTest(t, testClient, cmdtest.WithGitRunner(mockGit))
 		output, err := exec("123 --branch foo")
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, output.Stderr(), "[new branch] refs/heads/feat-new-mr:foo")
 		assert.Contains(t, output.Stderr(), "Switched to a new branch 'foo'")
 	})
@@ -231,7 +232,7 @@ func TestMrCheckout(t *testing.T) {
 		exec := setupTest(t, testClient, cmdtest.WithGitRunner(mockGit))
 		output, err := exec("123")
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, output.Stderr(), "fetch attempt refs/heads/feat-new-mr:feat-new-mr failed")
 		assert.Contains(t, output.Stderr(), "[new branch] refs/heads/feat-new-mr")
 		assert.Contains(t, output.Stderr(), "Switched to a new branch 'feat-new-mr'")
@@ -270,7 +271,7 @@ func TestMrCheckout(t *testing.T) {
 		exec := setupTest(t, testClient, cmdtest.WithGitRunner(mockGit))
 		output, err := exec("123")
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "fetch failed")
 		assert.Contains(t, output.Stderr(), "fetch attempt refs/heads/feat-new-mr:feat-new-mr failed")
 		assert.Contains(t, output.Stderr(), "fetch attempt refs/heads/feat-new-mr failed")
@@ -312,7 +313,7 @@ func TestMrCheckout(t *testing.T) {
 		exec := setupTest(t, testClient, cmdtest.WithGitRunner(mockGit))
 		output, err := exec("123")
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "could not checkout branch")
 		assert.Contains(t, output.Stderr(), "[new branch] refs/heads/feat-new-mr:feat-new-mr")
 		assert.Contains(t, output.Stderr(), "error: pathspec 'feat-new-mr' did not match")
@@ -352,7 +353,7 @@ func TestMrCheckout(t *testing.T) {
 		exec := setupTest(t, testClient, cmdtest.WithGitRunner(mockGit))
 		output, err := exec("123")
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "could not set config")
 		assert.Contains(t, output.Stderr(), "[new branch] refs/heads/feat-new-mr:feat-new-mr")
 		assert.Empty(t, output.String())
@@ -396,7 +397,7 @@ func TestMrCheckout_SetUpstreamTo(t *testing.T) {
 	exec := setupTest(t, testClient, cmdtest.WithGitRunner(mockGit))
 	output, err := exec("123 --set-upstream-to upstream/main")
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, output.Stderr(), "[new branch] refs/heads/feat-new-mr:feat-new-mr")
 	assert.Contains(t, output.Stderr(), "Switched to a new branch 'feat-new-mr'")
 }
@@ -439,12 +440,12 @@ func TestMrCheckout_HTTPSProtocolConfiguration(t *testing.T) {
 
 	cfg := config.NewBlankConfig()
 	err := cfg.Set("gitlab.com", "git_protocol", "https")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	exec := setupTest(t, testClient, cmdtest.WithGitRunner(mockGit), cmdtest.WithConfig(cfg))
 	output, err := exec("123")
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, output.Stderr(), "[new branch] refs/heads/feat-new-mr:feat-new-mr")
 	assert.Contains(t, output.Stderr(), "Switched to a new branch 'feat-new-mr'")
 }

@@ -3,7 +3,6 @@
 package registry
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,7 +35,7 @@ func TestGet_Unknown(t *testing.T) {
 
 	_, err := Get("does-not-exist")
 	require.Error(t, err)
-	assert.True(t, errors.Is(err, ErrNotFound), "error should wrap ErrNotFound")
+	require.ErrorIs(t, err, ErrNotFound, "error should wrap ErrNotFound")
 	assert.Contains(t, err.Error(), `unknown skill "does-not-exist"`)
 	assert.Contains(t, err.Error(), "glab skills list")
 }

@@ -127,10 +127,10 @@ func TestEnumValue_Set(t *testing.T) {
 			err := enumValue.Set(tt.setValue)
 
 			if tt.expectError {
-				assert.Error(t, err, "expected error but got none")
+				require.Error(t, err, "expected error but got none")
 				assert.NotEmpty(t, err.Error(), "expected non-empty error message")
 			} else {
-				assert.NoError(t, err, "unexpected error")
+				require.NoError(t, err, "unexpected error")
 				assert.Equal(t, tt.setValue, value, "expected value to be set correctly")
 				assert.Equal(t, tt.setValue, enumValue.String(), "expected String() to return set value")
 			}
@@ -148,7 +148,7 @@ func TestEnumValue_Set_ErrorMessage(t *testing.T) {
 
 	errorMsg := err.Error()
 	expectedPrefix := "must be one of"
-	assert.True(t, len(errorMsg) >= len(expectedPrefix), "error message should be long enough")
+	assert.GreaterOrEqual(t, len(errorMsg), len(expectedPrefix), "error message should be long enough")
 	assert.Equal(t, expectedPrefix, errorMsg[:len(expectedPrefix)], "error message should start with expected prefix")
 
 	// Check that all allowed values are mentioned in the error

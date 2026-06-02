@@ -239,7 +239,7 @@ func Test_parseConfigFile(t *testing.T) {
 				return
 			}
 			assert.Equal(t, yaml.MappingNode, yamlRoot.Content[0].Kind)
-			assert.Equal(t, 0, len(yamlRoot.Content[0].Content))
+			assert.Empty(t, yamlRoot.Content[0].Content)
 		})
 	}
 }

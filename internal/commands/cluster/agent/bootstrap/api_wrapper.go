@@ -270,7 +270,7 @@ func (a *apiWrapper) GetKASAddress() (string, error) {
 	}
 
 	if !metadata.KAS.Enabled {
-		return "", errors.New("KAS is not configured in this GitLab instance. Please contact your administrator.")
+		return "", errors.New("KAS is not configured in this GitLab instance; contact your administrator")
 	}
 
 	return metadata.KAS.ExternalURL, nil

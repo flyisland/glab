@@ -41,12 +41,12 @@ func TestNewCmdList(t *testing.T) {
 			return nil
 		}).Execute()
 
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, factory.IO(), gotOpts.io)
 
 		gotBaseRepo, _ := gotOpts.baseRepo()
 		expectedBaseRepo, _ := factory.BaseRepo()
-		assert.Equal(t, gotBaseRepo, expectedBaseRepo)
+		assert.Equal(t, expectedBaseRepo, gotBaseRepo)
 	})
 }
 
@@ -123,7 +123,7 @@ func TestMergeRequestList_tty(t *testing.T) {
 		!7	OWNER/REPO/merge_requests/7	MergeRequest two	(master) ← (test2)
 
 	`), output.String())
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestMergeRequestList_tty_withFlags(t *testing.T) {
@@ -172,7 +172,7 @@ func TestMergeRequestList_tty_withFlags(t *testing.T) {
 		output, err := exec("--opened -P1 -p100 -a someuser -l bug -m1")
 		require.NoError(t, err)
 
-		assert.Equal(t, "", output.Stderr())
+		assert.Empty(t, output.Stderr())
 		assert.Equal(t, `No open merge requests match your search in OWNER/REPO.
 
 
@@ -203,7 +203,7 @@ func TestMergeRequestList_tty_withFlags(t *testing.T) {
 		output, err := exec("--group GROUP")
 		require.NoError(t, err)
 
-		assert.Equal(t, "", output.Stderr())
+		assert.Empty(t, output.Stderr())
 		assert.Equal(t, `No open merge requests available on GROUP.
 
 `, output.String())
@@ -273,7 +273,7 @@ func TestMergeRequestList_tty_withFlags(t *testing.T) {
 		output, err := exec("--draft")
 		require.NoError(t, err)
 
-		assert.Equal(t, output.Stderr(), "")
+		assert.Empty(t, output.Stderr())
 		assert.Equal(t, heredoc.Doc(`
 		Showing 2 open merge requests in OWNER/REPO that match your search. (Page 1)
 
@@ -312,7 +312,7 @@ func TestMergeRequestList_tty_withFlags(t *testing.T) {
 		output, err := exec("--not-draft")
 		require.NoError(t, err)
 
-		assert.Equal(t, output.Stderr(), "")
+		assert.Empty(t, output.Stderr())
 		assert.Equal(t, "No open merge requests match your search in OWNER/REPO.\n\n\n", output.String())
 	})
 }
@@ -445,7 +445,7 @@ func TestMergeRequestList_hyperlinks(t *testing.T) {
 				gotCells := strings.Split(line, "\t")
 				expectedCells := tc.expectedCells[lineNum]
 
-				assert.Equal(t, len(expectedCells), len(gotCells))
+				assert.Len(t, gotCells, len(expectedCells))
 
 				for cellNum, gotCell := range gotCells {
 					expectedCell := expectedCells[cellNum]
@@ -725,7 +725,7 @@ func TestMergeRequestList_GroupAndReviewer(t *testing.T) {
 		!6	OWNER/REPO/merge_requests/6	MergeRequest one	(master) ← (test1)
 
 	`), output.String())
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestMergeRequestList_GroupAndAssignee(t *testing.T) {
@@ -788,7 +788,7 @@ func TestMergeRequestList_GroupAndAssignee(t *testing.T) {
 		!6	OWNER/REPO/merge_requests/6	MergeRequest one	(master) ← (test1)
 
 	`), output.String())
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestMergeRequestList_GroupWithAssigneeAndReviewer(t *testing.T) {
@@ -886,7 +886,7 @@ func TestMergeRequestList_GroupWithAssigneeAndReviewer(t *testing.T) {
 		!6	OWNER/REPO/merge_requests/6	MergeRequest one	(master) ← (test1)
 
 	`), output.String())
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestMergeRequestList_SortAndOrderBy(t *testing.T) {
@@ -957,7 +957,7 @@ func TestMergeRequestList_SortAndOrderBy(t *testing.T) {
 	output, err := exec("--order created_at --sort desc")
 	require.NoError(t, err)
 
-	assert.Equal(t, output.Stderr(), "")
+	assert.Empty(t, output.Stderr())
 	assert.Equal(t, heredoc.Doc(`
 	Showing 2 open merge requests in OWNER/REPO that match your search. (Page 1)
 

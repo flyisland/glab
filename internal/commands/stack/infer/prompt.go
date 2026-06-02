@@ -51,7 +51,7 @@ func promptForCommits(ctx context.Context, f cmdutils.Factory, gr git.GitRunner,
 	revArgs := args
 	commitData, err := gr.Git(append([]string{"log", "--format=%s%x00%h%x00%an", "--reverse"}, revArgs...)...)
 	if err != nil {
-		return nil, fmt.Errorf("could not get commit list: %v", err)
+		return nil, fmt.Errorf("could not get commit list: %w", err)
 	}
 
 	var buffer bytes.Buffer

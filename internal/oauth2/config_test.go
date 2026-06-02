@@ -75,13 +75,13 @@ func TestConfig_unmarshal(t *testing.T) {
 			}
 
 			token, err := unmarshal("gitlab.com", cfg)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, "refresh_token", token.RefreshToken)
 			assert.Equal(t, "access_token", token.AccessToken)
 
 			expectedDate, err := time.Parse(tt.expectedFormat, tt.expiryDate)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, expectedDate, token.Expiry)
 		})
@@ -101,14 +101,14 @@ func TestConfig_marshal(t *testing.T) {
 	}
 
 	err := marshal("gitlab.com", cfg, token)
-	require.Nil(t, err)
+	require.NoError(t, err)
 
-	require.Equal(t, cfg.hosts, map[string]map[string]string{
+	require.Equal(t, map[string]map[string]string{
 		"gitlab.com": {
 			"is_oauth2":            "true",
 			"oauth2_refresh_token": "refresh_token",
 			"token":                "access_token",
 			"oauth2_expiry_date":   token.Expiry.Format(time.RFC3339),
 		},
-	})
+	}, cfg.hosts)
 }

@@ -141,7 +141,7 @@ func Test_update_subcommand(t *testing.T) {
 
 		_, err := exec(`update 1 100`)
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "aborted... Note has an empty message.")
+		assert.Contains(t, err.Error(), "aborted: note has an empty message")
 	})
 
 	t.Run("non-integer identifier", func(t *testing.T) {

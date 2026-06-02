@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
@@ -15,7 +16,7 @@ func TestNewCmdAgent(t *testing.T) {
 	cmd := NewCmdAgent(cmdtest.NewTestFactory(ios))
 	cmd.SetOut(stdout)
 
-	assert.Nil(t, cmd.Execute())
+	require.NoError(t, cmd.Execute())
 
 	assert.Contains(t, stdout.String(), "Register new agents, configure existing ones")
 }

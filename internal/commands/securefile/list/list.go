@@ -73,7 +73,7 @@ func NewCmdList(f cmdutils.Factory) *cobra.Command {
 
 			files, _, err := client.SecureFiles.ListProjectSecureFiles(repo.FullName(), l)
 			if err != nil {
-				return fmt.Errorf("Error listing secure files: %v", err)
+				return fmt.Errorf("error listing secure files: %w", err)
 			}
 
 			return f.IO().PrintJSON(files)

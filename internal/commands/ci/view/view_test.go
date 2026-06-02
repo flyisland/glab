@@ -152,7 +152,7 @@ func Test_line(t *testing.T) {
 	}
 }
 
-func testbox(x, y, w, h int) *tview.TextView { // nolint:unparam
+func testbox(x, y, w, h int) *tview.TextView { //nolint:unparam
 	b := tview.NewTextView()
 	b.
 		SetBackgroundColor(tcell.ColorDefault).
@@ -1279,7 +1279,7 @@ func Test_bracketEscaper(t *testing.T) {
 
 			n, err := escaper.Write([]byte(test.input))
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, len(test.input), n, "should return number of input bytes consumed")
 			assert.Equal(t, test.expected, output.String())
 		})

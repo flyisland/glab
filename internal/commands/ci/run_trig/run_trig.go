@@ -119,7 +119,7 @@ func NewCmdRunTrig(f cmdutils.Factory) *cobra.Command {
 				token = os.Getenv("CI_JOB_TOKEN")
 			}
 			if token == "" {
-				return errors.New("`--token` parameter can be omitted only if `CI_JOB_TOKEN` environment variable is set.")
+				return errors.New("`--token` parameter can be omitted only if `CI_JOB_TOKEN` environment variable is set")
 			}
 			c.Token = new(token)
 

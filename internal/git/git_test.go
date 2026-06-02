@@ -162,7 +162,7 @@ func Test_CurrentBranch_detached_head(t *testing.T) {
 	if err == nil {
 		t.Errorf("expected an error")
 	}
-	if err != ErrNotOnAnyBranch {
+	if !errors.Is(err, ErrNotOnAnyBranch) {
 		t.Errorf("got unexpected error: %s instead of %s.", err, ErrNotOnAnyBranch)
 	}
 	if len(cs.Calls) != 1 {
@@ -199,7 +199,7 @@ branch.branch.remote git@gitlab.com:glab-test/test.git
 branch.branch.merge refs/heads/branch-name`)
 
 	u, err := ParseURL("git@gitlab.com:glab-test/test.git")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	wantCfg := BranchConfig{
 		"origin",
 		u,
@@ -287,7 +287,7 @@ Push  URL: https://gitlab.com/gitlab-community/cli.git
 HEAD branch: main`)
 
 		got, err := GetDefaultBranch("origin")
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "main", got)
 	})
 }
@@ -438,7 +438,7 @@ func TestSetConfig(t *testing.T) {
 
 			output, err := exec.Command("git", "config", "--get-all", "cool.testcase").Output()
 
-			require.Equal(t, string(output), tt.expected)
+			require.Equal(t, tt.expected, string(output))
 			require.NoError(t, err)
 		})
 	}
@@ -547,7 +547,7 @@ func TestGitUserName(t *testing.T) {
 			output, err := GitUserName()
 			require.NoError(t, err)
 
-			require.Equal(t, string(output), tC.expected)
+			require.Equal(t, tC.expected, string(output))
 		})
 	}
 }

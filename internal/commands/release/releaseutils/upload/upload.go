@@ -135,8 +135,6 @@ func (c *Context) uploadAsProjectMarkdownFile(projectID string, file *ReleaseFil
 	}
 	defer r.Close()
 
-	// Ignoring SA1019 - not sure what to do yet, see https://gitlab.com/gitlab-org/cli/-/merge_requests/1895#note_2331674215.
-	//nolint:staticcheck
 	projectFile, _, err := c.Client.ProjectMarkdownUploads.UploadProjectMarkdown(
 		projectID,
 		r,

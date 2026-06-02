@@ -193,12 +193,12 @@ func downloadAssets(ctx context.Context, client *gitlab.Client, io *iostreams.IO
 		}
 		destDir, err := filepath.Abs(destDir)
 		if err != nil {
-			return fmt.Errorf("resolving absolute download directory path: %v", err)
+			return fmt.Errorf("resolving absolute download directory path: %w", err)
 		}
 
 		destPath := filepath.Join(destDir, sanitizedAssetName)
 		if !strings.HasPrefix(destPath, destDir) {
-			return fmt.Errorf("invalid file path name.")
+			return fmt.Errorf("invalid file path name")
 		}
 
 		err = downloadAsset(ctx, client, *asset.URL, destPath)

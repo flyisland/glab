@@ -95,7 +95,7 @@ func (o *options) run(ctx context.Context) error {
 
 	instances, err := cfg.Hosts()
 	if len(instances) == 0 || err != nil {
-		return fmt.Errorf("No GitLab instances have been authenticated with glab. Run `%s` to authenticate.\n", c.Bold("glab auth login"))
+		return fmt.Errorf("no GitLab instances have been authenticated with glab; run `%s` to authenticate", c.Bold("glab auth login"))
 	}
 
 	// Determine which host(s) to check
@@ -110,7 +110,7 @@ func (o *options) run(ctx context.Context) error {
 	}
 
 	if o.hostname != "" && !slices.Contains(instances, o.hostname) {
-		return fmt.Errorf("%s %s has not been authenticated with glab. Run `%s %s` to authenticate.", c.FailedIcon(), o.hostname, c.Bold("glab auth login --hostname"), c.Bold(o.hostname))
+		return fmt.Errorf("%s %s has not been authenticated with glab; run `%s %s` to authenticate", c.FailedIcon(), o.hostname, c.Bold("glab auth login --hostname"), c.Bold(o.hostname))
 	}
 
 	failedAuth := false
@@ -205,7 +205,7 @@ func (o *options) run(ctx context.Context) error {
 	}
 
 	if failedAuth {
-		return fmt.Errorf("\n%s could not authenticate to one or more of the configured GitLab instances.", c.FailedIcon())
+		return fmt.Errorf("\n%s could not authenticate to one or more of the configured GitLab instances", c.FailedIcon())
 	} else {
 		return nil
 	}

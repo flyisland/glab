@@ -77,7 +77,7 @@ func TestOrbitNormalizeArch(t *testing.T) {
 			got, err := orbitNormalizeArch(tc.goos, tc.goarch)
 			if tc.expectError {
 				require.Error(t, err)
-				assert.True(t, errors.Is(err, binarymgr.ErrUnsupportedPlatform))
+				assert.ErrorIs(t, err, binarymgr.ErrUnsupportedPlatform)
 			} else {
 				require.NoError(t, err)
 				assert.Equal(t, tc.want, got)

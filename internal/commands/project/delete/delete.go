@@ -104,7 +104,7 @@ func (o *options) run(ctx context.Context) error {
 	}
 
 	if !o.forceDelete && !o.io.PromptEnabled() {
-		return &cmdutils.FlagError{Err: fmt.Errorf("--yes or -y flag is required when not running interactively.")}
+		return &cmdutils.FlagError{Err: fmt.Errorf("--yes or -y flag is required when not running interactively")}
 	}
 
 	if !o.forceDelete && o.io.PromptEnabled() {
@@ -124,7 +124,7 @@ func (o *options) run(ctx context.Context) error {
 			return err
 		}
 		if resp.StatusCode == http.StatusUnauthorized {
-			return fmt.Errorf("you are not authorized to delete %s.\nCheck your token used for glab. Make sure it has the `api` and `write_repository` scopes enabled.", o.repoName)
+			return fmt.Errorf("you are not authorized to delete %s; check your token used for glab and make sure it has the `api` and `write_repository` scopes enabled", o.repoName)
 		}
 		return err
 	}

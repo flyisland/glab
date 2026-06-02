@@ -105,7 +105,7 @@ func (o *options) run() error {
 
 	_, _, err = client.Tags.GetTag(repo.FullName(), o.tagName)
 	if err != nil {
-		return &cmdutils.FlagError{Err: fmt.Errorf("Invalid tag %s.", o.tagName)}
+		return &cmdutils.FlagError{Err: fmt.Errorf("invalid tag %s", o.tagName)}
 	}
 
 	return Publish(o.io, client, repo.FullName(), o.tagName)
@@ -170,7 +170,10 @@ func publishToCatalogRequestBody(version string) (*publishToCatalogRequest, erro
 	}
 
 	sort.Slice(componentsData, func(i, j int) bool {
-		return componentsData[i]["name"].(string) < componentsData[j]["name"].(string)
+		// `name` is always set to a string literal a few lines above.
+		ni, _ := componentsData[i]["name"].(string)
+		nj, _ := componentsData[j]["name"].(string)
+		return ni < nj
 	})
 
 	metadata["components"] = componentsData

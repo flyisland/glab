@@ -111,7 +111,7 @@ func NewCmdSyncStack(f cmdutils.Factory, gr git.GitRunner) *cobra.Command {
 func (o *options) run(ctx context.Context, f cmdutils.Factory, gr git.GitRunner) error {
 	client, err := auth.GetAuthenticatedClient(f.Config(), f.GitLabClient, f.IO())
 	if err != nil {
-		return fmt.Errorf("error authorizing with GitLab: %v", err)
+		return fmt.Errorf("error authorizing with GitLab: %w", err)
 	}
 	o.labClient = client
 
@@ -119,26 +119,26 @@ func (o *options) run(ctx context.Context, f cmdutils.Factory, gr git.GitRunner)
 
 	repo, err := f.BaseRepo()
 	if err != nil {
-		return fmt.Errorf("error determining base repo: %v", err)
+		return fmt.Errorf("error determining base repo: %w", err)
 	}
 
 	// This prompts the user for the head repo if they're in a fork,
 	// allowing them to choose between their fork and the original repository
 	source, err := create.ResolvedHeadRepo(ctx, f)()
 	if err != nil {
-		return fmt.Errorf("error determining head repo: %v", err)
+		return fmt.Errorf("error determining head repo: %w", err)
 	}
 
 	o.io.StartSpinner("Syncing")
 
 	stack, err := getStack()
 	if err != nil {
-		return fmt.Errorf("error getting current stack: %v", err)
+		return fmt.Errorf("error getting current stack: %w", err)
 	}
 
 	user, _, err := client.Users.CurrentUser()
 	if err != nil {
-		return fmt.Errorf("error getting current user: %v", err)
+		return fmt.Errorf("error getting current user: %w", err)
 	}
 
 	o.stack = stack
@@ -180,7 +180,7 @@ func (o *options) run(ctx context.Context, f cmdutils.Factory, gr git.GitRunner)
 	for ref := range stack.Iter() {
 		status, err := branchStatus(&ref, gr)
 		if err != nil {
-			return fmt.Errorf("error getting branch status: %v", err)
+			return fmt.Errorf("error getting branch status: %w", err)
 		}
 
 		switch {
@@ -201,7 +201,7 @@ func (o *options) run(ctx context.Context, f cmdutils.Factory, gr git.GitRunner)
 		case strings.Contains(status, NothingToCommit):
 			// this is fine. we can just move on.
 		default:
-			return fmt.Errorf("your Git branch is ahead, but it shouldn't be. You might need to squash your commits.")
+			return fmt.Errorf("your Git branch is ahead, but it shouldn't be; you might need to squash your commits")
 		}
 
 		if ref.MR == "" {
@@ -217,7 +217,7 @@ func (o *options) run(ctx context.Context, f cmdutils.Factory, gr git.GitRunner)
 			// we found an MR. let's get the status:
 			mr, _, err := mrutils.MRFromArgsWithOpts(ctx, f, []string{ref.Branch}, nil, "any")
 			if err != nil {
-				return fmt.Errorf("error getting merge request from branch: %v. Does it still exist?", err)
+				return fmt.Errorf("error getting merge request from branch: %w. Does it still exist?", err)
 			}
 
 			// remove the MR from the stack if it's merged
@@ -225,7 +225,7 @@ func (o *options) run(ctx context.Context, f cmdutils.Factory, gr git.GitRunner)
 			// but alert the user
 			err = removeOldMrs(o.io, &ref, mr, &stack, gr)
 			if err != nil {
-				return fmt.Errorf("error removing merged merge request: %v", err)
+				return fmt.Errorf("error removing merged merge request: %w", err)
 			}
 		}
 	}
@@ -233,7 +233,7 @@ func (o *options) run(ctx context.Context, f cmdutils.Factory, gr git.GitRunner)
 	if pushAfterSync {
 		err := forcePushAllWithLease(o, &stack, gr)
 		if err != nil {
-			return fmt.Errorf("error pushing branches to remote: %v", err)
+			return fmt.Errorf("error pushing branches to remote: %w", err)
 		}
 	}
 
@@ -311,12 +311,12 @@ func (o *options) complete(client *gitlab.Client) error {
 func getStack() (git.Stack, error) {
 	title, err := git.GetCurrentStackTitle()
 	if err != nil {
-		return git.Stack{}, fmt.Errorf("error getting current stack: %v", err)
+		return git.Stack{}, fmt.Errorf("error getting current stack: %w", err)
 	}
 
 	stack, err := git.GatherStackRefs(title)
 	if err != nil {
-		return git.Stack{}, fmt.Errorf("error getting current stack references: %v", err)
+		return git.Stack{}, fmt.Errorf("error getting current stack references: %w", err)
 	}
 	return stack, nil
 }
@@ -405,7 +405,7 @@ func forcePushAllWithLease(opts *options, stack *git.Stack, gr git.GitRunner) er
 func createMR(client *gitlab.Client, opts *options, ref *git.StackRef, gr git.GitRunner) (*gitlab.MergeRequest, error) {
 	targetProject, err := opts.target.Project(client)
 	if err != nil {
-		return &gitlab.MergeRequest{}, fmt.Errorf("error getting target project: %v", err)
+		return &gitlab.MergeRequest{}, fmt.Errorf("error getting target project: %w", err)
 	}
 
 	pushArgs := []string{"push", "--set-upstream", git.DefaultRemote}
@@ -416,7 +416,7 @@ func createMR(client *gitlab.Client, opts *options, ref *git.StackRef, gr git.Gi
 
 	_, err = gr.Git(pushArgs...)
 	if err != nil {
-		return &gitlab.MergeRequest{}, fmt.Errorf("error pushing branch: %v", err)
+		return &gitlab.MergeRequest{}, fmt.Errorf("error pushing branch: %w", err)
 	}
 
 	var previousBranch string
@@ -470,7 +470,7 @@ func createMR(client *gitlab.Client, opts *options, ref *git.StackRef, gr git.Gi
 
 	mr, _, err := client.MergeRequests.CreateMergeRequest(opts.source.FullName(), l)
 	if err != nil {
-		return &gitlab.MergeRequest{}, fmt.Errorf("error creating merge request with the API: %v", err)
+		return &gitlab.MergeRequest{}, fmt.Errorf("error creating merge request with the API: %w", err)
 	}
 
 	return mr, nil
@@ -533,7 +533,7 @@ func branchBehind(io *iostreams.IOStreams, ref *git.StackRef, gr git.GitRunner) 
 
 	_, err := gitPull(gr)
 	if err != nil {
-		return fmt.Errorf("error checking for a running Git pull: %v", err)
+		return fmt.Errorf("error checking for a running Git pull: %w", err)
 	}
 
 	return nil
@@ -545,7 +545,7 @@ func populateMR(io *iostreams.IOStreams, ref *git.StackRef, opts *options, clien
 
 	mr, err := createMR(client, opts, ref, gr)
 	if err != nil {
-		return fmt.Errorf("error updating stack ref files: %v", err)
+		return fmt.Errorf("error updating stack ref files: %w", err)
 	}
 
 	fmt.Println(progressString(io, "Merge request created!"))
@@ -555,7 +555,7 @@ func populateMR(io *iostreams.IOStreams, ref *git.StackRef, opts *options, clien
 	ref.MR = mr.WebURL
 	err = git.UpdateStackRefFile(opts.stack.Title, *ref)
 	if err != nil {
-		return fmt.Errorf("error updating stack ref files: %v", err)
+		return fmt.Errorf("error updating stack ref files: %w", err)
 	}
 
 	return nil

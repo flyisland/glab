@@ -61,7 +61,7 @@ func NewCmdNote(f cmdutils.Factory) *cobra.Command {
 				}
 			}
 			if strings.TrimSpace(body) == "" {
-				return fmt.Errorf("aborted... Note has an empty message.")
+				return fmt.Errorf("aborted: note has an empty message")
 			}
 
 			uniqueNoteEnabled, _ := cmd.Flags().GetBool("unique")

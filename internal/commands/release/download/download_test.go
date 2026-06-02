@@ -192,7 +192,7 @@ func Test_downloadAssets(t *testing.T) {
 				return
 			}
 
-			assert.NoError(t, err, "Should not have errors")
+			require.NoError(t, err, "Should not have errors")
 			assert.True(t, doesFileExist(filePathWanted), "File should exist")
 		})
 	}

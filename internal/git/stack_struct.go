@@ -43,7 +43,7 @@ func (s *Stack) RemoveRef(ref StackRef, gr GitRunner) error {
 		err := DeleteStackRefFile(s.Title, ref)
 		delete(s.Refs, ref.SHA)
 		if err != nil {
-			return fmt.Errorf("could not delete reference file %v:", err)
+			return fmt.Errorf("could not delete reference file: %w", err)
 		}
 
 		return nil
@@ -51,17 +51,17 @@ func (s *Stack) RemoveRef(ref StackRef, gr GitRunner) error {
 
 	err := s.adjustAdjacentRefs(ref)
 	if err != nil {
-		return fmt.Errorf("error adjusting next reference %v:", err)
+		return fmt.Errorf("error adjusting next reference: %w", err)
 	}
 
 	err = DeleteStackRefFile(s.Title, ref)
 	if err != nil {
-		return fmt.Errorf("could not delete reference file %v:", err)
+		return fmt.Errorf("could not delete reference file: %w", err)
 	}
 
 	err = s.RemoveBranch(ref, gr)
 	if err != nil {
-		return fmt.Errorf("could not remove branch %v:", err)
+		return fmt.Errorf("could not remove branch: %w", err)
 	}
 
 	delete(s.Refs, ref.SHA)
@@ -108,7 +108,7 @@ func (s *Stack) adjustAdjacentRefs(ref StackRef) error {
 
 		err := UpdateStackRefFile(s.Title, prev)
 		if err != nil {
-			return fmt.Errorf("could not update reference file %v:", err)
+			return fmt.Errorf("could not update reference file: %w", err)
 		}
 	}
 
@@ -121,7 +121,7 @@ func (s *Stack) adjustAdjacentRefs(ref StackRef) error {
 
 		err := UpdateStackRefFile(s.Title, next)
 		if err != nil {
-			return fmt.Errorf("could not update reference file %v:", err)
+			return fmt.Errorf("could not update reference file: %w", err)
 		}
 	}
 
@@ -150,7 +150,7 @@ func (s *Stack) Last() StackRef {
 	}
 
 	// All Stacks should be created with GatherStackRefs which validates the Stack consistency.
-	panic(errors.New("can't find the last ref in the chain. Data might be corrupted."))
+	panic(errors.New("can't find the last ref in the chain; data might be corrupted"))
 }
 
 func (s *Stack) First() StackRef {
@@ -165,7 +165,7 @@ func (s *Stack) First() StackRef {
 	}
 
 	// All Stacks should be created with GatherStackRefs which validates the Stack consistency.
-	panic(errors.New("can't find the first ref in the chain. Data might be corrupted."))
+	panic(errors.New("can't find the first ref in the chain; data might be corrupted"))
 }
 
 // Iter returns an iterator to range from the first to the last ref in the stack.
@@ -263,7 +263,7 @@ func AddStackBaseBranch(title string, branch string) error {
 
 	err = os.WriteFile(filename, data, 0o644)
 	if err != nil {
-		return fmt.Errorf("error adding branch metadata file %v: %v", filename, err)
+		return fmt.Errorf("error adding branch metadata file %v: %w", filename, err)
 	}
 
 	return nil
@@ -342,15 +342,15 @@ func validateStackRefs(s Stack) error {
 		}
 
 		if endRefs > 1 || startRefs > 1 {
-			return errors.New("More than one end or start ref detected. Data might be corrupted.")
+			return errors.New("more than one end or start ref detected; data might be corrupted")
 		}
 	}
 
 	if startRefs != 1 {
-		return errors.New("expected exactly one start ref. Data might be corrupted.")
+		return errors.New("expected exactly one start ref; data might be corrupted")
 	}
 	if endRefs != 1 {
-		return errors.New("expected exactly one end ref. Data might be corrupted.")
+		return errors.New("expected exactly one end ref; data might be corrupted")
 	}
 	return nil
 }

@@ -88,7 +88,7 @@ func TestCIDeleteByStatusFailsWithArgument(t *testing.T) {
 
 	exec := cmdtest.SetupCmdForTest(t, NewCmdDelete, false)
 	out, err := exec("--status=success 11111111")
-	assert.EqualError(t, err, "either a status filter or a pipeline ID must be passed, but not both.")
+	require.EqualError(t, err, "either a status filter or a pipeline ID must be passed, but not both")
 
 	assert.Empty(t, out.OutBuf.String())
 	assert.Empty(t, out.ErrBuf.String())
@@ -99,7 +99,7 @@ func TestCIDeleteWithoutFilterFailsWithoutArgument(t *testing.T) {
 
 	exec := cmdtest.SetupCmdForTest(t, NewCmdDelete, false)
 	out, err := exec("")
-	assert.EqualError(t, err, "accepts 1 arg(s), received 0")
+	require.EqualError(t, err, "accepts 1 arg(s), received 0")
 
 	assert.Empty(t, out.OutBuf.String())
 	assert.Empty(t, out.ErrBuf.String())
@@ -296,7 +296,7 @@ func TestParseRawPipelineIDsWithError(t *testing.T) {
 	pipelineIDs, err := parseRawPipelineIDs("test")
 
 	require.Error(t, err)
-	assert.Len(t, pipelineIDs, 0)
+	assert.Empty(t, pipelineIDs)
 }
 
 func TestExtractPipelineIDsFromFlagsWithError(t *testing.T) {
@@ -343,6 +343,6 @@ func TestOptsFromFlagsWithPagination(t *testing.T) {
 
 	opts := optsFromFlags(flags)
 
-	assert.Equal(t, opts.Page, int64(5))
-	assert.Equal(t, opts.PerPage, int64(10))
+	assert.Equal(t, int64(5), opts.Page)
+	assert.Equal(t, int64(10), opts.PerPage)
 }

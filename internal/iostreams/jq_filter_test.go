@@ -27,7 +27,7 @@ func TestJQFilter_SetEmptyClearsFilter(t *testing.T) {
 	require.NoError(t, j.Set(".foo"))
 	require.NoError(t, j.Set(""))
 	assert.False(t, j.IsActive())
-	assert.Equal(t, "", j.String())
+	assert.Empty(t, j.String())
 }
 
 func TestJQFilter_IsActiveZeroValue(t *testing.T) {
@@ -41,5 +41,5 @@ func TestJQFilter_TypeAndStringSatisfyPflagValue(t *testing.T) {
 	// Sanity check that the value satisfies the pflag.Value contract.
 	j := &JQFilter{}
 	assert.Equal(t, "string", j.Type())
-	assert.Equal(t, "", j.String())
+	assert.Empty(t, j.String())
 }

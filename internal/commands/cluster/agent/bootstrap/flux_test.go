@@ -26,7 +26,7 @@ func TestFlux_createHelmRepositoryManifest(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	assert.Equal(t, actualFile.path, "manifest-path/helm-repository-filepath")
+	assert.Equal(t, "manifest-path/helm-repository-filepath", actualFile.path)
 	assert.Equal(t, actualFile.content, []byte("content"))
 }
 
@@ -43,7 +43,7 @@ func TestFlux_createHelmRepositoryManifest_Failure(t *testing.T) {
 
 	// THEN
 	require.Error(t, err)
-	assert.Equal(t, actualFile, file{})
+	assert.Equal(t, file{}, actualFile)
 }
 
 func TestFlux_createHelmReReleaseManifest(t *testing.T) {
@@ -61,7 +61,7 @@ func TestFlux_createHelmReReleaseManifest(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	assert.Equal(t, actualFile.path, "manifest-path/helm-release-filepath")
+	assert.Equal(t, "manifest-path/helm-release-filepath", actualFile.path)
 	assert.Equal(t, actualFile.content, []byte("content"))
 }
 
@@ -80,7 +80,7 @@ func TestFlux_createHelmReReleaseManifest_Failure(t *testing.T) {
 
 	// THEN
 	require.Error(t, err)
-	assert.Equal(t, actualFile, file{})
+	assert.Equal(t, file{}, actualFile)
 }
 
 func TestFlux_reconcile(t *testing.T) {
@@ -146,7 +146,8 @@ func setupFlux(t *testing.T) (*MockCmd, FluxWrapper) {
 		[]string{"helm-release-values-1", "helm-release-values-2"}, []string{"helm-release-values-from-1"},
 		"flux-source-type", "flux-source-namespace", "flux-source-name",
 	)
-	fHack := f.(*localFluxWrapper)
+	fHack, ok := f.(*localFluxWrapper)
+	require.True(t, ok, "newFlux should return a *localFluxWrapper in tests")
 	fHack.reconcileRetryDelay = 0
 
 	return mockCmd, f
@@ -162,7 +163,11 @@ type startsWithMatcher struct {
 }
 
 func (m startsWithMatcher) Matches(arg any) bool {
-	m.actualS = arg.(string)
+	s, ok := arg.(string)
+	if !ok {
+		return false
+	}
+	m.actualS = s
 	return strings.HasPrefix(m.actualS, m.prefix)
 }
 

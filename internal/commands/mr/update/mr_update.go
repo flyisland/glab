@@ -57,11 +57,11 @@ func NewCmdUpdate(f cmdutils.Factory) *cobra.Command {
 			fillCommitBody, _ := cmd.Flags().GetBool("fill-commit-body")
 
 			if !autofill && fillCommitBody {
-				return &cmdutils.FlagError{Err: errors.New("--fill-commit-body should be used with --fill.")}
+				return &cmdutils.FlagError{Err: errors.New("--fill-commit-body should be used with --fill")}
 			}
 
 			if cmd.Flags().Changed("unassign") && cmd.Flags().Changed("assignee") {
-				return &cmdutils.FlagError{Err: fmt.Errorf("--assignee and --unassign are mutually exclusive.")}
+				return &cmdutils.FlagError{Err: errors.New("--assignee and --unassign are mutually exclusive")}
 			}
 
 			// Parse assignees Early so we can fail early in case of conflicts
@@ -94,7 +94,7 @@ func NewCmdUpdate(f cmdutils.Factory) *cobra.Command {
 
 			if cmd.Flags().Changed("lock-discussion") && cmd.Flags().Changed("unlock-discussion") {
 				return &cmdutils.FlagError{
-					Err: errors.New("--lock-discussion and --unlock-discussion can't be used together."),
+					Err: errors.New("--lock-discussion and --unlock-discussion can't be used together"),
 				}
 			}
 

@@ -74,12 +74,12 @@ func compileRun(f cmdutils.Factory, path string) error {
 
 	repo, err := f.BaseRepo()
 	if err != nil {
-		return fmt.Errorf("You must be in a GitLab project repository for this action: %w", err)
+		return fmt.Errorf("you must be in a GitLab project repository for this action: %w", err)
 	}
 
 	project, err := repo.Project(client)
 	if err != nil {
-		return fmt.Errorf("You must be in a GitLab project repository for this action: %w", err)
+		return fmt.Errorf("you must be in a GitLab project repository for this action: %w", err)
 	}
 
 	content, err := os.ReadFile(path)

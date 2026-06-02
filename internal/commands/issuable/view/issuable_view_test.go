@@ -205,7 +205,7 @@ func TestNewCmdView(t *testing.T) {
 				if viewIncidentWithIssueID {
 					require.Equal(t, wantErrorMsg, outErr)
 				} else {
-					require.Equal(t, "", outErr)
+					require.Empty(t, outErr)
 					require.Contains(t, out, fmt.Sprintf("%s #%d", testIssuable.title, tt.issueID))
 					require.Contains(t, out, testIssuable.description)
 					assert.Contains(t, out, fmt.Sprintf("https://gitlab.com/cli-automated-testing/test/-/issues/%d", tt.issueID))
@@ -227,7 +227,7 @@ func TestNewCmdView(t *testing.T) {
 						testIssuable.description,
 					}
 
-					assert.Equal(t, "", outErr)
+					assert.Empty(t, outErr)
 					t.Helper()
 					var r *regexp.Regexp
 					for _, l := range expectedOutputs {

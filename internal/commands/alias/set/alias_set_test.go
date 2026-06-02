@@ -45,7 +45,7 @@ func TestAliasSet_glab_command(t *testing.T) {
 	_, err := exec("set mr 'mr rebase'")
 
 	if assert.Error(t, err) {
-		assert.Equal(t, `could not create alias: "mr" is already a glab command.`, err.Error())
+		assert.Equal(t, `could not create alias: "mr" is already a glab command`, err.Error())
 	}
 }
 
@@ -195,7 +195,7 @@ func TestAliasSet_invalid_command(t *testing.T) {
 	exec := cmdtest.SetupCmdForTest(t, newCmdSetWithFakeHierarchy, true, cmdtest.WithConfig(cfg))
 	_, err := exec("set co 'pe checkout'")
 	if assert.Error(t, err) {
-		assert.Equal(t, "could not create alias: pe checkout does not correspond to a glab command.", err.Error())
+		assert.Equal(t, "could not create alias: pe checkout does not correspond to a glab command", err.Error())
 	}
 }
 

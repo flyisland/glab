@@ -70,12 +70,12 @@ func NewCmdGenerate(f cmdutils.Factory) *cobra.Command {
 				}
 
 				if len(tags) == 0 {
-					return errors.New("no tags found. Either fetch tags, or pass a version with --version instead.")
+					return errors.New("no tags found; either fetch tags, or pass a version with --version instead")
 				}
 
 				version, err := git.DescribeByTags()
 				if err != nil {
-					return fmt.Errorf("failed to determine version from `git describe`: %w..", err)
+					return fmt.Errorf("failed to determine version from `git describe`: %w", err)
 				}
 				opts.Version = new(version)
 			}

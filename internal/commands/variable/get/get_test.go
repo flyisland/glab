@@ -94,7 +94,7 @@ func Test_NewCmdGet(t *testing.T) {
 			f := cmdtest.NewTestFactory(io)
 
 			argv, err := shlex.Split(test.cli)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var gotOpts *options
 			cmd := NewCmdGet(f, func(opts *options) error {
@@ -108,10 +108,10 @@ func Test_NewCmdGet(t *testing.T) {
 
 			_, err = cmd.ExecuteC()
 			if test.wantsErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, test.wants.key, gotOpts.key)
 			assert.Equal(t, test.wants.group, gotOpts.group)

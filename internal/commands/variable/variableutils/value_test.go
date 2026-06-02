@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
@@ -33,14 +34,14 @@ func Test_getValue(t *testing.T) {
 			io, stdin, _, _ := cmdtest.TestIOStreams()
 
 			_, err := stdin.WriteString(tt.stdin)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			args := []string{tt.valueArg}
 			value, err := GetValue(tt.valueArg, io, args)
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			assert.Equal(t, value, tt.want)
+			assert.Equal(t, tt.want, value)
 		})
 	}
 }

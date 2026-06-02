@@ -1,6 +1,7 @@
 package delete
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -74,7 +75,7 @@ func NewCmdDelete(f cmdutils.Factory) *cobra.Command {
 			}
 
 			if len(args) > 0 {
-				return fmt.Errorf("either a status filter or a pipeline ID must be passed, but not both.")
+				return errors.New("either a status filter or a pipeline ID must be passed, but not both")
 			}
 
 			return nil

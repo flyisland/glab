@@ -35,7 +35,7 @@ func promptForCommit(ctx context.Context, f cmdutils.Factory, getText cmdutils.G
 	var cleanedDescription string
 	if !f.IO().IsOutputTTY() {
 		if defaultValue == "" {
-			return "", errors.New("No commit message provided and no TTY. Please provide a commit message with the --message flag.")
+			return "", errors.New("no commit message provided and no TTY; provide one with the --message flag")
 		}
 		return defaultValue, nil
 	}
@@ -46,7 +46,7 @@ func promptForCommit(ctx context.Context, f cmdutils.Factory, getText cmdutils.G
 	cleanedDescription = cleanDescription(description)
 
 	if cleanedDescription == "" {
-		return "", errors.New("Commit message cannot be empty.")
+		return "", errors.New("commit message cannot be empty")
 	}
 	return cleanedDescription, nil
 }

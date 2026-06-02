@@ -36,7 +36,7 @@ func TestAliasDelete(t *testing.T) {
 			isTTY:      true,
 			wantStdout: "",
 			wantStderr: "",
-			wantErr:    "no such alias 'co'.",
+			wantErr:    `no such alias "co"`,
 		},
 		{
 			name: "delete one",

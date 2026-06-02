@@ -60,7 +60,7 @@ func TestAddJQFlag_WithoutJSONOutput_FailsBeforeRun(t *testing.T) {
 
 	err := cmd.Execute()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "Using --jq requires --output=json")
+	assert.Contains(t, err.Error(), "using --jq requires --output=json")
 	assert.False(t, *ran, "command body should not have run")
 }
 

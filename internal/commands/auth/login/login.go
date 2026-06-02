@@ -121,7 +121,7 @@ func NewCmdLogin(f cmdutils.Factory) *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !opts.IO.PromptEnabled() && !tokenStdin && opts.Token == "" && opts.JobToken == "" && !opts.WebLogin && !opts.DeviceLogin {
-				return &cmdutils.FlagError{Err: errors.New("'--stdin', '--token', '--job-token', '--web', or '--device' required when not running interactively.")}
+				return &cmdutils.FlagError{Err: errors.New("'--stdin', '--token', '--job-token', '--web', or '--device' required when not running interactively")}
 			}
 
 			// --token, --stdin, --job-token, --web, --device are pairwise mutually

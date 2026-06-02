@@ -59,48 +59,48 @@ var multipleMRSelectQuestion = "Multiple merge requests exist for this branch. S
 // MRCheckErrors checks and return merge request errors specified in MRCheckErrOptions{}
 func MRCheckErrors(mr *gitlab.MergeRequest, err MRCheckErrOptions) error {
 	if mr.Draft && err.Draft {
-		return fmt.Errorf("this merge request is still a draft. Run `glab mr update %d --ready` to mark it as ready for review.", mr.IID)
+		return fmt.Errorf("this merge request is still a draft; run `glab mr update %d --ready` to mark it as ready for review", mr.IID)
 	}
 
 	dbg.Debug("MergeWhenPipelineSucceeds:", strconv.FormatBool(mr.MergeWhenPipelineSucceeds))
 	dbg.Debug("DetailedMergeStatus:", mr.DetailedMergeStatus)
 
 	if mr.DetailedMergeStatus == "ci_must_pass" {
-		return fmt.Errorf("this merge request requires a passing pipeline before merging.")
+		return fmt.Errorf("this merge request requires a passing pipeline before merging")
 	}
 
 	if mr.MergeWhenPipelineSucceeds && err.PipelineStatus && mr.Pipeline != nil {
 		if mr.Pipeline.Status != "success" {
-			return fmt.Errorf("the pipeline for this merge request has failed. The pipeline must succeed before merging.")
+			return fmt.Errorf("the pipeline for this merge request has failed; it must succeed before merging")
 		}
 	}
 
 	if mr.State == "merged" && err.Merged {
-		return fmt.Errorf("this merge request has already been merged.")
+		return fmt.Errorf("this merge request has already been merged")
 	}
 
 	if mr.State == "closed" && err.Closed {
-		return fmt.Errorf("this merge request has been closed.")
+		return fmt.Errorf("this merge request has been closed")
 	}
 
 	if mr.State == "opened" && err.Opened {
-		return fmt.Errorf("this merge request is already open.")
+		return fmt.Errorf("this merge request is already open")
 	}
 
 	if mr.Subscribed && err.Subscribed {
-		return fmt.Errorf("you are already subscribed to this merge request.")
+		return fmt.Errorf("you are already subscribed to this merge request")
 	}
 
 	if !mr.Subscribed && err.Unsubscribed {
-		return fmt.Errorf("you are not subscribed to this merge request.")
+		return fmt.Errorf("you are not subscribed to this merge request")
 	}
 
 	if err.MergePrivilege && !mr.User.CanMerge {
-		return fmt.Errorf("you do not have permission to merge this merge request.")
+		return fmt.Errorf("you do not have permission to merge this merge request")
 	}
 
 	if err.Conflict && mr.HasConflicts {
-		return fmt.Errorf("merge conflicts exist. Resolve the conflicts and try again, or merge locally.")
+		return fmt.Errorf("merge conflicts exist; resolve the conflicts and try again, or merge locally")
 	}
 
 	return nil
@@ -177,7 +177,7 @@ func MRFromArgsWithOpts(
 			if urlRepo.RepoHost() != baseRepo.RepoHost() {
 				apiClient, err := f.ApiClient(urlRepo.RepoHost())
 				if err != nil {
-					return nil, nil, fmt.Errorf("failed to connect to GitLab instance %s from URL (%s): %v", urlRepo.RepoHost(), args[0], err)
+					return nil, nil, fmt.Errorf("failed to connect to GitLab instance %s from URL (%s): %w", urlRepo.RepoHost(), args[0], err)
 				}
 				client = apiClient.Lab()
 			}
@@ -188,7 +188,7 @@ func MRFromArgsWithOpts(
 			if err != nil {
 				branch = args[0]
 			} else if mrID == 0 { // to check for cases where the user explicitly specified mrID to be zero
-				return nil, nil, fmt.Errorf("invalid merge request ID provided.")
+				return nil, nil, fmt.Errorf("invalid merge request ID provided")
 			}
 		}
 	}
@@ -427,7 +427,7 @@ func AutofillMRFromCommits(targetBranch, sourceBranch string, fillCommitBody boo
 	commits, err := git.Commits(targetBranch, sourceBranch)
 	if err != nil {
 		// If git fails, create a simple title from branch name
-		return utils.Humanize(sourceBranch), "", nil
+		return utils.Humanize(sourceBranch), "", nil //nolint:nilerr // intentional fallback: branch-name title when git history is unavailable
 	}
 
 	return GenerateMRTitleAndBody(commits, sourceBranch, fillCommitBody)
@@ -447,7 +447,7 @@ func GenerateMRTitleAndBody(commits []*git.Commit, sourceBranch string, fillComm
 		commitBody, err := git.CommitBody(commits[0].Sha)
 		if err != nil {
 			// If we can't get the commit body, fall back to the commit title
-			return title, commits[0].Title, nil
+			return title, commits[0].Title, nil //nolint:nilerr // intentional fallback: commit title as body when CommitBody fails
 		}
 
 		if strings.TrimSpace(commitBody) != "" {

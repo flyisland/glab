@@ -61,7 +61,7 @@ func (o *options) complete(args []string) error {
 	if len(args) == 1 {
 		strInt, err := strconv.Atoi(args[0])
 		if err != nil {
-			return fmt.Errorf("Deploy key ID must be an integer: %s", args[0])
+			return fmt.Errorf("deploy key ID must be an integer: %s", args[0])
 		}
 		o.keyID = int64(strInt)
 	}

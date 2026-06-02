@@ -384,7 +384,7 @@ func TestCreateBranches(t *testing.T) {
 
 		restoredRef := stack.First()
 		assert.Equal(t, "Existing layer", restoredRef.Description)
-		assert.Equal(t, "", restoredRef.Next, "existing ref's Next should be reverted to empty")
+		assert.Empty(t, restoredRef.Next, "existing ref's Next should be reverted to empty")
 
 		_ = dir
 	})
@@ -439,7 +439,7 @@ func TestParseBaseBranch(t *testing.T) {
 
 		branch, err := parseBaseBranch(mockGR, []string{"abc123"})
 		require.NoError(t, err)
-		assert.Equal(t, "", branch)
+		assert.Empty(t, branch)
 	})
 
 	t.Run("returns error when rev-parse fails", func(t *testing.T) {

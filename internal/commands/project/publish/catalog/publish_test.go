@@ -82,7 +82,7 @@ func TestPublishCatalog(t *testing.T) {
 			tagName:        "6.6.6",
 			isValidTagName: false,
 			wantErr:        true,
-			errMsg:         "Invalid tag 6.6.6.",
+			errMsg:         "invalid tag 6.6.6",
 		},
 	}
 
@@ -106,9 +106,9 @@ func TestPublishCatalog(t *testing.T) {
 					if tc.wantBody != "" {
 						var reqBody, expectedBody map[string]any
 						err := json.NewDecoder(r.Body).Decode(&reqBody)
-						require.NoError(t, err)
+						assert.NoError(t, err)
 						err = json.Unmarshal([]byte(tc.wantBody), &expectedBody)
-						require.NoError(t, err)
+						assert.NoError(t, err)
 
 						reqBodyJSON, _ := json.Marshal(reqBody)
 						expectedBodyJSON, _ := json.Marshal(expectedBody)
@@ -142,10 +142,10 @@ func TestPublishCatalog(t *testing.T) {
 			output, err := exec(tc.tagName)
 
 			if tc.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Equal(t, tc.errMsg, err.Error())
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Contains(t, output.String(), tc.wantOutput)
 			}
 		})

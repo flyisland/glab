@@ -135,7 +135,7 @@ func NewClient(newAuthSource newAuthSource, options ...ClientOption) (*Client, e
 		gitlab.WithRequestOptions(gitlab.WithHeaders(client.customHeaders)),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize GitLab client: %v", err)
+		return nil, fmt.Errorf("failed to initialize GitLab client: %w", err)
 	}
 
 	client.gitlabClient = gitlabClient
@@ -442,7 +442,8 @@ func NewHTTPRequest(ctx context.Context, c *Client, method string, baseURL *url.
 // Is404 checks if the error represents a 404 response
 func Is404(err error) bool {
 	// If the error is a typed response
-	if errResponse, ok := err.(*gitlab.ErrorResponse); ok &&
+	errResponse := &gitlab.ErrorResponse{}
+	if errors.As(err, &errResponse) &&
 		errResponse.Response != nil &&
 		errResponse.Response.StatusCode == http.StatusNotFound {
 		return true

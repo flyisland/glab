@@ -8,6 +8,7 @@ import (
 
 	"github.com/docker/docker-credential-helpers/credentials"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/cli/internal/config"
 )
@@ -75,7 +76,7 @@ hosts:
 				t.Run(name, func(t *testing.T) {
 					helper := Helper{cfg: tt.cfg}
 					gotUser, gotPassword, err := helper.Get(tt.registryURL)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Equal(t, tt.expectUser, gotUser, "username does not match")
 					assert.Equal(t, tt.expectPassword, gotPassword, "password does not match")
 				})
@@ -166,7 +167,7 @@ hosts:
 				t.Run(name, func(t *testing.T) {
 					helper := Helper{cfg: tt.cfg}
 					gotUser, gotPassword, err := helper.Get(tt.registryURL)
-					assert.ErrorContains(t, err, tt.expectErr)
+					require.ErrorContains(t, err, tt.expectErr)
 					assert.Empty(t, gotUser, "username is not empty")
 					assert.Empty(t, gotPassword, "password is not empty")
 				})
@@ -189,7 +190,7 @@ hosts:
 	t.Run("List", func(t *testing.T) {
 		var helper Helper
 		got, err := helper.List()
-		assert.ErrorContains(t, err, "glab auth docker-helper does not")
+		require.ErrorContains(t, err, "glab auth docker-helper does not")
 		assert.Empty(t, got)
 	})
 }

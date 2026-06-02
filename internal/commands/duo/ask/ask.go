@@ -58,8 +58,8 @@ const (
 	gitCmd            = "git"
 	gitCmdAPIPath     = "ai/llm/git_command"
 	spinnerText       = "Generating Git commands..."
-	aiResponseErr     = "Error: AI response has not been generated correctly."
-	apiUnreachableErr = "Error: API is unreachable."
+	aiResponseErr     = "AI response has not been generated correctly"
+	apiUnreachableErr = "API is unreachable"
 )
 
 func NewCmdAsk(f cmdutils.Factory) *cobra.Command {
@@ -235,7 +235,7 @@ func (opts *opts) executeCommand(ctx context.Context, cmd string) error {
 		return nil
 	}
 
-	execCmd := exec.Command("git", gitArgs[1:]...)
+	execCmd := exec.CommandContext(ctx, "git", gitArgs[1:]...)
 	output, err := run.PrepareCmd(execCmd).Output()
 	if err != nil {
 		return err
@@ -246,7 +246,7 @@ func (opts *opts) executeCommand(ctx context.Context, cmd string) error {
 	}
 
 	if err := opts.IO.StartPager(); err != nil {
-		return fmt.Errorf("failed to start pager: %q", err)
+		return fmt.Errorf("failed to start pager: %w", err)
 	}
 	defer opts.IO.StopPager()
 

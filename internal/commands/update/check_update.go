@@ -112,7 +112,7 @@ func checkUpdate(f cmdutils.Factory, silentSuccess bool, forceCheck bool) error 
 		return fmt.Errorf("failed checking for glab updates: %s", err.Error())
 	}
 	if len(releases) < 1 {
-		return fmt.Errorf("no release found for glab.")
+		return errors.New("no release found for glab")
 	}
 	latestRelease := releases[0]
 	releaseURL := fmt.Sprintf("%s/-/releases/%s", defaultProjectURL, latestRelease.TagName)

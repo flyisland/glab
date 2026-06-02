@@ -11,6 +11,7 @@ import (
 	"github.com/acarl005/stripansi"
 	"github.com/google/shlex"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
@@ -90,7 +91,7 @@ func Test_deleteMergeRequest(t *testing.T) {
 			assertFunc: func(t *testing.T, out, outErr string, err error) {
 				t.Helper()
 
-				assert.Equal(t, "invalid merge request ID provided.", err.Error())
+				assert.Equal(t, "invalid merge request ID provided", err.Error())
 			},
 		},
 		{
@@ -141,9 +142,9 @@ func Test_deleteMergeRequest(t *testing.T) {
 			cmd.SetArgs(argv)
 			_, err = cmd.ExecuteC()
 			if !tt.wantErr {
-				assert.Nil(t, err)
+				require.NoError(t, err)
 			} else {
-				assert.NotNil(t, err)
+				require.Error(t, err)
 			}
 
 			out := stripansi.Strip(stdout.String())

@@ -8,6 +8,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 	gitlab_testing "gitlab.com/gitlab-org/api/client-go/v2/testing"
@@ -54,7 +55,7 @@ func TestAgentList(t *testing.T) {
 		2	prd	about 1 day ago
 
 	`), output.String())
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestAgentList_Pagination(t *testing.T) {
@@ -88,7 +89,7 @@ func TestAgentList_Pagination(t *testing.T) {
 		2	prd	about 1 day ago
 
 	`), output.String())
-	assert.Equal(t, ``, output.Stderr())
+	assert.Empty(t, output.Stderr())
 }
 
 func TestAgentList_JSON(t *testing.T) {
@@ -113,7 +114,7 @@ func TestAgentList_JSON(t *testing.T) {
 		}, &gitlab.Response{}, nil)
 
 	output, err := exec("--output json")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Contains(t, output.String(), `"id":1`)
 	assert.Contains(t, output.String(), `"name":"local"`)

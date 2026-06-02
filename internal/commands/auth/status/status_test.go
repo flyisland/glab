@@ -64,7 +64,7 @@ func Test_NewCmdStatus(t *testing.T) {
 			f := cmdtest.NewTestFactory(nil)
 
 			argv, err := shlex.Split(tt.cli)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var gotOpts *options
 			cmd := NewCmdStatus(f, func(opts *options) error {
@@ -81,7 +81,7 @@ func Test_NewCmdStatus(t *testing.T) {
 			cmd.SetErr(&bytes.Buffer{})
 
 			_, err = cmd.ExecuteC()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, tt.wants.hostname, gotOpts.hostname)
 			assert.Equal(t, tt.wants.showToken, gotOpts.showToken)
@@ -113,7 +113,7 @@ hosts:
 
 	cfgFile := config.ConfigFile()
 	configs, err := config.ParseConfig("config.yml")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name    string
@@ -158,7 +158,7 @@ hosts:
 				hostname: "invalid.example",
 			},
 			wantErr: true,
-			stderr:  "x invalid.example has not been authenticated with glab. Run `glab auth login --hostname invalid.example` to authenticate.",
+			stderr:  "x invalid.example has not been authenticated with glab; run `glab auth login --hostname invalid.example` to authenticate",
 		},
 		{
 			name: "with token set in env variable",
@@ -188,7 +188,7 @@ hosts:
 		tc.MockUsers.EXPECT().CurrentUser(gomock.Any()).Return(&gitlab.User{Username: "john_doe"}, nil, nil),
 	)
 
-	client := func(token, hostname string) (*api.Client, error) { // nolint:unparam
+	client := func(token, hostname string) (*api.Client, error) { //nolint:unparam
 		return cmdtest.NewTestApiClient(t, nil, token, hostname, api.WithGitLabClient(tc.Client)), nil
 	}
 
@@ -214,13 +214,13 @@ hosts:
 				t.Errorf("statusRun() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			assert.Equal(t, stdout.String(), "")
+			assert.Empty(t, stdout.String())
 
 			if tt.wantErr {
-				assert.NotNil(t, err)
+				require.Error(t, err)
 				assert.Equal(t, tt.stderr, err.Error())
 			} else {
-				assert.Nil(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.stderr, stderr.String())
 			}
 		})
@@ -239,7 +239,7 @@ hosts:
 	tc := gitlabtesting.NewTestClient(t)
 	tc.MockUsers.EXPECT().CurrentUser(gomock.Any()).Return(nil, &gitlab.Response{Response: &http.Response{StatusCode: http.StatusUnauthorized}}, errors.New("GET https://gitlab.example.com/api/v4/user: 401 {error: invalid_token}"))
 
-	client := func(token, hostname string) (*api.Client, error) { // nolint:unparam
+	client := func(token, hostname string) (*api.Client, error) { //nolint:unparam
 		return cmdtest.NewTestApiClient(t, nil, token, hostname, api.WithGitLabClient(tc.Client)), nil
 	}
 
@@ -292,7 +292,7 @@ hosts:
 		tc.MockUsers.EXPECT().CurrentUser(gomock.Any()).Return(nil, &gitlab.Response{Response: &http.Response{StatusCode: http.StatusUnauthorized}}, errors.New("GET https://test.example/api/v4/user: 401 {message: no token provided}")),
 	)
 
-	client := func(token, hostname string) (*api.Client, error) { // nolint:unparam
+	client := func(token, hostname string) (*api.Client, error) { //nolint:unparam
 		return cmdtest.NewTestApiClient(t, nil, token, hostname, api.WithGitLabClient(tc.Client)), nil
 	}
 
@@ -321,7 +321,7 @@ test.example
 
 	t.Setenv("GITLAB_TOKEN", "")
 	configs, err := config.ParseConfig("config.yml")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	io, _, stdout, stderr := cmdtest.TestIOStreams()
 
 	opts := &options{
@@ -336,7 +336,7 @@ test.example
 	}
 
 	err = opts.run(t.Context())
-	assert.Equal(t, "\nx could not authenticate to one or more of the configured GitLab instances.", err.Error())
+	assert.Equal(t, "\nx could not authenticate to one or more of the configured GitLab instances", err.Error())
 	assert.Empty(t, stdout.String())
 	assert.Equal(t, expectedOutput, stderr.String())
 }
@@ -347,7 +347,7 @@ git_protocol: ssh
 `, "")()
 
 	configs, err := config.ParseConfig("config.yml")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	io, _, stdout, _ := cmdtest.TestIOStreams()
 
 	opts := &options{
@@ -361,7 +361,7 @@ git_protocol: ssh
 	}
 	t.Run("no instance authenticated", func(t *testing.T) {
 		err := opts.run(t.Context())
-		assert.Equal(t, "No GitLab instances have been authenticated with glab. Run `glab auth login` to authenticate.\n", err.Error())
+		assert.Equal(t, "no GitLab instances have been authenticated with glab; run `glab auth login` to authenticate", err.Error())
 		assert.Empty(t, stdout.String())
 	})
 }
@@ -383,6 +383,6 @@ func Test_statusRun_flagValidation(t *testing.T) {
 
 	_, err := exec("--all --hostname gitlab.example.com")
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "if any flags in the group [all hostname] are set none of the others can be")
 }

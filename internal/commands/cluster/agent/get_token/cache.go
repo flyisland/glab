@@ -34,12 +34,12 @@ type keyringStorage struct{}
 
 func (k *keyringStorage) get(id string) ([]byte, error) {
 	data, err := keyring.Get(keyringService, id)
-	switch err {
-	case nil:
+	switch {
+	case err == nil:
 		return []byte(data), nil
-	case keyring.ErrNotFound:
+	case errors.Is(err, keyring.ErrNotFound):
 		return nil, errNotFound
-	case keyring.ErrUnsupportedPlatform:
+	case errors.Is(err, keyring.ErrUnsupportedPlatform):
 		return nil, errUnsupportedPlatform
 	default:
 		return nil, err
@@ -135,12 +135,12 @@ func (c *cache) isTokenExpired(token *gitlab.PersonalAccessToken) bool {
 
 func (c *cache) get() (*gitlab.PersonalAccessToken, error) {
 	token, err := c.getCachedToken()
-	switch err {
-	case nil:
+	switch {
+	case err == nil:
 		return token, nil
-	case errNotFound:
+	case errors.Is(err, errNotFound):
 		fallthrough
-	case errTokenExpired, errTokenRevoked:
+	case errors.Is(err, errTokenExpired), errors.Is(err, errTokenRevoked):
 		return c.createAndCacheToken()
 	default:
 		return nil, err

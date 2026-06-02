@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
@@ -16,7 +17,7 @@ func TestNewCmdBoard(t *testing.T) {
 	cmd := NewCmdBoard(cmdtest.NewTestFactory(nil))
 	cmd.SetOut(&buf)
 
-	assert.Nil(t, cmd.Execute())
+	require.NoError(t, cmd.Execute())
 
 	assert.Contains(t, buf.String(), "Work with GitLab issue boards in the given project.\n")
 }

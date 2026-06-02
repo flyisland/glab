@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/cli/internal/glinstance"
 )
@@ -41,7 +42,7 @@ func TestClientID(t *testing.T) {
 				},
 			}
 			clientID, err := oauthClientID(cfg, testCase.hostname)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, testCase.expectedClientID, clientID)
 		})
 	}
@@ -53,7 +54,7 @@ func TestClientID(t *testing.T) {
 			},
 		}
 		clientID, err := oauthClientID(cfg, "salsa.debian.org")
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Empty(t, clientID)
 	})
 }

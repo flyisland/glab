@@ -354,7 +354,8 @@ func TestNewCmdCreate_TemplateFromCommitMessages(t *testing.T) {
 
 	exec := cmdtest.SetupCmdForTest(t, func(f cmdutils.Factory) *cobra.Command {
 		// Set up factory with remotes stub
-		tf := f.(*cmdtest.Factory)
+		tf, ok := f.(*cmdtest.Factory)
+		require.True(t, ok, "expected cmdtest.Factory")
 		tf.RemotesStub = func() (glrepo.Remotes, error) {
 			return glrepo.Remotes{
 				{
@@ -556,7 +557,7 @@ func TestMRCreate_nontty_insufficient_flags(t *testing.T) {
 
 	_, err := exec("")
 	require.Error(t, err)
-	assert.Equal(t, "--title or --fill required for non-interactive mode.", err.Error())
+	assert.Equal(t, "--title or --fill required for non-interactive mode", err.Error())
 }
 
 func TestMrBodyAndTitle(t *testing.T) {
@@ -674,7 +675,7 @@ func TestGenerateMRCompareURL(t *testing.T) {
 		"merge_request%5Bsource_branch%5D=%40%7Ccalc&merge_request%5Bsource_project_id%5D=101&merge_request%5Btarget_branch%5D=project%2Fmy-branch&merge_request%5Btarget_project_id%5D=100&" +
 		"merge_request%5Btitle%5D=Autofill+tests+%7C+for+this+%40project"
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedUrl, u)
 }
 
@@ -863,7 +864,8 @@ func TestMRCreate_RemotesError_PropagatesError(t *testing.T) {
 	// Setup command using cmdtest.SetupCmdForTest
 	exec := cmdtest.SetupCmdForTest(t,
 		func(f cmdutils.Factory) *cobra.Command {
-			tf := f.(*cmdtest.Factory)
+			tf, ok := f.(*cmdtest.Factory)
+			require.True(t, ok, "expected cmdtest.Factory")
 
 			// Simulate being outside a git repository - Remotes() fails
 			remotesErr := errors.New("fatal: not a git repository (or any of the parent directories): .git")

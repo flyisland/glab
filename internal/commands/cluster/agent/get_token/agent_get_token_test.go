@@ -39,8 +39,8 @@ func TestAgentGetToken(t *testing.T) {
 		t.Errorf("error running command `cluster agent get-token --agent 42`: %v", err)
 	}
 
-	assert.Equal(t, `{"kind":"ExecCredential","apiVersion":"client.authentication.k8s.io/v1","spec":{"interactive":false},"status":{"expirationTimestamp":"2023-01-01T23:55:00Z","token":"pat:42:glpat-XTESTX"}}`+"\n", output.String())
-	assert.Equal(t, ``, output.Stderr())
+	assert.JSONEq(t, `{"kind":"ExecCredential","apiVersion":"client.authentication.k8s.io/v1","spec":{"interactive":false},"status":{"expirationTimestamp":"2023-01-01T23:55:00Z","token":"pat:42:glpat-XTESTX"}}`+"\n", output.String())
+	assert.Empty(t, output.Stderr())
 }
 
 // TestAgentGetToken_OutputIsValidExecCredential round-trips the command's

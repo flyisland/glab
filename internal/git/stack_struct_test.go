@@ -110,10 +110,10 @@ func Test_StackRemoveRef(t *testing.T) {
 			}
 
 			err := CreateRefFiles(tt.args.stack.Refs, tt.args.stack.Title)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			err = tt.args.stack.RemoveRef(tt.args.remove, mockCmd)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			require.Equal(t, tt.expected, tt.args.stack.Refs)
 
@@ -193,7 +193,7 @@ func Test_StackLast(t *testing.T) {
 			s := &Stack{Refs: tt.mockRefs}
 			got := s.Last()
 
-			require.Equal(t, got, tt.expected)
+			require.Equal(t, tt.expected, got)
 		})
 	}
 }
@@ -225,7 +225,7 @@ func Test_StackFirst(t *testing.T) {
 			s := &Stack{Refs: tt.mockRefs}
 			got := s.First()
 
-			require.Equal(t, got, tt.expected)
+			require.Equal(t, tt.expected, got)
 		})
 	}
 }
@@ -517,7 +517,7 @@ func Test_GatherStackRefs(t *testing.T) {
 
 			for _, stack := range tt.stacks {
 				err := AddStackRefFile(tt.args.title, stack)
-				require.Nil(t, err)
+				require.NoError(t, err)
 			}
 
 			stack, err := GatherStackRefs(tt.args.title)
@@ -525,10 +525,10 @@ func Test_GatherStackRefs(t *testing.T) {
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
-				require.Nil(t, err)
+				require.NoError(t, err)
 			}
 
-			require.Equal(t, stack, tt.expected)
+			require.Equal(t, tt.expected, stack)
 		})
 	}
 }
@@ -628,19 +628,19 @@ func Test_adjustAdjacentRefs(t *testing.T) {
 
 			for _, stack := range tt.stacks {
 				err := AddStackRefFile(tt.args.title, stack)
-				require.Nil(t, err)
+				require.NoError(t, err)
 			}
 
 			originalStack, err := GatherStackRefs(tt.args.title)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			err = originalStack.adjustAdjacentRefs(tt.args.adjust)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
-				require.Nil(t, err)
+				require.NoError(t, err)
 			}
 
 			require.Equal(t, tt.expected.Refs, originalStack.Refs)

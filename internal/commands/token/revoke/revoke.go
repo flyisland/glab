@@ -143,9 +143,9 @@ func (o *options) run() error {
 		case 1:
 			token = tokens[0]
 		case 0:
-			return cmdutils.FlagError{Err: fmt.Errorf("no token found with the name '%v'.", o.name)}
+			return cmdutils.FlagError{Err: fmt.Errorf("no token found with the name %q", o.name)}
 		default:
-			return cmdutils.FlagError{Err: fmt.Errorf("multiple tokens found with the name '%v'. Use the ID instead.", o.name)}
+			return cmdutils.FlagError{Err: fmt.Errorf("multiple tokens found with the name %q; use the ID instead", o.name)}
 		}
 		if _, err = client.PersonalAccessTokens.RevokePersonalAccessTokenByID(token.ID); err != nil {
 			return err
@@ -170,9 +170,9 @@ func (o *options) run() error {
 			case 1:
 				token = tokens[0]
 			case 0:
-				return cmdutils.FlagError{Err: fmt.Errorf("no token found with the name '%v'.", o.name)}
+				return cmdutils.FlagError{Err: fmt.Errorf("no token found with the name %q", o.name)}
 			default:
-				return cmdutils.FlagError{Err: fmt.Errorf("multiple tokens found with the name '%v'. Use the ID instead.", o.name)}
+				return cmdutils.FlagError{Err: fmt.Errorf("multiple tokens found with the name %q; use the ID instead", o.name)}
 			}
 
 			if _, err = client.GroupAccessTokens.RevokeGroupAccessToken(o.group, token.ID); err != nil {
@@ -201,9 +201,9 @@ func (o *options) run() error {
 			case 1:
 				token = tokens[0]
 			case 0:
-				return cmdutils.FlagError{Err: fmt.Errorf("no token found with the name '%v'.", o.name)}
+				return cmdutils.FlagError{Err: fmt.Errorf("no token found with the name %q", o.name)}
 			default:
-				return cmdutils.FlagError{Err: fmt.Errorf("multiple tokens found with the name '%v'. Use the ID instead.", o.name)}
+				return cmdutils.FlagError{Err: fmt.Errorf("multiple tokens found with the name %q; use the ID instead", o.name)}
 			}
 
 			if _, err := client.ProjectAccessTokens.RevokeProjectAccessToken(repo.FullName(), token.ID); err != nil {

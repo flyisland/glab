@@ -24,7 +24,7 @@ func TestSemanticSearch_MissingQuery(t *testing.T) {
 
 	_, err := exec("")
 
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "required flag(s) \"query\" not set")
 }
 
@@ -173,7 +173,7 @@ func TestSemanticSearch_KnnOutOfRange(t *testing.T) {
 			cmdtest.WithBaseRepo("OWNER", "REPO", ""),
 		)
 		_, err := exec(cli)
-		assert.Error(t, err, "expected error for %q", cli)
+		require.Error(t, err, "expected error for %q", cli)
 		assert.Contains(t, err.Error(), "--knn must be between 1 and 100")
 	}
 }
@@ -186,7 +186,7 @@ func TestSemanticSearch_LimitOutOfRange(t *testing.T) {
 			cmdtest.WithBaseRepo("OWNER", "REPO", ""),
 		)
 		_, err := exec(cli)
-		assert.Error(t, err, "expected error for %q", cli)
+		require.Error(t, err, "expected error for %q", cli)
 		assert.Contains(t, err.Error(), "--limit must be between 1 and 100")
 	}
 }
@@ -199,7 +199,7 @@ func TestSemanticSearch_BaseRepoError(t *testing.T) {
 	)
 
 	_, err := exec(`-q foo`)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "not a git repository")
 }
 
@@ -222,6 +222,6 @@ func TestSemanticSearch_APIError(t *testing.T) {
 	)
 
 	_, err = exec(`-q foo`)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "semantic search request failed")
 }

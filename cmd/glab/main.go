@@ -139,7 +139,8 @@ func main() {
 
 			err = preparedCmd.Run()
 			if err != nil {
-				if ee, ok := err.(*exec.ExitError); ok {
+				ee := &exec.ExitError{}
+				if errors.As(err, &ee) {
 					os.Exit(ee.ExitCode())
 				}
 

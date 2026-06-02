@@ -7,13 +7,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_GitDir(t *testing.T) {
 	gotRelative := filepath.Join(GitDir(true)...)
 	gotAbsolute := filepath.Join(GitDir(false)...)
 	absRelative, err := filepath.Abs(gotRelative)
-	assert.Equal(t, nil, err)
+	require.NoError(t, err)
 	assert.Equal(t, gotAbsolute, absRelative)
 }
 
