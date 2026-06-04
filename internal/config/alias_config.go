@@ -2,18 +2,15 @@ package config
 
 import (
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"go.yaml.in/yaml/v3"
 )
 
-func aliasesConfigFile() string {
-	return path.Join(ConfigDir(), "aliases.yml")
-}
-
 type AliasConfig struct {
 	ConfigMap
 	Parent Config
+	dir    string
 }
 
 func (a *AliasConfig) Get(alias string) (string, bool) {
@@ -46,11 +43,14 @@ func (a *AliasConfig) Delete(alias string) error {
 }
 
 func (a *AliasConfig) Write() error {
+	if a.dir == "" {
+		return nil
+	}
 	aliasesBytes, err := yaml.Marshal(a.ConfigMap.Root)
 	if err != nil {
 		return err
 	}
-	err = WriteConfigFile(aliasesConfigFile(), yamlNormalize(aliasesBytes))
+	err = writeConfigFile(filepath.Join(a.dir, "aliases.yml"), yamlNormalize(aliasesBytes))
 	if err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}

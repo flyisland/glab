@@ -248,7 +248,7 @@ func (o *options) validate(cmd *cobra.Command) error {
 }
 
 func parseIssue(apiClientFunc func(repoHost string) (*api.Client, error), gitlabClient *gitlab.Client, opts *options) (*gitlab.Issue, error) {
-	issue, _, err := issueutils.IssueFromArg(apiClientFunc, gitlabClient, opts.baseRepo, opts.defaultHostname, opts.RelatedIssue)
+	issue, _, err := issueutils.IssueFromArg(apiClientFunc, gitlabClient, opts.baseRepo, opts.defaultHostname, opts.config(), opts.RelatedIssue)
 	if err != nil {
 		return nil, err
 	}
@@ -902,7 +902,7 @@ func ResolvedHeadRepo(ctx context.Context, f cmdutils.Factory) func() (glrepo.In
 		if err != nil {
 			return nil, err
 		}
-		repoContext, err := glrepo.ResolveRemotesToRepos(remotes, client, f.DefaultHostname())
+		repoContext, err := glrepo.ResolveRemotesToRepos(remotes, client, f.DefaultHostname(), f.Config())
 		if err != nil {
 			return nil, err
 		}
@@ -917,7 +917,7 @@ func ResolvedHeadRepo(ctx context.Context, f cmdutils.Factory) func() (glrepo.In
 
 func headRepoOverride(opts *options, repo string) {
 	opts.headRepo = func() (glrepo.Interface, error) {
-		return glrepo.FromFullName(repo, opts.defaultHostname)
+		return glrepo.FromFullName(repo, opts.defaultHostname, opts.config())
 	}
 }
 

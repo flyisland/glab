@@ -12,6 +12,7 @@ import (
 
 	"gitlab.com/gitlab-org/cli/internal/api"
 	"gitlab.com/gitlab-org/cli/internal/cmdutils"
+	"gitlab.com/gitlab-org/cli/internal/config"
 	"gitlab.com/gitlab-org/cli/internal/glrepo"
 	"gitlab.com/gitlab-org/cli/internal/iostreams"
 	"gitlab.com/gitlab-org/cli/internal/mcpannotations"
@@ -29,6 +30,7 @@ type options struct {
 	baseRepo        func() (glrepo.Interface, error)
 	gitlabClient    func() (*gitlab.Client, error)
 	defaultHostname func() string
+	config          config.Config
 
 	archive       *bool
 	defaultBranch *string
@@ -43,6 +45,7 @@ func NewCmdUpdate(f cmdutils.Factory) *cobra.Command {
 		baseRepo:        f.BaseRepo,
 		gitlabClient:    f.GitLabClient,
 		defaultHostname: f.DefaultHostname,
+		config:          f.Config(),
 	}
 
 	cmd := &cobra.Command{
@@ -190,7 +193,7 @@ func (o *options) getRepoFromProjectID() (glrepo.Interface, error) {
 		}
 
 		// Get the repo full name from the ProjectID which can be a full URL or a group/repo format
-		return glrepo.FromFullName(projectID, o.defaultHostname())
+		return glrepo.FromFullName(projectID, o.defaultHostname(), o.config)
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -140,34 +141,60 @@ func (cm *ConfigMap) RemoveEntry(key string) {
 }
 
 func NewConfig(root *yaml.Node) Config {
+	return newConfig(root, "")
+}
+
+// newConfig builds a fileConfig that persists to dir. An empty dir means the
+// config is in-memory only and Write()/WriteAll() are no-ops.
+func newConfig(root *yaml.Node, dir string) Config {
 	return &fileConfig{
 		ConfigMap:    ConfigMap{Root: root.Content[0]},
 		documentRoot: root,
+		dir:          dir,
 	}
 }
 
-// NewFromString initializes a Config from a yaml string
+// NewFromString initializes an in-memory Config from a yaml string. It has no
+// directory behind it, so Write()/WriteAll() are no-ops.
 func NewFromString(str string) Config {
+	return newConfigFromString(str, "")
+}
+
+// NewFromStringInDir initializes a Config from a yaml string that persists to
+// dir. Intended for tests that need to inspect what would be written to disk.
+func NewFromStringInDir(str, dir string) Config {
+	return newConfigFromString(str, dir)
+}
+
+func newConfigFromString(str, dir string) Config {
 	root, err := parseConfigData([]byte(str))
 	if err != nil {
 		panic(err)
 	}
-	return NewConfig(root)
+	return newConfig(root, dir)
 }
 
-// NewBlankConfig initializes a config file pre-populated with comments and default values
+// NewBlankConfig initializes an in-memory config pre-populated with comments and
+// default values. It has no directory behind it, so Write()/WriteAll() are no-ops.
 func NewBlankConfig() Config {
-	return NewConfig(NewBlankRoot())
+	return newConfig(NewBlankRoot(), "")
+}
+
+// NewBlankConfigInDir initializes a blank config that persists to dir.
+func NewBlankConfigInDir(dir string) Config {
+	return newConfig(NewBlankRoot(), dir)
 }
 
 func NewBlankRoot() *yaml.Node {
 	return rootConfig()
 }
 
-// A fileConfig reads and writes glab configuration to a file on disk.
+// A fileConfig reads and writes glab configuration to a file on disk. An empty
+// dir means the config is in-memory only and its writers are no-ops.
 type fileConfig struct {
 	ConfigMap
 	documentRoot *yaml.Node
+	dir          string
 }
 
 func (c *fileConfig) Root() *yaml.Node {
@@ -372,6 +399,10 @@ func (c *fileConfig) Set(hostname, key, value string) error {
 }
 
 func (c *fileConfig) Write() error {
+	if c.dir == "" {
+		return nil
+	}
+
 	mainData := yaml.Node{Kind: yaml.MappingNode}
 
 	nodes := c.documentRoot.Content[0].Content
@@ -388,8 +419,7 @@ func (c *fileConfig) Write() error {
 		return err
 	}
 
-	filename := ConfigFile()
-	return WriteConfigFile(filename, yamlNormalize(mainBytes))
+	return writeConfigFile(filepath.Join(c.dir, "config.yml"), yamlNormalize(mainBytes))
 }
 
 func (c *fileConfig) WriteAll() error {
@@ -459,6 +489,7 @@ func (c *fileConfig) Local() (*LocalConfig, error) {
 	return &LocalConfig{
 		Parent:    c,
 		ConfigMap: ConfigMap{Root: valueNode},
+		dir:       c.dir,
 	}, nil
 }
 
@@ -512,6 +543,7 @@ func (c *fileConfig) Aliases() (*AliasConfig, error) {
 	return &AliasConfig{
 		Parent:    c,
 		ConfigMap: ConfigMap{Root: valueNode},
+		dir:       c.dir,
 	}, nil
 }
 

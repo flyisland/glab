@@ -17,6 +17,7 @@ import (
 	"regexp"
 	"strconv"
 
+	"gitlab.com/gitlab-org/cli/internal/config"
 	"gitlab.com/gitlab-org/cli/internal/glrepo"
 )
 
@@ -73,7 +74,7 @@ var mergeRequestURLPathRE = regexp.MustCompile(`^(/(?:[^-][^/]+/){2,})+(?:-/)?me
 // TODO: Unify this with issueutils.issueURLPathRE in a follow-up MR.
 var issueURLPathRE = regexp.MustCompile(`^(/(?:[^-][^/]+/){2,})+(?:-/)?(?:issues/(?:incident/)?|work_items/)(\d+)(?:/.*)?$`)
 
-func ParseGitLabURL(urlStr, defaultHostname string) *GitLabResourceMetadata {
+func ParseGitLabURL(urlStr, defaultHostname string, cfg config.Config) *GitLabResourceMetadata {
 	u, err := url.Parse(urlStr)
 	if err != nil {
 		return nil
@@ -94,7 +95,7 @@ func ParseGitLabURL(urlStr, defaultHostname string) *GitLabResourceMetadata {
 		// Use the captured group which contains the repository path
 		u.Path = m[1]
 
-		repo, err := glrepo.FromURL(u, defaultHostname)
+		repo, err := glrepo.FromURL(u, defaultHostname, cfg)
 		if err != nil {
 			return nil
 		}
@@ -117,7 +118,7 @@ func ParseGitLabURL(urlStr, defaultHostname string) *GitLabResourceMetadata {
 		// Use the captured group which contains the repository path
 		u.Path = m[1]
 
-		repo, err := glrepo.FromURL(u, defaultHostname)
+		repo, err := glrepo.FromURL(u, defaultHostname, cfg)
 		if err != nil {
 			return nil
 		}
@@ -134,8 +135,8 @@ func ParseGitLabURL(urlStr, defaultHostname string) *GitLabResourceMetadata {
 
 // ParseMergeRequestFromURL extracts merge request ID and repository from a GitLab URL
 // Returns 0 and nil if the URL is not a valid merge request URL
-func ParseMergeRequestFromURL(urlStr, defaultHostname string) (int, glrepo.Interface) {
-	metadata := ParseGitLabURL(urlStr, defaultHostname)
+func ParseMergeRequestFromURL(urlStr, defaultHostname string, cfg config.Config) (int, glrepo.Interface) {
+	metadata := ParseGitLabURL(urlStr, defaultHostname, cfg)
 	if metadata != nil && metadata.Type == GitLabResourceMergeRequest {
 		return metadata.ID, metadata.Repo
 	}

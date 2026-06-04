@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"gitlab.com/gitlab-org/cli/internal/config"
 	"gitlab.com/gitlab-org/cli/internal/glinstance"
 	"gitlab.com/gitlab-org/cli/internal/glrepo"
 )
@@ -125,7 +126,7 @@ func TestParseGitLabURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ParseGitLabURL(tt.url, glinstance.DefaultHostname)
+			result := ParseGitLabURL(tt.url, glinstance.DefaultHostname, config.NewBlankConfig())
 
 			if tt.wantID == 0 {
 				require.Nil(t, result, "Expected nil result for invalid URL")
@@ -137,7 +138,7 @@ func TestParseGitLabURL(t *testing.T) {
 			require.Equal(t, tt.wantType, result.Type)
 
 			if tt.wantRepoURL != "" {
-				expectedRepo, err := glrepo.FromFullName(tt.wantRepoURL, glinstance.DefaultHostname)
+				expectedRepo, err := glrepo.FromFullName(tt.wantRepoURL, glinstance.DefaultHostname, config.NewBlankConfig())
 				require.NoError(t, err)
 				require.Equal(t, expectedRepo, result.Repo)
 			}
@@ -167,11 +168,11 @@ func TestParseMergeRequestFromURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			id, repo := ParseMergeRequestFromURL(tt.url, glinstance.DefaultHostname)
+			id, repo := ParseMergeRequestFromURL(tt.url, glinstance.DefaultHostname, config.NewBlankConfig())
 			require.Equal(t, tt.wantID, id)
 
 			if tt.wantID != 0 && tt.wantRepoURL != "" {
-				expectedRepo, err := glrepo.FromFullName(tt.wantRepoURL, glinstance.DefaultHostname)
+				expectedRepo, err := glrepo.FromFullName(tt.wantRepoURL, glinstance.DefaultHostname, config.NewBlankConfig())
 				require.NoError(t, err)
 				require.Equal(t, expectedRepo, repo)
 			} else {

@@ -4,7 +4,6 @@ package infer
 
 import (
 	"fmt"
-	"io"
 	"testing"
 	"time"
 
@@ -59,7 +58,6 @@ func TestCreateShaBranch(t *testing.T) {
 
 	t.Run("uses configured branch prefix", func(t *testing.T) {
 		git.InitGitRepo(t)
-		defer config.StubWriteConfig(io.Discard, io.Discard)()
 
 		factory := createFactoryWithConfig("myprefix")
 
@@ -70,7 +68,6 @@ func TestCreateShaBranch(t *testing.T) {
 
 	t.Run("falls back to USER env var", func(t *testing.T) {
 		git.InitGitRepo(t)
-		defer config.StubWriteConfig(io.Discard, io.Discard)()
 
 		t.Setenv("USER", "testuser")
 		factory := createFactoryWithConfig("")
@@ -82,7 +79,6 @@ func TestCreateShaBranch(t *testing.T) {
 
 	t.Run("falls back to glab-stack when no USER", func(t *testing.T) {
 		git.InitGitRepo(t)
-		defer config.StubWriteConfig(io.Discard, io.Discard)()
 
 		t.Setenv("USER", "")
 		factory := createFactoryWithConfig("")
@@ -99,7 +95,6 @@ func TestCreateBranches(t *testing.T) {
 
 	t.Run("creates branches and ref files for each commit", func(t *testing.T) {
 		dir := git.InitGitRepoWithCommit(t)
-		defer config.StubWriteConfig(io.Discard, io.Discard)()
 
 		stackTitle := "test-stack"
 		err := git.SetLocalConfig("glab.currentstack", stackTitle)
@@ -172,7 +167,6 @@ func TestCreateBranches(t *testing.T) {
 
 	t.Run("appends to existing stack", func(t *testing.T) {
 		dir := git.InitGitRepoWithCommit(t)
-		defer config.StubWriteConfig(io.Discard, io.Discard)()
 
 		stackTitle := "test-stack"
 		err := git.SetLocalConfig("glab.currentstack", stackTitle)
@@ -238,7 +232,6 @@ func TestCreateBranches(t *testing.T) {
 
 	t.Run("rolls back on cherry-pick conflict", func(t *testing.T) {
 		dir := git.InitGitRepoWithCommit(t)
-		defer config.StubWriteConfig(io.Discard, io.Discard)()
 
 		stackTitle := "test-stack"
 		err := git.SetLocalConfig("glab.currentstack", stackTitle)
@@ -305,7 +298,6 @@ func TestCreateBranches(t *testing.T) {
 
 	t.Run("rolls back modified existing ref on cherry-pick conflict", func(t *testing.T) {
 		dir := git.InitGitRepoWithCommit(t)
-		defer config.StubWriteConfig(io.Discard, io.Discard)()
 
 		stackTitle := "test-stack"
 		err := git.SetLocalConfig("glab.currentstack", stackTitle)

@@ -15,12 +15,6 @@ import (
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
 
-// noWriteConfig wraps a config.Config so cfg.Write() doesn't touch disk
-// in tests. Avoids needing config.StubWriteConfig per test.
-type noWriteConfig struct{ config.Config }
-
-func (noWriteConfig) Write() error { return nil }
-
 func newBannerTest(t *testing.T, currentVersion, lastSeen, showWhatsNew, codingAgent string) (*iostreams.IOStreams, config.Config, api.BuildInfo, *bytes.Buffer) {
 	t.Helper()
 	cfg := config.NewBlankConfig()
@@ -31,7 +25,7 @@ func newBannerTest(t *testing.T, currentVersion, lastSeen, showWhatsNew, codingA
 		require.NoError(t, cfg.Set("", "show_whats_new", showWhatsNew))
 	}
 	ios, _, _, stderr := cmdtest.TestIOStreams(cmdtest.WithTestIOStreamsAsTTY(false))
-	return ios, noWriteConfig{cfg}, api.BuildInfo{Version: currentVersion, CodingAgent: codingAgent}, stderr
+	return ios, cfg, api.BuildInfo{Version: currentVersion, CodingAgent: codingAgent}, stderr
 }
 
 func TestMaybeShowPostUpgradeBanner(t *testing.T) {

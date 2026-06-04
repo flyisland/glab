@@ -7,6 +7,7 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
+	"gitlab.com/gitlab-org/cli/internal/config"
 	"gitlab.com/gitlab-org/cli/internal/git"
 )
 
@@ -107,15 +108,15 @@ func (r Remote) RepoHost() string {
 }
 
 // TODO: accept an interface instead of git.RemoteSet
-func TranslateRemotes(gitRemotes git.RemoteSet, urlTranslate func(*url.URL) *url.URL, defaultHostname string) Remotes {
+func TranslateRemotes(gitRemotes git.RemoteSet, urlTranslate func(*url.URL) *url.URL, defaultHostname string, cfg config.Config) Remotes {
 	remotes := Remotes{}
 	for _, r := range gitRemotes {
 		var repo Interface
 		if r.FetchURL != nil {
-			repo, _ = FromURL(urlTranslate(r.FetchURL), defaultHostname)
+			repo, _ = FromURL(urlTranslate(r.FetchURL), defaultHostname, cfg)
 		}
 		if r.PushURL != nil && repo == nil {
-			repo, _ = FromURL(urlTranslate(r.PushURL), defaultHostname)
+			repo, _ = FromURL(urlTranslate(r.PushURL), defaultHostname, cfg)
 		}
 		if repo == nil {
 			continue

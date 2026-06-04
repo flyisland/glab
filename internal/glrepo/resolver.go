@@ -12,6 +12,7 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
 	"gitlab.com/gitlab-org/cli/internal/api"
+	"gitlab.com/gitlab-org/cli/internal/config"
 	"gitlab.com/gitlab-org/cli/internal/git"
 	"gitlab.com/gitlab-org/cli/internal/iostreams"
 )
@@ -25,13 +26,14 @@ var (
 	resolverHeadRepoQuestion = "Which should be the head repository (where branches are pushed) for this directory?"
 )
 
-func ResolveRemotesToRepos(remotes Remotes, client *gitlab.Client, defaultHostname string) (*ResolvedRemotes, error) {
+func ResolveRemotesToRepos(remotes Remotes, client *gitlab.Client, defaultHostname string, cfg config.Config) (*ResolvedRemotes, error) {
 	sort.Stable(remotes)
 
 	result := &ResolvedRemotes{
 		remotes:         remotes,
 		apiClient:       client,
 		defaultHostname: defaultHostname,
+		cfg:             cfg,
 	}
 
 	return result, nil
@@ -61,6 +63,7 @@ type ResolvedRemotes struct {
 	network         []gitlab.Project
 	apiClient       *gitlab.Client
 	defaultHostname string
+	cfg             config.Config
 }
 
 func (r *ResolvedRemotes) BaseRepo(ctx context.Context, ios *iostreams.IOStreams) (Interface, error) {
@@ -70,7 +73,7 @@ func (r *ResolvedRemotes) BaseRepo(ctx context.Context, ios *iostreams.IOStreams
 		if remote.ResolvedBase == "base" {
 			return remote, nil
 		} else if after, ok := strings.CutPrefix(remote.ResolvedBase, "base:"); ok {
-			repo, err := FromFullName(after, r.defaultHostname)
+			repo, err := FromFullName(after, r.defaultHostname, r.cfg)
 			if err != nil {
 				return nil, err
 			}
@@ -81,7 +84,7 @@ func (r *ResolvedRemotes) BaseRepo(ctx context.Context, ios *iostreams.IOStreams
 		if remote.Resolved == "base" {
 			return remote, nil
 		} else if after, ok := strings.CutPrefix(remote.Resolved, "base:"); ok {
-			repo, err := FromFullName(after, r.defaultHostname)
+			repo, err := FromFullName(after, r.defaultHostname, r.cfg)
 			if err != nil {
 				return nil, err
 			}
@@ -89,7 +92,7 @@ func (r *ResolvedRemotes) BaseRepo(ctx context.Context, ios *iostreams.IOStreams
 		} else if remote.Resolved != "" && !strings.HasPrefix(remote.Resolved, "head") {
 			// Backward compatibility kludge for remote-less resolutions created before
 			// BaseRepo started creating resolutions prefixed with `base:`
-			repo, err := FromFullName(remote.Resolved, r.defaultHostname)
+			repo, err := FromFullName(remote.Resolved, r.defaultHostname, r.cfg)
 			if err != nil {
 				return nil, err
 			}
@@ -151,7 +154,7 @@ func (r *ResolvedRemotes) BaseRepo(ctx context.Context, ios *iostreams.IOStreams
 
 	// determine corresponding git remote
 	selectedRepo := repoMap[baseName]
-	selectedRepoInfo, _ := FromFullName(selectedRepo.HTTPURLToRepo, r.defaultHostname)
+	selectedRepoInfo, _ := FromFullName(selectedRepo.HTTPURLToRepo, r.defaultHostname, r.cfg)
 	resolution := "base"
 	remote, _ := r.RemoteForRepo(selectedRepoInfo)
 	if remote == nil {
@@ -183,7 +186,7 @@ func (r *ResolvedRemotes) HeadRepo(ctx context.Context, ios *iostreams.IOStreams
 		if remote.ResolvedHead == "head" {
 			return remote, nil
 		} else if after, ok := strings.CutPrefix(remote.ResolvedHead, "head:"); ok {
-			repo, err := FromFullName(after, r.defaultHostname)
+			repo, err := FromFullName(after, r.defaultHostname, r.cfg)
 			if err != nil {
 				return nil, err
 			}
@@ -194,7 +197,7 @@ func (r *ResolvedRemotes) HeadRepo(ctx context.Context, ios *iostreams.IOStreams
 		if remote.Resolved == "head" {
 			return remote, nil
 		} else if after, ok := strings.CutPrefix(remote.Resolved, "head:"); ok {
-			repo, err := FromFullName(after, r.defaultHostname)
+			repo, err := FromFullName(after, r.defaultHostname, r.cfg)
 			if err != nil {
 				return nil, err
 			}
@@ -242,7 +245,7 @@ func (r *ResolvedRemotes) HeadRepo(ctx context.Context, ios *iostreams.IOStreams
 			// We cannot prompt so get the first repo that is a fork
 			for _, repo := range repoNames {
 				if repoMap[repo].ForkedFromProject != nil {
-					selectedRepoInfo, _ := FromFullName((repoMap[repo].HTTPURLToRepo), r.defaultHostname)
+					selectedRepoInfo, _ := FromFullName((repoMap[repo].HTTPURLToRepo), r.defaultHostname, r.cfg)
 					remote, _ := r.RemoteForRepo(selectedRepoInfo)
 					return remote, nil
 				}
@@ -259,7 +262,7 @@ func (r *ResolvedRemotes) HeadRepo(ctx context.Context, ios *iostreams.IOStreams
 
 	// determine corresponding git remote
 	selectedRepo := repoMap[headName]
-	selectedRepoInfo, _ := FromFullName(selectedRepo.HTTPURLToRepo, r.defaultHostname)
+	selectedRepoInfo, _ := FromFullName(selectedRepo.HTTPURLToRepo, r.defaultHostname, r.cfg)
 	resolution := "head"
 	remote, _ := r.RemoteForRepo(selectedRepoInfo)
 	if remote == nil {

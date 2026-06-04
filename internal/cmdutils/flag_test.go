@@ -33,7 +33,7 @@ type dummyFactory struct {
 }
 
 func (f *dummyFactory) RepoOverride(repo string) error {
-	baseRepo, err := glrepo.FromFullName(repo, glinstance.DefaultHostname)
+	baseRepo, err := glrepo.FromFullName(repo, glinstance.DefaultHostname, config.NewBlankConfig())
 	if err != nil {
 		return err
 	}

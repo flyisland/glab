@@ -3,8 +3,8 @@
 package config
 
 import (
-	"bytes"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -13,6 +13,15 @@ import (
 	"github.com/zalando/go-keyring"
 	"go.yaml.in/yaml/v3"
 )
+
+// persistedFile returns the contents of a config file written into dir by a
+// dir-backed Config, for tests that assert on what was persisted.
+func persistedFile(t *testing.T, dir, name string) string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(dir, name))
+	require.NoError(t, err)
+	return string(data)
+}
 
 func Test_BlankConfig_RoundTripsAndExposesSchemaKeys(t *testing.T) {
 	root := NewBlankRoot()
@@ -44,7 +53,8 @@ func Test_BlankConfig_RoundTripsAndExposesSchemaKeys(t *testing.T) {
 }
 
 func Test_fileConfig_Set(t *testing.T) {
-	defer StubConfig(`---
+	dir := t.TempDir()
+	seedFile(t, dir, "config.yml", `---
 git_protocol: ssh
 editor: vim
 hosts:
@@ -52,14 +62,9 @@ hosts:
     token:
     git_protocol: https
     username: user
-`, `
-`)()
+`)
 
-	mainBuf := bytes.Buffer{}
-	aliasesBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &aliasesBuf)()
-
-	c, err := ParseConfig("config.yml")
+	c, err := ParseConfig(filepath.Join(dir, "config.yml"))
 	require.NoError(t, err)
 
 	assert.NoError(t, c.Set("", "editor", "nano"))
@@ -79,11 +84,12 @@ hosts:
     example.com:
         username: testUser
 `)
-	assert.Equal(t, expected, mainBuf.String())
+	assert.Equal(t, expected, persistedFile(t, dir, "config.yml"))
 }
 
 func Test_fileConfig_Set_Empty_Removes(t *testing.T) {
-	defer StubConfig(`---
+	dir := t.TempDir()
+	seedFile(t, dir, "config.yml", `---
 git_protocol: ssh
 editor: vim
 hosts:
@@ -91,14 +97,9 @@ hosts:
     token: foobar
     git_protocol: https
     username: user
-`, `
-`)()
+`)
 
-	mainBuf := bytes.Buffer{}
-	aliasesBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &aliasesBuf)()
-
-	c, err := ParseConfig("config.yml")
+	c, err := ParseConfig(filepath.Join(dir, "config.yml"))
 	require.NoError(t, err)
 
 	assert.NoError(t, c.Set("", "editor", ""))
@@ -112,17 +113,15 @@ hosts:
         git_protocol: https
         username: user
 `)
-	assert.Equal(t, expected, mainBuf.String())
+	assert.Equal(t, expected, persistedFile(t, dir, "config.yml"))
 }
 
 func Test_defaultConfig(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	hostsBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &hostsBuf)()
-
-	cfg := NewBlankConfig()
+	dir := t.TempDir()
+	cfg := NewBlankConfigInDir(dir)
 	require.NoError(t, cfg.Write())
-	assert.Empty(t, hostsBuf.String())
+	_, statErr := os.Stat(filepath.Join(dir, "aliases.yml"))
+	assert.True(t, os.IsNotExist(statErr), "Write() must not persist the aliases file")
 
 	proto, err := cfg.Get("", "git_protocol")
 	require.NoError(t, err)
@@ -140,10 +139,6 @@ func Test_defaultConfig(t *testing.T) {
 }
 
 func Test_getFromKeyring(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	hostsBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &hostsBuf)()
-
 	c := NewBlankConfig()
 
 	// Ensure host exists and its token is empty
@@ -167,10 +162,6 @@ func Test_getFromKeyring(t *testing.T) {
 }
 
 func Test_config_Get_NotFoundError(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	hostsBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &hostsBuf)()
-
 	cfg := NewBlankConfig()
 
 	local, err := cfg.Local()
@@ -246,12 +237,9 @@ func TestConfig_parseHosts_NoHosts(t *testing.T) {
 }
 
 func Test_SetKeyring_StoresTokenInKeyringAndSetsIndicator(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	hostsBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &hostsBuf)()
-
+	dir := t.TempDir()
 	keyring.MockInit()
-	cfg := NewBlankConfig()
+	cfg := NewBlankConfigInDir(dir)
 
 	// Enable keyring mode
 	err := cfg.Set("gitlab.com", "use_keyring", "true")
@@ -274,18 +262,15 @@ func Test_SetKeyring_StoresTokenInKeyringAndSetsIndicator(t *testing.T) {
 	// Verify token is NOT in config (removed/empty)
 	err = cfg.Write()
 	require.NoError(t, err)
-	configContent := mainBuf.String()
+	configContent := persistedFile(t, dir, "config.yml")
 	assert.NotContains(t, configContent, "glpat-secret-token", "Token should not be in plaintext config")
 	assert.Contains(t, configContent, "use_keyring: true")
 }
 
 func Test_SetKeyring_OAuth2RefreshToken(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	hostsBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &hostsBuf)()
-
+	dir := t.TempDir()
 	keyring.MockInit()
-	cfg := NewBlankConfig()
+	cfg := NewBlankConfigInDir(dir)
 
 	// Enable keyring mode
 	err := cfg.Set("gitlab.com", "use_keyring", "true")
@@ -308,18 +293,19 @@ func Test_SetKeyring_OAuth2RefreshToken(t *testing.T) {
 	// Verify refresh token is NOT in config
 	err = cfg.Write()
 	require.NoError(t, err)
-	configContent := mainBuf.String()
+	configContent := persistedFile(t, dir, "config.yml")
 	assert.NotContains(t, configContent, "refresh-secret-token", "Refresh token should not be in plaintext config")
 }
 
 func Test_GetWithSource_RetrievesFromKeyringWhenUseKeyringSet(t *testing.T) {
-	defer StubConfig(heredoc.Doc(`
+	dir := t.TempDir()
+	seedFile(t, dir, "config.yml", heredoc.Doc(`
 		---
 		hosts:
 		  gitlab.com:
 		    use_keyring: "true"
 		    is_oauth2: true
-	`), ``)()
+	`))
 
 	keyring.MockInit()
 
@@ -331,7 +317,7 @@ func Test_GetWithSource_RetrievesFromKeyringWhenUseKeyringSet(t *testing.T) {
 	err = keyring.Set("glab:gitlab.com:oauth2_refresh_token", "", "refresh-from-keyring")
 	require.NoError(t, err)
 
-	cfg, err := ParseConfig("config.yml")
+	cfg, err := ParseConfig(filepath.Join(dir, "config.yml"))
 	require.NoError(t, err)
 
 	// Retrieve token - should come from keyring, not config
@@ -348,16 +334,17 @@ func Test_GetWithSource_RetrievesFromKeyringWhenUseKeyringSet(t *testing.T) {
 }
 
 func Test_GetWithSource_ErrorsWhenKeyringEnabledButTokenMissing(t *testing.T) {
-	defer StubConfig(`---
+	dir := t.TempDir()
+	seedFile(t, dir, "config.yml", `---
 hosts:
   gitlab.com:
     use_keyring: "true"
-`, ``)()
+`)
 
 	keyring.MockInit()
 	// Don't store any token in keyring
 
-	cfg, err := ParseConfig("config.yml")
+	cfg, err := ParseConfig(filepath.Join(dir, "config.yml"))
 	require.NoError(t, err)
 
 	// Should error when trying to retrieve from keyring but token doesn't exist
@@ -369,10 +356,6 @@ hosts:
 }
 
 func Test_SetKeyring_JobToken(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	hostsBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &hostsBuf)()
-
 	keyring.MockInit()
 	cfg := NewBlankConfig()
 
@@ -396,18 +379,15 @@ func Test_SetKeyring_JobToken(t *testing.T) {
 }
 
 func Test_SetKeyring_CleansUpExistingPlaintextToken(t *testing.T) {
-	defer StubConfig(`---
+	dir := t.TempDir()
+	seedFile(t, dir, "config.yml", `---
 hosts:
   gitlab.com:
     token: glpat-old-plaintext-token
-`, ``)()
-
-	mainBuf := bytes.Buffer{}
-	hostsBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &hostsBuf)()
+`)
 
 	keyring.MockInit()
-	cfg, err := ParseConfig("config.yml")
+	cfg, err := ParseConfig(filepath.Join(dir, "config.yml"))
 	require.NoError(t, err)
 
 	// Enable keyring mode
@@ -422,7 +402,7 @@ hosts:
 	require.NoError(t, err)
 
 	// Verify old plaintext token is removed from config
-	configContent := mainBuf.String()
+	configContent := persistedFile(t, dir, "config.yml")
 	assert.NotContains(t, configContent, "glpat-old-plaintext-token")
 	assert.NotContains(t, configContent, "glpat-new-keyring-token")
 	assert.Contains(t, configContent, "use_keyring: \"true\"")

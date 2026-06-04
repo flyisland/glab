@@ -130,7 +130,7 @@ func (o *options) complete(args []string) error {
 		}
 
 		// Get the repo full name from the ProjectID which can be a full URL or a group/repo format
-		repo, err := glrepo.FromFullName(o.projectID, o.defaultHostname)
+		repo, err := glrepo.FromFullName(o.projectID, o.defaultHostname, o.config)
 		if err != nil {
 			return err
 		}

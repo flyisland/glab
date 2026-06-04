@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 	"syscall"
 
@@ -189,10 +188,23 @@ func ParseDefaultConfig() (Config, error) {
 		// No config found, use default writable location
 		configPath = ConfigFile()
 	}
-	return ParseConfig(configPath)
+
+	// Merge the git-based local config; this is the production path where a
+	// per-repository .git/glab-cli/config.yml may override global settings.
+	cfg, cfgErr := parseConfig(configPath, LocalConfigFile())
+
+	// SearchConfigFile may locate the config in a read-only system-wide XDG
+	// directory, but glab always persists to the user's writable config dir.
+	// Pin the persistence target to ConfigDir() so Write() keeps writing there
+	// even when the config was read from elsewhere.
+	if fc, ok := cfg.(*fileConfig); ok {
+		fc.dir = ConfigDir()
+	}
+
+	return cfg, cfgErr
 }
 
-var ReadConfigFile = func(filename string) ([]byte, error) {
+func readConfigFile(filename string) ([]byte, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, pathError(err)
@@ -201,17 +213,11 @@ var ReadConfigFile = func(filename string) ([]byte, error) {
 	return data, nil
 }
 
-var WriteConfigFile = func(filename string, data []byte) error {
-	err := os.MkdirAll(path.Dir(filename), 0o750)
-	if err != nil {
+func writeConfigFile(filename string, data []byte) error {
+	if err := os.MkdirAll(filepath.Dir(filename), 0o750); err != nil {
 		return pathError(err)
 	}
-	_, err = os.ReadFile(filename)
-	if err != nil && !os.IsNotExist(err) {
-		return err
-	}
-	err = WriteFile(filename, data, 0o600)
-	return err
+	return WriteFile(filename, data, 0o600)
 }
 
 func ParseConfigFile(filename string) ([]byte, *yaml.Node, error) {
@@ -229,7 +235,7 @@ func ParseConfigFile(filename string) ([]byte, *yaml.Node, error) {
 		}
 	}
 
-	data, err := ReadConfigFile(filename)
+	data, err := readConfigFile(filename)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -260,7 +266,24 @@ func parseConfigData(data []byte) (*yaml.Node, error) {
 	return &root, nil
 }
 
+// ParseConfig reads the main config from filename and the aliases file from the
+// same directory. It does not read a separate local config file; callers that
+// need local (per-repository) overrides merged in pass the path explicitly via
+// parseConfig.
 func ParseConfig(filename string) (Config, error) {
+	return parseConfig(filename, "")
+}
+
+// parseConfig reads the main config from filename and the aliases file from the
+// same directory. When localPath is non-empty, the local config file at that
+// path is merged in under a "local" key (production passes the git-based path;
+// tests pass a temp file). The returned config persists back to the directory
+// it was parsed from, so a config read from a temp dir (tests) or a custom
+// GLAB_CONFIG_DIR writes back to the same place instead of recomputing a global
+// path on Write().
+func parseConfig(filename, localPath string) (Config, error) {
+	dir := filepath.Dir(filename)
+
 	_, root, err := ParseConfigFile(filename)
 	var confError error
 	if err != nil {
@@ -272,20 +295,22 @@ func ParseConfig(filename string) (Config, error) {
 		}
 	}
 
-	// Load local config file
-	if _, localRoot, err := ParseConfigFile(LocalConfigFile()); err == nil {
-		if len(localRoot.Content[0].Content) > 0 {
-			newContent := []*yaml.Node{
-				{Value: "local"},
-				localRoot.Content[0],
+	// Merge the local (per-repository) config file when a path is given.
+	if localPath != "" {
+		if _, localRoot, err := ParseConfigFile(localPath); err == nil {
+			if len(localRoot.Content[0].Content) > 0 {
+				newContent := []*yaml.Node{
+					{Value: "local"},
+					localRoot.Content[0],
+				}
+				restContent := root.Content[0].Content
+				root.Content[0].Content = append(newContent, restContent...)
 			}
-			restContent := root.Content[0].Content
-			root.Content[0].Content = append(newContent, restContent...)
 		}
 	}
 
-	// Load aliases config file
-	if _, aliasesRoot, err := ParseConfigFile(aliasesConfigFile()); err == nil {
+	// Load the aliases file from the same directory as the main config.
+	if _, aliasesRoot, err := ParseConfigFile(filepath.Join(dir, "aliases.yml")); err == nil {
 		if len(aliasesRoot.Content[0].Content) > 0 {
 			newContent := []*yaml.Node{
 				{Value: "aliases"},
@@ -298,7 +323,7 @@ func ParseConfig(filename string) (Config, error) {
 		return nil, err
 	}
 
-	return NewConfig(root), confError
+	return newConfig(root, dir), confError
 }
 
 func pathError(err error) error {
@@ -316,7 +341,7 @@ func findRegularFile(p string) string {
 		if s, err := os.Stat(p); err == nil && s.Mode().IsRegular() {
 			return p
 		}
-		newPath := path.Dir(p)
+		newPath := filepath.Dir(p)
 		if newPath == p || newPath == "/" || newPath == "." {
 			break
 		}

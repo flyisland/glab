@@ -65,7 +65,7 @@ func TestTranslateRemotes(t *testing.T) {
 	identityURL := func(u *url.URL) *url.URL {
 		return u
 	}
-	result := TranslateRemotes(gitRemotes, identityURL, glinstance.DefaultHostname)
+	result := TranslateRemotes(gitRemotes, identityURL, glinstance.DefaultHostname, config.NewBlankConfig())
 
 	if len(result) != 2 {
 		t.Errorf("got %d results", len(result))
@@ -294,13 +294,13 @@ func TestTranslateRemotes_SplitHostSubfolder(t *testing.T) {
 
 	t.Run("split-host with subfolder - correct config pattern", func(t *testing.T) {
 		// Setup: Config keyed under API hostname with ssh_host and subfolder
-		defer config.StubConfig(`---
+		cfg := config.NewFromString(`---
 hosts:
   api.example.com:
     token: TEST_TOKEN
     ssh_host: git.example.com
     subfolder: gitlab
-`, "")()
+`)
 
 		// Git remote URL includes the subfolder in the path
 		remoteURL, _ := url.Parse("https://api.example.com/gitlab/owner/repo.git")
@@ -316,7 +316,7 @@ hosts:
 			return u
 		}
 
-		result := TranslateRemotes(gitRemotes, identityURL, "gitlab.com")
+		result := TranslateRemotes(gitRemotes, identityURL, "gitlab.com", cfg)
 
 		// Verify results
 		assert.Len(t, result, 1, "should translate one remote")

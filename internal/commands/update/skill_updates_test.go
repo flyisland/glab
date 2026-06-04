@@ -21,7 +21,7 @@ func newSkillCheckConfig(t *testing.T, notifySetting string) config.Config {
 	if notifySetting != "" {
 		require.NoError(t, cfg.Set("", "notify_skill_updates", notifySetting))
 	}
-	return noWriteConfig{cfg}
+	return cfg
 }
 
 // stubDiscovered makes the check functions see a deterministic set of

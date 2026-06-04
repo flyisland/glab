@@ -14,6 +14,7 @@ import (
 type LocalConfig struct {
 	ConfigMap
 	Parent Config
+	dir    string
 }
 
 // for later use we might prefer relative paths
@@ -65,12 +66,12 @@ func GitDir(preferRelative bool) []string {
 
 // LocalConfigDir returns the local config path in map
 // which must be joined for complete path
-var LocalConfigDir = func() []string {
+func LocalConfigDir() []string {
 	return append(GitDir(true), "glab-cli")
 }
 
 // LocalConfigFile returns the config file name with full path
-var LocalConfigFile = func() string {
+func LocalConfigFile() string {
 	configFile := append(LocalConfigDir(), "config.yml")
 	return filepath.Join(configFile...)
 }
@@ -107,6 +108,11 @@ func (a *LocalConfig) Delete(key string) error {
 }
 
 func (a *LocalConfig) Write() error {
+	// An empty dir means the config is in-memory only; nothing to persist.
+	if a.dir == "" {
+		return nil
+	}
+
 	// Check if it's a Git repository
 	if !CheckPathExists(filepath.Join(GitDir(true)...)) {
 		return errors.New("not a Git repository")
@@ -116,7 +122,7 @@ func (a *LocalConfig) Write() error {
 	if err != nil {
 		return err
 	}
-	err = WriteConfigFile(LocalConfigFile(), yamlNormalize(localConfigBytes))
+	err = writeConfigFile(LocalConfigFile(), yamlNormalize(localConfigBytes))
 	if err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}

@@ -171,7 +171,7 @@ func MRFromArgsWithOpts(
 
 	if len(args) > 0 {
 		// First, try to parse as a GitLab MR URL
-		if urlMRID, urlRepo := cmdutils.ParseMergeRequestFromURL(args[0], f.DefaultHostname()); urlMRID != 0 {
+		if urlMRID, urlRepo := cmdutils.ParseMergeRequestFromURL(args[0], f.DefaultHostname(), f.Config()); urlMRID != 0 {
 			mrID = urlMRID
 			// Update client to use the hostname from the URL if it's different
 			if urlRepo.RepoHost() != baseRepo.RepoHost() {

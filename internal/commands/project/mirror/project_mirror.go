@@ -12,6 +12,7 @@ import (
 
 	"gitlab.com/gitlab-org/cli/internal/api"
 	"gitlab.com/gitlab-org/cli/internal/cmdutils"
+	"gitlab.com/gitlab-org/cli/internal/config"
 	"gitlab.com/gitlab-org/cli/internal/glrepo"
 	"gitlab.com/gitlab-org/cli/internal/iostreams"
 	"gitlab.com/gitlab-org/cli/internal/mcpannotations"
@@ -32,6 +33,7 @@ type options struct {
 	client          *gitlab.Client
 	baseRepoFactory func() (glrepo.Interface, error)
 	defaultHostname string
+	config          config.Config
 }
 
 func NewCmdMirror(f cmdutils.Factory) *cobra.Command {
@@ -41,6 +43,7 @@ func NewCmdMirror(f cmdutils.Factory) *cobra.Command {
 		gitlabClient:    f.GitLabClient,
 		baseRepoFactory: f.BaseRepo,
 		defaultHostname: f.DefaultHostname(),
+		config:          f.Config(),
 	}
 
 	projectMirrorCmd := &cobra.Command{
@@ -107,7 +110,7 @@ func NewCmdMirror(f cmdutils.Factory) *cobra.Command {
 
 func (o *options) complete(args []string) error {
 	if len(args) > 0 {
-		baseRepo, err := glrepo.FromFullName(args[0], o.defaultHostname)
+		baseRepo, err := glrepo.FromFullName(args[0], o.defaultHostname, o.config)
 		if err != nil {
 			return err
 		}

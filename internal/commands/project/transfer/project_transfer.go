@@ -37,7 +37,7 @@ func NewCmdTransfer(f cmdutils.Factory) *cobra.Command {
 			var repo glrepo.Interface
 			if len(args) != 0 {
 				// repository is coming from command args, not -R
-				repo, err = glrepo.FromFullName(args[0], f.DefaultHostname())
+				repo, err = glrepo.FromFullName(args[0], f.DefaultHostname(), f.Config())
 				if err != nil {
 					return err
 				}

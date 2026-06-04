@@ -151,7 +151,7 @@ func (f *Factory) GitLabClient() (*gitlab.Client, error) {
 
 func (f *Factory) BaseRepo() (glrepo.Interface, error) {
 	if f.repoOverride != "" {
-		return glrepo.FromFullName(f.repoOverride, glinstance.DefaultHostname)
+		return glrepo.FromFullName(f.repoOverride, glinstance.DefaultHostname, f.Config())
 	}
 	return f.BaseRepoStub()
 }

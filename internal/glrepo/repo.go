@@ -98,7 +98,7 @@ func NewWithHost(owner, repo, hostname string) Interface {
 
 // FromFullName extracts the GitLab repository information from the following
 // formats: "OWNER/REPO", "HOST/OWNER/REPO", "HOST/GROUP/NAMESPACE/REPO", and a full URL.
-func FromFullName(nwo string, defaultHostname string) (Interface, error) {
+func FromFullName(nwo string, defaultHostname string, cfg config.Config) (Interface, error) {
 	nwo = strings.TrimSpace(nwo)
 	// check if it's a valid git URL and parse it
 	if git.IsValidURL(nwo) {
@@ -106,12 +106,12 @@ func FromFullName(nwo string, defaultHostname string) (Interface, error) {
 		if err != nil {
 			return nil, err
 		}
-		return FromURL(u, defaultHostname)
+		return FromURL(u, defaultHostname, cfg)
 	}
 	// check if it is valid URL and parse it
 	if utils.IsValidURL(nwo) {
 		u, _ := url.Parse(nwo)
-		return FromURL(u, defaultHostname)
+		return FromURL(u, defaultHostname, cfg)
 	}
 
 	repo := nwo[strings.LastIndex(nwo, "/")+1:]
@@ -136,17 +136,14 @@ func FromFullName(nwo string, defaultHostname string) (Interface, error) {
 		// However, it could be that the user is specifying a hostname but we can't be sure of that
 		// So we check in the list of authenticated hosts and see if it matches any
 		// if not, we assume it is a group name that contains a dot
-		if strings.ContainsRune(parts[0], '.') {
+		if strings.ContainsRune(parts[0], '.') && cfg != nil {
 			var rI Interface
-			cfg, err := config.Init()
-			if err == nil {
-				hosts, _ := cfg.Hosts()
-				if slices.Contains(hosts, parts[0]) {
-					rI = NewWithHost(parts[1], repo, normalizeHostname(parts[0]))
-				}
-				if rI != nil {
-					return rI, nil
-				}
+			hosts, _ := cfg.Hosts()
+			if slices.Contains(hosts, parts[0]) {
+				rI = NewWithHost(parts[1], repo, normalizeHostname(parts[0]))
+			}
+			if rI != nil {
+				return rI, nil
 			}
 		}
 		// if the first part is not a valid URL, and does not match an
@@ -161,16 +158,14 @@ func FromFullName(nwo string, defaultHostname string) (Interface, error) {
 }
 
 // FromURL extracts the GitLab repository information from a git remote URL
-func FromURL(u *url.URL, defaultHostname string) (Interface, error) {
+func FromURL(u *url.URL, defaultHostname string, cfg config.Config) (Interface, error) {
 	if u.Hostname() == "" {
 		return nil, fmt.Errorf("no hostname detected")
 	}
 
-	cfg, err := config.ParseDefaultConfig()
-
-	// Retrieve subfolder from config - now we always know it!
+	// Retrieve subfolder from the injected config when available.
 	var subfolder string
-	if err == nil {
+	if cfg != nil {
 		subfolder, _ = cfg.Get(u.Hostname(), "subfolder")
 
 		// Backward compatibility: extract subfolder from api_host if subfolder field is empty
