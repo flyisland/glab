@@ -81,7 +81,7 @@ func (o *options) complete(args []string) error {
 		o.remoteName = defaultRemoteName(o.projectID)
 	}
 
-	repo, err := glrepo.FromFullName(o.projectID, o.defaultHostname)
+	repo, err := glrepo.FromFullName(o.projectID, o.defaultHostname, o.config())
 	if err != nil {
 		return fmt.Errorf("invalid project reference: %w", err)
 	}

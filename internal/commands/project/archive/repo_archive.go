@@ -53,7 +53,7 @@ func NewCmdArchive(f cmdutils.Factory) *cobra.Command {
 			var client *gitlab.Client
 			var repo glrepo.Interface
 			if len(args) != 0 {
-				repo, err = glrepo.FromFullName(args[0], f.DefaultHostname())
+				repo, err = glrepo.FromFullName(args[0], f.DefaultHostname(), f.Config())
 				if err != nil {
 					return err
 				}

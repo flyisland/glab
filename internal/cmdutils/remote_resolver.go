@@ -38,6 +38,8 @@ func (rr *remoteResolver) Resolver(hostOverride string) func() (glrepo.Remotes, 
 			return nil, remotesError
 		}
 
+		cfg := rr.getConfig()
+
 		sshTranslate := git.ParseSSHConfig().Translator()
 		resolvedRemotes := glrepo.TranslateRemotes(
 			gitRemotes,
@@ -50,9 +52,8 @@ func (rr *remoteResolver) Resolver(hostOverride string) func() (glrepo.Remotes, 
 				}
 			},
 			rr.defaultHostname,
+			cfg,
 		)
-
-		cfg := rr.getConfig()
 
 		knownHosts := map[string]bool{}
 		sshHostMapping := map[string]string{} // Maps SSH hostnames to config keys

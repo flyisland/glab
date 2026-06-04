@@ -92,7 +92,7 @@ func (f *DefaultFactory) RepoOverride(repo string) error {
 
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	baseRepo, err := glrepo.FromFullName(repo, f.defaultHostname)
+	baseRepo, err := glrepo.FromFullName(repo, f.defaultHostname, f.config)
 	if err != nil {
 		return err // return the error if repo was overridden.
 	}
@@ -175,7 +175,7 @@ func (f *DefaultFactory) resolveBaseRepoFromRemotes(ctx context.Context) (glrepo
 		return nil, err
 	}
 
-	repoContext, err := glrepo.ResolveRemotesToRepos(remotes, ac.Lab(), f.defaultHostname)
+	repoContext, err := glrepo.ResolveRemotesToRepos(remotes, ac.Lab(), f.defaultHostname, f.config)
 	if err != nil {
 		return nil, err
 	}

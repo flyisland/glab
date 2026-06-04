@@ -71,7 +71,7 @@ func Test_RemoteURL(t *testing.T) {
 }
 
 func Test_repoFromURL(t *testing.T) {
-	defer config.StubConfig(`---
+	cfg := config.NewFromString(`---
 hosts:
   my.host.com:
     token: OTOKEN
@@ -82,7 +82,7 @@ hosts:
   git.host.com:
     token: OTOKEN
     api_host: git-api.host.com
-`, "")()
+`)
 
 	tests := []struct {
 		name   string
@@ -205,7 +205,7 @@ hosts:
 				t.Fatalf("got error %q", err)
 			}
 
-			repo, err := FromURL(u, glinstance.DefaultHostname)
+			repo, err := FromURL(u, glinstance.DefaultHostname, cfg)
 			if err != nil {
 				if tt.err == nil {
 					t.Fatalf("got error %q", err)
@@ -227,7 +227,7 @@ hosts:
 }
 
 func TestFromFullName(t *testing.T) {
-	defer config.StubConfig(`---
+	cfg := config.NewFromString(`---
 hosts:
   gitlab.com:
     token: xxxxxxxxxxxxxxxxxxxx
@@ -235,7 +235,7 @@ hosts:
     api_protocol: https
   example.org:
     token: xxxxxxxxxxxxxxxxxxxxx
-`, "")()
+`)
 	tests := []struct {
 		name          string
 		input         string
@@ -357,7 +357,7 @@ hosts:
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, err := FromFullName(tt.input, glinstance.DefaultHostname)
+			r, err := FromFullName(tt.input, glinstance.DefaultHostname, cfg)
 			if tt.wantErr != nil {
 				if err == nil {
 					t.Fatalf("no error in result, expected %v", tt.wantErr)

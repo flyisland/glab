@@ -2,15 +2,10 @@ package config
 
 import (
 	"fmt"
-	"path"
 	"path/filepath"
 
 	"go.yaml.in/yaml/v3"
 )
-
-func aliasesConfigFile() string {
-	return path.Join(ConfigDir(), "aliases.yml")
-}
 
 type AliasConfig struct {
 	ConfigMap

@@ -155,7 +155,7 @@ func runCreateProject(cmd *cobra.Command, args []string, f cmdutils.Factory) err
 	var gitlabClient *gitlab.Client
 	if len(args) == 1 {
 		var host string
-		host, namespace, projectPath = projectPathFromArgs(args, f.DefaultHostname())
+		host, namespace, projectPath = projectPathFromArgs(args, f.DefaultHostname(), f.Config())
 		client, err := f.ApiClient(host)
 		if err != nil {
 			return err
@@ -374,13 +374,13 @@ func initializeRepo(projectPath, remoteURL string) error {
 	return nil
 }
 
-func projectPathFromArgs(args []string, defaultHostname string) (string, string, string) {
+func projectPathFromArgs(args []string, defaultHostname string, cfg config.Config) (string, string, string) {
 	// sanitize input by removing trailing "/"
 	project := strings.TrimSuffix(args[0], "/")
 
 	var host, namespace string
 	if strings.Contains(project, "/") {
-		pp, _ := glrepo.FromFullName(project, defaultHostname)
+		pp, _ := glrepo.FromFullName(project, defaultHostname, cfg)
 		host = pp.RepoHost()
 		project = pp.RepoName()
 		namespace = pp.RepoNamespace()

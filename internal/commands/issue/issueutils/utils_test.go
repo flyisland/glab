@@ -11,6 +11,7 @@ import (
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
+	"gitlab.com/gitlab-org/cli/internal/config"
 	"gitlab.com/gitlab-org/cli/internal/glinstance"
 	"gitlab.com/gitlab-org/cli/internal/glrepo"
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
@@ -130,11 +131,11 @@ func Test_issueMetadataFromURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			id, repo := issueMetadataFromURL(tt.str, glinstance.DefaultHostname)
+			id, repo := issueMetadataFromURL(tt.str, glinstance.DefaultHostname, config.NewBlankConfig())
 			require.Equal(t, tt.want, id)
 
 			if tt.want != 0 && tt.path != "" {
-				expectedRepo, err := glrepo.FromFullName(tt.path, glinstance.DefaultHostname)
+				expectedRepo, err := glrepo.FromFullName(tt.path, glinstance.DefaultHostname, config.NewBlankConfig())
 				require.NoError(t, err)
 				require.Equal(t, expectedRepo, repo)
 			}

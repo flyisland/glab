@@ -151,7 +151,7 @@ func Test_ResolveRemotesToRepos(t *testing.T) {
 
 	// Test the normal and most expected usage
 	t.Run("simple", func(t *testing.T) {
-		r, err := ResolveRemotesToRepos(rem.remotes, rem.apiClient, glinstance.DefaultHostname)
+		r, err := ResolveRemotesToRepos(rem.remotes, rem.apiClient, glinstance.DefaultHostname, config.NewBlankConfig())
 		require.NoError(t, err)
 
 		assert.Equal(t, rem.apiClient, r.apiClient)
@@ -693,13 +693,13 @@ func Test_BaseRepo(t *testing.T) {
 		// Git remote uses git.example.com, but API returns api.example.com/gitlab/owner/repo.git
 
 		// Mock config with subfolder - using CORRECT config pattern (API hostname as key)
-		defer config.StubConfig(`---
+		cfg := config.NewFromString(`---
 hosts:
   api.example.com:
     token: TEST_TOKEN
     ssh_host: git.example.com
     subfolder: gitlab
-`, "")()
+`)
 
 		localRem := &ResolvedRemotes{
 			remotes: Remotes{
@@ -712,6 +712,7 @@ hosts:
 			},
 			apiClient:       &gitlab.Client{},
 			defaultHostname: "gitlab.com",
+			cfg:             cfg,
 			network: []gitlab.Project{
 				{
 					ID:                1,

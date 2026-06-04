@@ -190,7 +190,9 @@ func ParseDefaultConfig() (Config, error) {
 		configPath = ConfigFile()
 	}
 
-	cfg, cfgErr := ParseConfig(configPath)
+	// Merge the git-based local config; this is the production path where a
+	// per-repository .git/glab-cli/config.yml may override global settings.
+	cfg, cfgErr := parseConfig(configPath, LocalConfigFile())
 
 	// SearchConfigFile may locate the config in a read-only system-wide XDG
 	// directory, but glab always persists to the user's writable config dir.
@@ -271,10 +273,22 @@ func parseConfigData(data []byte) (*yaml.Node, error) {
 	return &root, nil
 }
 
+// ParseConfig reads the main config from filename and the aliases file from the
+// same directory. It does not read a separate local config file; callers that
+// need local (per-repository) overrides merged in pass the path explicitly via
+// parseConfig.
 func ParseConfig(filename string) (Config, error) {
-	// The config persists back to the directory it was parsed from, so that a
-	// config read from a temp dir (tests) or a custom GLAB_CONFIG_DIR writes
-	// back to the same place instead of recomputing a global path on Write().
+	return parseConfig(filename, "")
+}
+
+// parseConfig reads the main config from filename and the aliases file from the
+// same directory. When localPath is non-empty, the local config file at that
+// path is merged in under a "local" key (production passes the git-based path;
+// tests pass a temp file). The returned config persists back to the directory
+// it was parsed from, so a config read from a temp dir (tests) or a custom
+// GLAB_CONFIG_DIR writes back to the same place instead of recomputing a global
+// path on Write().
+func parseConfig(filename, localPath string) (Config, error) {
 	dir := filepath.Dir(filename)
 
 	_, root, err := ParseConfigFile(filename)
@@ -288,20 +302,22 @@ func ParseConfig(filename string) (Config, error) {
 		}
 	}
 
-	// Load local config file
-	if _, localRoot, err := ParseConfigFile(LocalConfigFile()); err == nil {
-		if len(localRoot.Content[0].Content) > 0 {
-			newContent := []*yaml.Node{
-				{Value: "local"},
-				localRoot.Content[0],
+	// Merge the local (per-repository) config file when a path is given.
+	if localPath != "" {
+		if _, localRoot, err := ParseConfigFile(localPath); err == nil {
+			if len(localRoot.Content[0].Content) > 0 {
+				newContent := []*yaml.Node{
+					{Value: "local"},
+					localRoot.Content[0],
+				}
+				restContent := root.Content[0].Content
+				root.Content[0].Content = append(newContent, restContent...)
 			}
-			restContent := root.Content[0].Content
-			root.Content[0].Content = append(newContent, restContent...)
 		}
 	}
 
-	// Load aliases config file
-	if _, aliasesRoot, err := ParseConfigFile(aliasesConfigFile()); err == nil {
+	// Load the aliases file from the same directory as the main config.
+	if _, aliasesRoot, err := ParseConfigFile(filepath.Join(dir, "aliases.yml")); err == nil {
 		if len(aliasesRoot.Content[0].Content) > 0 {
 			newContent := []*yaml.Node{
 				{Value: "aliases"},

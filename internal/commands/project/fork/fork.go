@@ -113,12 +113,12 @@ func (o *options) run(ctx context.Context) error {
 			if err != nil {
 				return fmt.Errorf("invalid argument: %w", err)
 			}
-			o.repoToFork, err = glrepo.FromURL(u, o.defaultHostname)
+			o.repoToFork, err = glrepo.FromURL(u, o.defaultHostname, o.config())
 			if err != nil {
 				return fmt.Errorf("invalid argument: %w", err)
 			}
 		} else {
-			o.repoToFork, err = glrepo.FromFullName(o.repo, o.defaultHostname)
+			o.repoToFork, err = glrepo.FromFullName(o.repo, o.defaultHostname, o.config())
 			if err != nil {
 				return fmt.Errorf("argument error: %w", err)
 			}

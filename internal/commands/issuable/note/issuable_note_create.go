@@ -40,7 +40,7 @@ func NewCmdNote(f cmdutils.Factory, issueType issuable.IssueType) *cobra.Command
 				return err
 			}
 
-			issue, repo, err := issueutils.IssueFromArg(f.ApiClient, client, f.BaseRepo, f.DefaultHostname(), args[0])
+			issue, repo, err := issueutils.IssueFromArg(f.ApiClient, client, f.BaseRepo, f.DefaultHostname(), f.Config(), args[0])
 			if err != nil {
 				return err
 			}
