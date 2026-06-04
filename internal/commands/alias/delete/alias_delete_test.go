@@ -53,8 +53,6 @@ func TestAliasDelete(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			defer config.StubWriteConfig(io.Discard, io.Discard)()
-
 			cfg := config.NewFromString(tt.config)
 
 			ios, _, stdout, stderr := cmdtest.TestIOStreams(cmdtest.WithTestIOStreamsAsTTY(true))

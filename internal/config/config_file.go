@@ -189,7 +189,18 @@ func ParseDefaultConfig() (Config, error) {
 		// No config found, use default writable location
 		configPath = ConfigFile()
 	}
-	return ParseConfig(configPath)
+
+	cfg, cfgErr := ParseConfig(configPath)
+
+	// SearchConfigFile may locate the config in a read-only system-wide XDG
+	// directory, but glab always persists to the user's writable config dir.
+	// Pin the persistence target to ConfigDir() so Write() keeps writing there
+	// even when the config was read from elsewhere.
+	if fc, ok := cfg.(*fileConfig); ok {
+		fc.dir = ConfigDir()
+	}
+
+	return cfg, cfgErr
 }
 
 var ReadConfigFile = func(filename string) ([]byte, error) {
@@ -201,7 +212,7 @@ var ReadConfigFile = func(filename string) ([]byte, error) {
 	return data, nil
 }
 
-var WriteConfigFile = func(filename string, data []byte) error {
+func writeConfigFile(filename string, data []byte) error {
 	err := os.MkdirAll(path.Dir(filename), 0o750)
 	if err != nil {
 		return pathError(err)
@@ -261,6 +272,11 @@ func parseConfigData(data []byte) (*yaml.Node, error) {
 }
 
 func ParseConfig(filename string) (Config, error) {
+	// The config persists back to the directory it was parsed from, so that a
+	// config read from a temp dir (tests) or a custom GLAB_CONFIG_DIR writes
+	// back to the same place instead of recomputing a global path on Write().
+	dir := filepath.Dir(filename)
+
 	_, root, err := ParseConfigFile(filename)
 	var confError error
 	if err != nil {
@@ -298,7 +314,7 @@ func ParseConfig(filename string) (Config, error) {
 		return nil, err
 	}
 
-	return NewConfig(root), confError
+	return newConfig(root, dir), confError
 }
 
 func pathError(err error) error {

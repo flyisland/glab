@@ -20,19 +20,13 @@ import (
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
 
-// noWriteConfig wraps a config.Config and turns Write() into a no-op so
-// tests don't need StubWriteConfig to keep cfg.Write() from hitting disk.
-type noWriteConfig struct{ config.Config }
-
-func (noWriteConfig) Write() error { return nil }
-
 func newTestConfig(t *testing.T, kvs map[string]string) config.Config {
 	t.Helper()
 	cfg := config.NewBlankConfig()
 	for k, v := range kvs {
 		require.NoError(t, cfg.Set("", k, v))
 	}
-	return noWriteConfig{cfg}
+	return cfg
 }
 
 // Tests that exercise the API client install per-test mocks via this

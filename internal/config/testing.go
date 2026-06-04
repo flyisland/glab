@@ -2,29 +2,9 @@ package config
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path"
 )
-
-func StubWriteConfig(wc io.Writer, wh io.Writer) func() {
-	orig := WriteConfigFile
-	WriteConfigFile = func(fn string, data []byte) error {
-		switch path.Base(fn) {
-		case "config.yml":
-			_, err := wc.Write(data)
-			return err
-		case "aliases.yml":
-			_, err := wh.Write(data)
-			return err
-		default:
-			return fmt.Errorf("write to unstubbed file: %q", fn)
-		}
-	}
-	return func() {
-		WriteConfigFile = orig
-	}
-}
 
 func StubConfig(main, aliases string) func() {
 	orig := ReadConfigFile

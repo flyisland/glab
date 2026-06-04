@@ -3,9 +3,9 @@
 package logout
 
 import (
-	"bytes"
 	"fmt"
-	"io"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -39,12 +39,11 @@ func Test_NewCmdLogout(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mainBuf := bytes.Buffer{}
-			defer config.StubWriteConfig(&mainBuf, io.Discard)()
+			dir := t.TempDir()
 
 			token := "xxxxxxxx"
 
-			cfg := config.NewFromString(heredoc.Docf(
+			cfg := config.NewFromStringInDir(heredoc.Docf(
 				`
 					hosts:
 					  gitlab.something.com:
@@ -57,7 +56,7 @@ func Test_NewCmdLogout(t *testing.T) {
 					    oauth2_expiry_date: %[1]s
 				`,
 				token,
-			))
+			), dir)
 
 			// removing the environment variable so CI does not interfere
 			t.Setenv("GITLAB_TOKEN", "")
@@ -72,7 +71,9 @@ func Test_NewCmdLogout(t *testing.T) {
 				logoutMessage := fmt.Sprintf("Successfully logged out of %s\n", tt.hostname)
 				assert.Equal(t, logoutMessage, output.String())
 
-				cfg := config.NewFromString(mainBuf.String())
+				data, err := os.ReadFile(filepath.Join(dir, "config.yml"))
+				require.NoError(t, err)
+				cfg := config.NewFromString(string(data))
 				gitlabToken, _ := cfg.Get("gitlab.something.com", "token")
 				assert.Equal(t, token, gitlabToken)
 

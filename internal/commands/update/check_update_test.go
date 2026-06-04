@@ -3,12 +3,12 @@
 package update
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -134,8 +134,6 @@ func TestNewCheckUpdateCmd(t *testing.T) {
 			stubInstallMethod(t, tc.installMethod)
 			stubNoInstalledSkills(t)
 
-			defer config.StubWriteConfig(io.Discard, io.Discard)()
-
 			exec := cmdtest.SetupCmdForTest(t, NewCheckUpdateCmd, true,
 				cmdtest.WithBuildInfo(api.BuildInfo{Version: tc.version, CodingAgent: tc.codingAgent}),
 			)
@@ -161,8 +159,6 @@ func TestNewCheckUpdateCmd_error(t *testing.T) {
 
 	mockClientCreator(t, testClient)
 
-	defer config.StubWriteConfig(io.Discard, io.Discard)()
-
 	exec := cmdtest.SetupCmdForTest(t, NewCheckUpdateCmd, true,
 		cmdtest.WithBuildInfo(api.BuildInfo{Version: "1.11.0"}),
 	)
@@ -183,8 +179,6 @@ func TestNewCheckUpdateCmd_no_release(t *testing.T) {
 		Return([]*gitlab.Release{}, nil, nil)
 
 	mockClientCreator(t, testClient)
-
-	defer config.StubWriteConfig(io.Discard, io.Discard)()
 
 	exec := cmdtest.SetupCmdForTest(t, NewCheckUpdateCmd, true,
 		cmdtest.WithBuildInfo(api.BuildInfo{Version: "1.11.0"}),
@@ -398,16 +392,14 @@ func Test_checkLastUpdate(t *testing.T) {
 				t.Setenv(tt.envVarKey, tt.envVarVal)
 			}
 
-			mainBuf := bytes.Buffer{}
-			defer config.StubWriteConfig(&mainBuf, io.Discard)()
-
+			dir := t.TempDir()
 			f := cmdtest.NewTestFactory(nil,
 				func(f *cmdtest.Factory) {
 					f.ConfigStub = func() config.Config {
 						if tt.lastUpdate != "" {
-							return config.NewFromString(fmt.Sprintf("last_update_check_timestamp: %s", tt.lastUpdate))
+							return config.NewFromStringInDir(fmt.Sprintf("last_update_check_timestamp: %s", tt.lastUpdate), dir)
 						}
-						return config.NewBlankConfig()
+						return config.NewBlankConfigInDir(dir)
 					}
 				},
 			)
@@ -423,7 +415,9 @@ func Test_checkLastUpdate(t *testing.T) {
 
 			// For first time check, verify timestamp was set
 			if tt.name == "first time check" {
-				cfg := config.NewFromString(mainBuf.String())
+				data, err := os.ReadFile(filepath.Join(dir, "config.yml"))
+				require.NoError(t, err)
+				cfg := config.NewFromString(string(data))
 				timestamp, err := cfg.Get("", "last_update_check_timestamp")
 
 				require.NoError(t, err)

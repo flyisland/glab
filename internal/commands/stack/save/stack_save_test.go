@@ -4,7 +4,6 @@ package save
 
 import (
 	"bytes"
-	"io"
 	"net/http"
 	"os"
 	"path"
@@ -497,8 +496,6 @@ func Test_createShaBranch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			git.InitGitRepo(t)
-
-			defer config.StubWriteConfig(io.Discard, io.Discard)()
 
 			factory := createFactoryWithConfig("branch_prefix", tt.prefix)
 

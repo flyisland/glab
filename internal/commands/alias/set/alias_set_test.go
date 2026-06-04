@@ -3,8 +3,8 @@
 package set
 
 import (
-	"bytes"
-	"io"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/MakeNowJust/heredoc/v2"
@@ -16,6 +16,15 @@ import (
 	"gitlab.com/gitlab-org/cli/internal/config"
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
+
+// persistedAliases returns the aliases.yml contents written by a dir-backed
+// config, for tests that assert what the command persisted.
+func persistedAliases(t *testing.T, dir string) string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(dir, "aliases.yml"))
+	require.NoError(t, err)
+	return string(data)
+}
 
 // newCmdSetWithFakeHierarchy creates NewCmdSet wrapped in a fake command hierarchy
 // needed for validCommand testing.
@@ -37,8 +46,6 @@ func newCmdSetWithFakeHierarchy(f cmdutils.Factory) *cobra.Command {
 }
 
 func TestAliasSet_glab_command(t *testing.T) {
-	defer config.StubWriteConfig(io.Discard, io.Discard)()
-
 	cfg := config.NewFromString(``)
 
 	exec := cmdtest.SetupCmdForTest(t, newCmdSetWithFakeHierarchy, true, cmdtest.WithConfig(cfg))
@@ -50,13 +57,11 @@ func TestAliasSet_glab_command(t *testing.T) {
 }
 
 func TestAliasSet_empty_aliases(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	defer config.StubWriteConfig(io.Discard, &mainBuf)()
-
-	cfg := config.NewFromString(heredoc.Doc(`
+	dir := t.TempDir()
+	cfg := config.NewFromStringInDir(heredoc.Doc(`
 		aliases:
 		editor: vim
-	`))
+	`), dir)
 
 	exec := cmdtest.SetupCmdForTest(t, newCmdSetWithFakeHierarchy, true, cmdtest.WithConfig(cfg))
 	output, err := exec("set co 'mr checkout'")
@@ -69,13 +74,10 @@ func TestAliasSet_empty_aliases(t *testing.T) {
 
 	expected := `co: mr checkout
 `
-	assert.Equal(t, expected, mainBuf.String())
+	assert.Equal(t, expected, persistedAliases(t, dir))
 }
 
 func TestAliasSet_existing_alias(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	defer config.StubWriteConfig(io.Discard, &mainBuf)()
-
 	cfg := config.NewFromString(heredoc.Doc(`
 		aliases:
 		  co: mr checkout
@@ -89,10 +91,8 @@ func TestAliasSet_existing_alias(t *testing.T) {
 }
 
 func TestAliasSet_space_args(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	defer config.StubWriteConfig(io.Discard, &mainBuf)()
-
-	cfg := config.NewFromString(``)
+	dir := t.TempDir()
+	cfg := config.NewFromStringInDir(``, dir)
 
 	exec := cmdtest.SetupCmdForTest(t, newCmdSetWithFakeHierarchy, true, cmdtest.WithConfig(cfg))
 	output, err := exec(`set il 'issue list -l "cool story"'`)
@@ -100,7 +100,7 @@ func TestAliasSet_space_args(t *testing.T) {
 
 	assert.Regexp(t, `Adding alias for.*il.*issue list -l "cool story".`, output.Stderr())
 
-	assert.Regexp(t, `il: issue list -l "cool story"`, mainBuf.String())
+	assert.Regexp(t, `il: issue list -l "cool story"`, persistedAliases(t, dir))
 }
 
 func TestAliasSet_arg_processing(t *testing.T) {
@@ -128,10 +128,8 @@ func TestAliasSet_arg_processing(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.Cmd, func(t *testing.T) {
-			mainBuf := bytes.Buffer{}
-			defer config.StubWriteConfig(io.Discard, &mainBuf)()
-
-			cfg := config.NewFromString(``)
+			dir := t.TempDir()
+			cfg := config.NewFromStringInDir(``, dir)
 
 			exec := cmdtest.SetupCmdForTest(t, newCmdSetWithFakeHierarchy, true, cmdtest.WithConfig(cfg))
 			output, err := exec("set " + c.Cmd)
@@ -140,18 +138,16 @@ func TestAliasSet_arg_processing(t *testing.T) {
 			}
 
 			assert.Regexp(t, c.ExpectedOutputLine, output.Stderr())
-			assert.Regexp(t, c.ExpectedConfigLine, mainBuf.String())
+			assert.Regexp(t, c.ExpectedConfigLine, persistedAliases(t, dir))
 		})
 	}
 }
 
 func TestAliasSet_init_alias_cfg(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	defer config.StubWriteConfig(io.Discard, &mainBuf)()
-
-	cfg := config.NewFromString(heredoc.Doc(`
+	dir := t.TempDir()
+	cfg := config.NewFromStringInDir(heredoc.Doc(`
 		editor: vim
-	`))
+	`), dir)
 
 	exec := cmdtest.SetupCmdForTest(t, newCmdSetWithFakeHierarchy, true, cmdtest.WithConfig(cfg))
 	output, err := exec("set diff 'mr diff'")
@@ -162,17 +158,15 @@ func TestAliasSet_init_alias_cfg(t *testing.T) {
 
 	assert.Regexp(t, "Adding alias for.*diff.*mr diff", output.Stderr())
 	assert.Contains(t, output.Stderr(), "Added alias.")
-	assert.Equal(t, expected, mainBuf.String())
+	assert.Equal(t, expected, persistedAliases(t, dir))
 }
 
 func TestAliasSet_existing_aliases(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	defer config.StubWriteConfig(io.Discard, &mainBuf)()
-
-	cfg := config.NewFromString(heredoc.Doc(`
+	dir := t.TempDir()
+	cfg := config.NewFromStringInDir(heredoc.Doc(`
 		aliases:
 		  foo: bar
-	`))
+	`), dir)
 
 	exec := cmdtest.SetupCmdForTest(t, newCmdSetWithFakeHierarchy, true, cmdtest.WithConfig(cfg))
 	output, err := exec("set view 'mr view'")
@@ -184,12 +178,10 @@ view: mr view
 
 	assert.Regexp(t, "Adding alias for.*view.*mr view", output.Stderr())
 	assert.Contains(t, output.Stderr(), "Added alias.")
-	assert.Equal(t, expected, mainBuf.String())
+	assert.Equal(t, expected, persistedAliases(t, dir))
 }
 
 func TestAliasSet_invalid_command(t *testing.T) {
-	defer config.StubWriteConfig(io.Discard, io.Discard)()
-
 	cfg := config.NewFromString(``)
 
 	exec := cmdtest.SetupCmdForTest(t, newCmdSetWithFakeHierarchy, true, cmdtest.WithConfig(cfg))
@@ -200,10 +192,8 @@ func TestAliasSet_invalid_command(t *testing.T) {
 }
 
 func TestShellAlias_flag(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	defer config.StubWriteConfig(io.Discard, &mainBuf)()
-
-	cfg := config.NewFromString(``)
+	dir := t.TempDir()
+	cfg := config.NewFromStringInDir(``, dir)
 
 	exec := cmdtest.SetupCmdForTest(t, newCmdSetWithFakeHierarchy, true, cmdtest.WithConfig(cfg))
 	output, err := exec("set --shell igrep 'glab issue list | grep'")
@@ -215,14 +205,12 @@ func TestShellAlias_flag(t *testing.T) {
 
 	expected := `igrep: '!glab issue list | grep'
 `
-	assert.Equal(t, expected, mainBuf.String())
+	assert.Equal(t, expected, persistedAliases(t, dir))
 }
 
 func TestShellAlias_bang(t *testing.T) {
-	mainBuf := bytes.Buffer{}
-	defer config.StubWriteConfig(io.Discard, &mainBuf)()
-
-	cfg := config.NewFromString(``)
+	dir := t.TempDir()
+	cfg := config.NewFromStringInDir(``, dir)
 
 	exec := cmdtest.SetupCmdForTest(t, newCmdSetWithFakeHierarchy, true, cmdtest.WithConfig(cfg))
 	output, err := exec("set igrep '!glab issue list | grep'")
@@ -232,5 +220,5 @@ func TestShellAlias_bang(t *testing.T) {
 
 	expected := `igrep: '!glab issue list | grep'
 `
-	assert.Equal(t, expected, mainBuf.String())
+	assert.Equal(t, expected, persistedAliases(t, dir))
 }
