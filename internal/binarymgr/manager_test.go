@@ -21,6 +21,11 @@ import (
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
 
+// noMorePages returns a response that signals gitlab.ScanAndCollect to stop.
+func noMorePages() *gitlab.Response {
+	return &gitlab.Response{NextPage: 0}
+}
+
 // testSpec is a minimal Spec used by manager-level tests. The duo and orbit
 // command packages have their own integration coverage of full specs.
 func testSpec() Spec {
@@ -191,8 +196,8 @@ func TestManager_CheckForUpdate(t *testing.T) {
 
 			testClient := gitlabtesting.NewTestClient(t, gitlab.WithBaseURL("https://gitlab.com"))
 			testClient.MockPackages.EXPECT().
-				ListProjectPackages(tc.spec.ProjectID, gomock.Any(), gomock.Any()).
-				Return([]*gitlab.Package{{ID: 1, Version: tc.latestVersion}}, nil, nil)
+				ListProjectPackages(tc.spec.ProjectID, gomock.Any(), gomock.Any(), gomock.Any()).
+				Return([]*gitlab.Package{{ID: 1, Version: tc.latestVersion}}, noMorePages(), nil)
 
 			ios, _, _, _ := cmdtest.TestIOStreams(cmdtest.WithTestIOStreamsAsTTY(false))
 			m := &Manager{io: ios, spec: tc.spec, client: testClient.Client}
@@ -206,14 +211,129 @@ func TestManager_CheckForUpdate(t *testing.T) {
 	}
 }
 
+func TestManager_fetchLatestPackage(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		packages    []*gitlab.Package
+		wantVersion string
+		wantErr     string
+	}{
+		{
+			name: "picks highest semver, not lexicographic (created_at order)",
+			// Order the API returns with OrderBy=created_at,Sort=desc: most
+			// recent first. 8.100.0 is the newest release and the highest
+			// semver — lexicographically it sorts below 8.99.0.
+			packages: []*gitlab.Package{
+				{ID: 1, Version: "8.100.0"},
+				{ID: 2, Version: "8.99.0"},
+				{ID: 3, Version: "8.98.0"},
+			},
+			wantVersion: "8.100.0",
+		},
+		{
+			name: "picks highest semver regardless of position",
+			// Simulates a hotfix released after a higher minor: 8.99.1 is
+			// most recent (position 0) but 8.100.0 is the higher semver.
+			packages: []*gitlab.Package{
+				{ID: 1, Version: "8.99.1"},
+				{ID: 2, Version: "8.100.0"},
+				{ID: 3, Version: "8.99.0"},
+			},
+			wantVersion: "8.100.0",
+		},
+		{
+			name: "skips unparseable versions",
+			packages: []*gitlab.Package{
+				{ID: 1, Version: "latest"},
+				{ID: 2, Version: "8.100.0"},
+				{ID: 3, Version: "not-a-version"},
+			},
+			wantVersion: "8.100.0",
+		},
+		{
+			name:     "errors when registry is empty",
+			packages: []*gitlab.Package{},
+			wantErr:  "no packages found",
+		},
+		{
+			name: "errors when no version parses",
+			packages: []*gitlab.Package{
+				{ID: 1, Version: "latest"},
+				{ID: 2, Version: "snapshot"},
+			},
+			wantErr: "no packages with parseable versions found",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			spec := testSpec()
+			testClient := gitlabtesting.NewTestClient(t, gitlab.WithBaseURL("https://gitlab.com"))
+			testClient.MockPackages.EXPECT().
+				ListProjectPackages(spec.ProjectID, gomock.Any(), gomock.Any(), gomock.Any()).
+				Return(tc.packages, noMorePages(), nil)
+
+			ios, _, _, _ := cmdtest.TestIOStreams(cmdtest.WithTestIOStreamsAsTTY(false))
+			m := &Manager{io: ios, spec: spec, client: testClient.Client}
+
+			pkg, err := m.fetchLatestPackage(t.Context())
+			if tc.wantErr != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tc.wantErr)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tc.wantVersion, pkg.Version)
+		})
+	}
+}
+
+func TestManager_fetchLatestPackage_paginates(t *testing.T) {
+	t.Parallel()
+
+	// Verify gitlab.ScanAndCollect walks pages: the highest semver lives on
+	// page 2, so a single-page scan would miss it and return the wrong value.
+	spec := testSpec()
+	testClient := gitlabtesting.NewTestClient(t, gitlab.WithBaseURL("https://gitlab.com"))
+
+	page1 := []*gitlab.Package{
+		{ID: 1, Version: "8.99.1"},
+		{ID: 2, Version: "8.99.0"},
+	}
+	page2 := []*gitlab.Package{
+		{ID: 3, Version: "8.100.0"},
+		{ID: 4, Version: "8.98.0"},
+	}
+
+	gomock.InOrder(
+		testClient.MockPackages.EXPECT().
+			ListProjectPackages(spec.ProjectID, gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(page1, &gitlab.Response{NextPage: 2}, nil),
+		testClient.MockPackages.EXPECT().
+			ListProjectPackages(spec.ProjectID, gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(page2, noMorePages(), nil),
+	)
+
+	ios, _, _, _ := cmdtest.TestIOStreams(cmdtest.WithTestIOStreamsAsTTY(false))
+	m := &Manager{io: ios, spec: spec, client: testClient.Client}
+
+	pkg, err := m.fetchLatestPackage(t.Context())
+	require.NoError(t, err)
+	assert.Equal(t, "8.100.0", pkg.Version)
+}
+
 func TestManager_fetchPackageAsset_majorVersionBlocked(t *testing.T) {
 	t.Parallel()
 
 	spec := testSpec()
 	testClient := gitlabtesting.NewTestClient(t, gitlab.WithBaseURL("https://gitlab.com"))
 	testClient.MockPackages.EXPECT().
-		ListProjectPackages(spec.ProjectID, gomock.Any(), gomock.Any()).
-		Return([]*gitlab.Package{{ID: 1, Version: "9.0.0"}}, nil, nil)
+		ListProjectPackages(spec.ProjectID, gomock.Any(), gomock.Any(), gomock.Any()).
+		Return([]*gitlab.Package{{ID: 1, Version: "9.0.0"}}, noMorePages(), nil)
 
 	ios, _, _, _ := cmdtest.TestIOStreams(cmdtest.WithTestIOStreamsAsTTY(false))
 	m := &Manager{io: ios, spec: spec, client: testClient.Client}
