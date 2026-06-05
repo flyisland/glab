@@ -284,22 +284,43 @@ func (m *Manager) downloadAndInstall(ctx context.Context, platform Platform) (*B
 	}, nil
 }
 
+// fetchLatestPackage returns the package with the highest semantic version
+// in the registry. The GitLab packages API sorts `order_by=version`
+// lexicographically (8.99.0 > 8.100.0), so we collect all packages and pick
+// the max via hashicorp/go-version client-side. Non-parseable versions are
+// skipped — the generic packages API permits any version string.
 func (m *Manager) fetchLatestPackage(ctx context.Context) (*gitlab.Package, error) {
 	opts := &gitlab.ListProjectPackagesOptions{
 		PackageType: new("generic"),
 		PackageName: &m.spec.PackageName,
-		OrderBy:     new("version"),
+		OrderBy:     new("created_at"),
 		Sort:        new("desc"),
-		ListOptions: gitlab.ListOptions{PerPage: 1},
 	}
-	packages, _, err := m.client.Packages.ListProjectPackages(m.spec.ProjectID, opts, gitlab.WithContext(ctx))
+	packages, err := gitlab.ScanAndCollect(func(p gitlab.PaginationOptionFunc) ([]*gitlab.Package, *gitlab.Response, error) {
+		return m.client.Packages.ListProjectPackages(m.spec.ProjectID, opts, p, gitlab.WithContext(ctx))
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch packages: %w", err)
 	}
 	if len(packages) == 0 {
 		return nil, errors.New("no packages found")
 	}
-	return packages[0], nil
+
+	var latestPkg *gitlab.Package
+	var latestVer *version.Version
+	for _, pkg := range packages {
+		v, err := version.NewVersion(pkg.Version)
+		if err != nil {
+			continue
+		}
+		if latestVer == nil || v.GreaterThan(latestVer) {
+			latestPkg, latestVer = pkg, v
+		}
+	}
+	if latestPkg == nil {
+		return nil, errors.New("no packages with parseable versions found")
+	}
+	return latestPkg, nil
 }
 
 func (m *Manager) fetchPackageAsset(ctx context.Context, platform Platform) (*packageAsset, error) {
