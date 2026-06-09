@@ -1,6 +1,10 @@
 variables:
   GO_VERSION: "1.26.3"
   GITLAB_ADVANCED_SAST_ENABLED: "true"
+  # glab image version for the weekly tag-release job. Defaults to latest
+  # (dogfooding); override on the release schedule to pin a known-good version
+  # if a :latest regression ever breaks the release, without a new commit.
+  TAG_RELEASE_IMAGE_VERSION: "latest"
 
 .code-patterns: &code-patterns
   - ".gitlab/**/*"
@@ -39,12 +43,18 @@ variables:
       echo "Using unsigned binaries"
     fi
 
-# run the pipeline only on MRs, tags, and default branch
+# run the pipeline only on MRs, tags, default branch, and the release schedule
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Skip jobs in the weekly release schedule, this intentionally does not match other scheduled pipelines
+.skip-on-release-schedule: &skip-on-release-schedule
+  if: $RELEASE_SCHEDULE == "true"
+  when: never
 
 default:
   image: ${GITLAB_DEPENDENCY_PROXY}golang:${GO_VERSION}
@@ -99,6 +109,7 @@ include:
 .test:
   stage: test
   rules:
+    - *skip-on-release-schedule
     - changes: *code-patterns
       when: always
 
@@ -267,6 +278,7 @@ check_go_version:
   script:
     - scripts/check-go-version.sh
   rules:
+    - *skip-on-release-schedule
     - changes:
         - go.mod
         - .tool-versions
@@ -379,6 +391,7 @@ build_test:
   extends: .release
   stage: build
   rules:
+    - *skip-on-release-schedule
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_TAG
@@ -409,6 +422,26 @@ build_test:
       optional: false
     - job: sign_windows_installer
       optional: true
+
+# Weekly release: create the next tag, which triggers the tag-driven release
+# pipeline below. See docs/release_process.md.
+tag-release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/cli:$TAG_RELEASE_IMAGE_VERSION
+  needs: []
+  variables:
+    GIT_DEPTH: 0
+    # Reuses the release token; must NOT be CI_JOB_TOKEN, whose tag creation
+    # does not trigger the release pipeline.
+    GITLAB_TOKEN: $GITLAB_TOKEN_RELEASE
+    GITLAB_HOST: $CI_SERVER_HOST
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $RELEASE_SCHEDULE == "true"
+  before_script:
+    # glab image is Alpine without bash; the script needs it for set -o pipefail.
+    - apk add --no-cache bash
+  script:
+    - scripts/release/create-release-tag.sh
 
 release:
   extends: .release
@@ -467,6 +500,7 @@ windows_installer:
     name: ${GITLAB_DEPENDENCY_PROXY}amake/innosetup:latest
     entrypoint: [""]
   rules:
+    - *skip-on-release-schedule
     - if: $CI_COMMIT_TAG
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -492,6 +526,7 @@ build_windows:
   extends: .go-cache
   stage: build
   rules:
+    - *skip-on-release-schedule
     - if: $CI_COMMIT_TAG
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -564,6 +599,7 @@ snapcraft_build_edge:
   extends: .snapcraft_base
   stage: build
   rules:
+    - *skip-on-release-schedule
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
     - if: $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
     - changes:
@@ -593,6 +629,7 @@ snapcraft_release_edge:
   needs:
     - snapcraft_build_edge
   rules:
+    - *skip-on-release-schedule
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script:
     - export SNAPCRAFT_STORE_CREDENTIALS=$(cat $SNAPCRAFT_CREDENTIALS_FILE)
