@@ -102,6 +102,9 @@ func NewCmdApi(f cmdutils.Factory, runF func(*options) error) *cobra.Command {
 		- If the value starts with %[1]s@%[1]s, the rest of the value is interpreted as a
 		  filename to read the value from. Pass %[1]s-%[1]s to read from standard input.
 
+		Neither %[1]s--field%[1]s nor %[1]s--raw-field%[1]s parses JSON arrays or objects;
+		those values are sent as strings. To pass a JSON body literally, use %[1]s--input%[1]s.
+
 		For GraphQL requests, all fields other than %[1]squery%[1]s and %[1]soperationName%[1]s are
 		interpreted as GraphQL variables.
 
@@ -140,6 +143,11 @@ func NewCmdApi(f cmdutils.Factory, runF func(*options) error) *cobra.Command {
 
 			# Upload a file to a project wiki
 			glab api --method POST projects/:fullpath/wikis/attachments --form "file=@./image.png" --form "branch=main"
+
+			# Debug the HTTP request and response, including headers and body.
+			# Use --input (here, piped from stdin) for JSON arrays or objects;
+			# --field only converts scalars (bool, int, null, placeholders, @file).
+			echo '{"allowed_to_push":[{"user_id":1}]}' | GLAB_DEBUG_HTTP=1 glab api -X PATCH "projects/:fullpath/protected_branches/main" --input -
 
 			# Fetch all pages of issues
 			glab api issues --paginate
@@ -197,6 +205,7 @@ func NewCmdApi(f cmdutils.Factory, runF func(*options) error) *cobra.Command {
 			"help:environment": heredoc.Doc(`
 				GITLAB_TOKEN, OAUTH_TOKEN (in order of precedence): an authentication token for API requests.
 				GITLAB_HOST, GITLAB_URI, GITLAB_URL: specify a GitLab host to make request to.
+				GLAB_DEBUG_HTTP: print the full HTTP request and response, including headers and body, to stderr.
 			`),
 		},
 		Args: cobra.ExactArgs(1),
