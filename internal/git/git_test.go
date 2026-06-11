@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -314,6 +315,36 @@ func TestGetRemoteURL(t *testing.T) {
 		if err == nil {
 			t.Errorf("GetRemoteURL() error = %v, wantErr %v", err, true)
 		}
+	})
+}
+
+func TestGitCommonDir(t *testing.T) {
+	t.Run("normal repo", func(t *testing.T) {
+		repoDir := InitGitRepo(t)
+
+		got, err := GitCommonDir()
+		require.NoError(t, err)
+		// git rev-parse --git-common-dir may return a relative path (".git")
+		// when cwd is the repo root, so normalize before comparing.
+		absGot, err := filepath.Abs(got)
+		require.NoError(t, err)
+		require.Equal(t, filepath.Join(repoDir, ".git"), absGot)
+	})
+
+	t.Run("worktree", func(t *testing.T) {
+		repoDir := InitGitRepoWithCommit(t)
+		worktreeDir := t.TempDir()
+
+		addCmd := GitCommand("worktree", "add", worktreeDir, "-b", "worktree-branch")
+		addCmd.Dir = repoDir
+		_, err := run.PrepareCmd(addCmd).Output()
+		require.NoError(t, err)
+
+		t.Chdir(worktreeDir)
+
+		got, err := GitCommonDir()
+		require.NoError(t, err)
+		require.Equal(t, filepath.Join(repoDir, ".git"), got)
 	})
 }
 
