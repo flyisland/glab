@@ -214,39 +214,54 @@ instructions:
       10. Document environment variables via the `cobra.Command.Annotations`
           map (key: `help:environment`), not inside `Long`.
 
+      Usage line / positional arguments (`Use` field):
+      11. Format positional arguments with these conventions:
+          - Required: `<arg>` (e.g., `glab mr view <id>`).
+          - Optional: `[<arg>]` (e.g., `glab ci trace [<job-id>]`).
+          - One of several, required: `<id | branch | url>`
+            (e.g., `glab mr checkout <id | branch | url>`).
+          - One of several, optional: `[<id | branch>]`
+            (e.g., `glab mr note list [<id | branch>]`).
+
       Experimental and beta features:
-      11. Use `text.ExperimentalString` or `text.BetaString` from
+      13. Use `text.ExperimentalString` or `text.BetaString` from
           `internal/text/text.go`. Do not copy these strings manually.
-      12. When only a flag is experimental, prepend `(EXPERIMENTAL)` to its
+      14. When only a flag is experimental, prepend `(EXPERIMENTAL)` to its
           description and add a note in `Long` explaining feature flag
           requirements.
 
       Examples (`Example` field):
-      13. Every command must include at least one realistic example. Do not
+      15. Every command must include at least one realistic example. Do not
           use examples that only repeat the command syntax.
-      14. Examples live on the leaf command they apply to, not on parent
+      16. Examples live on the leaf command they apply to, not on parent
           group commands.
-      15. Annotate examples with an inline comment using `# Comment text`
+      17. Annotate examples with an inline comment using `# Comment text`
           above the command. Lead with the simplest realistic invocation and
           annotate even that one — explicit beats implicit for users scanning
           `--help`.
-      16. For commands with many options, show the most common combinations first.
-      17. Use `heredoc.Doc(\`...\`)` (from `github.com/MakeNowJust/heredoc/v2`)
+      18. For commands with many options, show the most common combinations first.
+      19. Use `heredoc.Doc(\`...\`)` (from `github.com/MakeNowJust/heredoc/v2`)
           for multi-line `Long` and `Example` content. Indent with tabs (the
           heredoc package strips them). Don't hand-format multi-line strings.
 
       Flag descriptions:
-      18. Start each flag description with a capital letter and end with a period.
-      19. Use angle-bracket placeholders for user-supplied values:
+      20. Start each flag description with a capital letter and end with a period.
+      21. Use angle-bracket placeholders for user-supplied values:
           `<username>`, `<branch>`, `<id>`.
-      20. Always state the default value for boolean flags: `(default false)`.
-      21. For output-format flags, use `-F, --output [text | json]` as the
+      22. Do not manually annotate boolean flag defaults. pflag automatically
+          appends `(default true)` for boolean flags whose default is `true`.
+          Do not add it manually. No default annotation is required for boolean
+          flags whose default is `false`; do not add `(default false)`.
+      23. Use standard metavars for common value types: `username` for a
+          username, `string` for a branch name / file path / output format,
+          `int` for an integer ID.
+      24. For output-format flags, use `-F, --output [text | json]` as the
           canonical form.
-      22. For slice flags (`StringSliceVar`, `Int64SliceVar`, etc.), include
+      25. For slice flags (`StringSliceVar`, `Int64SliceVar`, etc.), include
           the phrase: `Multiple <items> can be comma-separated or specified by
           repeating the flag.` Use `StringArrayVar` if comma-separation should
           NOT be supported.
-      23. Do not use `-v` as a shorthand for anything — it collides with
+      26. Do not use `-v` as a shorthand for anything — it collides with
           `--verbose` and `--version` conventions.
 
   - name: Flag handling
@@ -368,6 +383,27 @@ instructions:
       3. Document environment variables on the `cobra.Command.Annotations`
          map (key: `help:environment`), not in free-form `Long` text — that
          placement is also surfaced in generated docs.
+
+  - name: Deprecations
+    fileFilters:
+      - 'internal/**/*.go'
+    instructions: |
+      1. When deprecating a flag with `cmd.Flags().MarkDeprecated(...)`, write
+         the message as a sentence continuation: Cobra prepends
+         `Flag --<flag> has been deprecated, ` (ending in a comma), so start
+         your message with a lowercase letter and end with a period. For
+         example, `use --output instead.` renders as
+         `Flag --output-format has been deprecated, use --output instead.`.
+      2. When the deprecated flag has a direct replacement, end the message
+         with `use --<replacement> instead.`. When there is no replacement,
+         describe the resulting behavior. For example, `tracking is enabled by default.`.
+      3. Avoid time-relative words like `now` or `currently` in deprecation
+         messages.
+      4. When deprecating an environment variable, update the `help:environment`
+         annotation in `root.go`: remove the deprecated entry, add the
+         replacement with a full description, keep all entries in alphabetical
+         order, and mirror the change in the README's environment variables
+         section.
 
   # ============================================================
   # TESTS
