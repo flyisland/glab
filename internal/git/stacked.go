@@ -10,13 +10,13 @@ import (
 )
 
 // StackLocation returns the path to the stacked metadata directory.
-// It uses git rev-parse --git-dir so it works in worktrees.
+// It uses git rev-parse --git-common-dir so stacks are shared across all worktrees.
 func StackLocation() (string, error) {
-	gitDir, err := GitDir()
+	commonDir, err := GitCommonDir()
 	if err != nil {
-		return "", fmt.Errorf("finding git directory: %w", err)
+		return "", fmt.Errorf("finding git common directory: %w", err)
 	}
-	return filepath.Join(gitDir, "stacked"), nil
+	return filepath.Join(commonDir, "stacked"), nil
 }
 
 const BaseBranchFile = "BASE_BRANCH"

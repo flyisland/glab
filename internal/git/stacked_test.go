@@ -93,6 +93,13 @@ func Test_AddStackRefDir(t *testing.T) {
 
 			_, err = os.Stat(filepath.Join(stackLoc, tt.branch))
 			require.NoError(t, err)
+
+			if tt.worktree {
+				// Ensure nothing was written to the per-worktree git dir.
+				gitDir, err := GitDir()
+				require.NoError(t, err)
+				require.NoDirExists(t, filepath.Join(gitDir, "stacked"))
+			}
 		})
 	}
 }
@@ -128,6 +135,13 @@ func Test_StackRootDir(t *testing.T) {
 			// Verify the path contains the expected components
 			require.Contains(t, got, "stacked", "StackRootDir() should contain stacked dir name")
 			require.Contains(t, got, tt.title, "StackRootDir() should contain title")
+
+			if tt.worktree {
+				// Verify it resolves to the common git dir, not the per-worktree one.
+				commonDir, err := GitCommonDir()
+				require.NoError(t, err)
+				require.True(t, strings.HasPrefix(got, commonDir), "StackRootDir() should be under common git dir")
+			}
 		})
 	}
 }
@@ -193,6 +207,12 @@ func Test_AddStackRefFile(t *testing.T) {
 			require.NoError(t, err)
 
 			require.Equal(t, stackRef, tt.args.stackRef)
+
+			if tt.worktree {
+				gitDir, err := GitDir()
+				require.NoError(t, err)
+				require.NoDirExists(t, filepath.Join(gitDir, "stacked"))
+			}
 		})
 	}
 }
@@ -268,6 +288,12 @@ func Test_UpdateStackRefFile(t *testing.T) {
 			require.NoError(t, err)
 
 			require.Equal(t, stackRef, tt.args.stackRef)
+
+			if tt.worktree {
+				gitDir, err := GitDir()
+				require.NoError(t, err)
+				require.NoDirExists(t, filepath.Join(gitDir, "stacked"))
+			}
 		})
 	}
 }
@@ -311,6 +337,12 @@ func Test_GetStacks(t *testing.T) {
 			got, err := GetStacks()
 			require.NoError(t, err)
 			require.Equal(t, want, got)
+
+			if worktree {
+				gitDir, err := GitDir()
+				require.NoError(t, err)
+				require.NoDirExists(t, filepath.Join(gitDir, "stacked"))
+			}
 		})
 		t.Run("no stacks"+suffix, func(t *testing.T) {
 			InitGitRepoOrWorktree(t, worktree)
@@ -320,4 +352,32 @@ func Test_GetStacks(t *testing.T) {
 			require.Equal(t, want, got)
 		})
 	}
+}
+
+func Test_StackLocation_SharedAcrossWorktrees(t *testing.T) {
+	repo := NewTestRepo(t)
+	worktreeDir1 := repo.addWorktree(t)
+	worktreeDir2 := repo.addWorktree(t)
+
+	// Create a stack from worktree 1.
+	t.Chdir(worktreeDir1)
+	ref1 := StackRef{SHA: "abc123", Branch: "wt1-branch"}
+	err := AddStackRefFile("shared-stack", ref1)
+	require.NoError(t, err)
+
+	// Verify it is visible from worktree 2.
+	t.Chdir(worktreeDir2)
+	stacks, err := GetStacks()
+	require.NoError(t, err)
+	require.Len(t, stacks, 1)
+	require.Equal(t, "shared-stack", stacks[0].Title)
+
+	// Verify the file is in the common dir, not in either worktree git dir.
+	commonDir, err := GitCommonDir()
+	require.NoError(t, err)
+	require.FileExists(t, filepath.Join(commonDir, "stacked", "shared-stack", "abc123.json"))
+
+	gitDir1, err := GitDir()
+	require.NoError(t, err)
+	require.NoDirExists(t, filepath.Join(gitDir1, "stacked"))
 }

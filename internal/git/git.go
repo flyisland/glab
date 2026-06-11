@@ -353,6 +353,18 @@ var GitDir = func() (string, error) {
 	return firstLine(output), nil
 }
 
+// GitCommonDir returns the path to the shared git directory for the repository.
+// In a normal repo this returns "<toplevel>/.git".
+// In a worktree this returns "<main-repo>/.git" (the common dir shared by all worktrees).
+func GitCommonDir() (string, error) {
+	cmd := exec.Command("git", "rev-parse", "--git-common-dir")
+	output, err := run.PrepareCmd(cmd).Output()
+	if err != nil {
+		return "", err
+	}
+	return firstLine(output), nil
+}
+
 func outputLines(output []byte) []string {
 	lines := strings.TrimSuffix(string(output), "\n")
 	return strings.Split(lines, "\n")

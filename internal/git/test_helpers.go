@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -86,24 +87,45 @@ func configureGitConfig(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// InitGitWorktree creates a git worktree from an existing repo (which must
-// have at least one commit) and chdir's into it. Returns the worktree path.
-func InitGitWorktree(t *testing.T) string {
+// testRepo scaffolds a git repo and its worktrees for tests. It owns its root
+// directory and an auto-incrementing counter so every worktree it creates gets
+// a unique branch name without any hardcoding.
+type testRepo struct {
+	rootDir       string
+	worktreeCount atomic.Int32
+}
+
+// NewTestRepo initializes a new git repo with a single commit (so worktrees can
+// be created from it) and returns a testRepo for scaffolding worktrees.
+func NewTestRepo(t *testing.T) *testRepo {
+	t.Helper()
+	return &testRepo{rootDir: InitGitRepoWithCommit(t)}
+}
+
+// addWorktree creates a new worktree from the repo with an auto-incremented
+// branch name, chdir's into it, and returns the new worktree path.
+func (tr *testRepo) addWorktree(t *testing.T) string {
 	t.Helper()
 
-	// We need a commit before we can create a worktree
-	repoDir := InitGitRepoWithCommit(t)
-
 	worktreeDir := t.TempDir()
+	branch := fmt.Sprintf("worktree-branch-%d", tr.worktreeCount.Add(1))
 
-	addCmd := GitCommand("worktree", "add", worktreeDir, "-b", "worktree-branch")
-	addCmd.Dir = repoDir
+	addCmd := GitCommand("worktree", "add", worktreeDir, "-b", branch)
+	addCmd.Dir = tr.rootDir
 	_, err := run.PrepareCmd(addCmd).Output()
 	require.NoError(t, err)
 
 	t.Chdir(worktreeDir)
 
 	return worktreeDir
+}
+
+// InitGitWorktree creates a git worktree from a new repo (which gets one
+// commit) and chdir's into it. Returns the worktree path.
+func InitGitWorktree(t *testing.T) string {
+	t.Helper()
+
+	return NewTestRepo(t).addWorktree(t)
 }
 
 // InitGitRepoOrWorktree initializes a git repo or worktree based on the
