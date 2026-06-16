@@ -91,8 +91,10 @@ func TestOrbitAssetName(t *testing.T) {
 
 	assert.Equal(t, "orbit-local-darwin-aarch64.tar.gz", orbitAssetName("darwin", "aarch64"))
 	assert.Equal(t, "orbit-local-darwin-x86_64.tar.gz", orbitAssetName("darwin", "x86_64"))
-	assert.Equal(t, "orbit-local-linux-aarch64.tar.gz", orbitAssetName("linux", "aarch64"))
-	assert.Equal(t, "orbit-local-linux-x86_64.tar.gz", orbitAssetName("linux", "x86_64"))
+	// Linux uses the musl build (orbit-local-linux-musl-*) instead of the
+	// default orbit-local-<os>-<arch> pattern for glibc portability.
+	assert.Equal(t, "orbit-local-linux-musl-aarch64.tar.gz", orbitAssetName("linux", "aarch64"))
+	assert.Equal(t, "orbit-local-linux-musl-x86_64.tar.gz", orbitAssetName("linux", "x86_64"))
 	assert.Equal(t, "orbit-local-windows-x86_64.zip", orbitAssetName("windows", "x86_64"))
 }
 
