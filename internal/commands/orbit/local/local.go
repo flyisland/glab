@@ -54,11 +54,22 @@ func orbitNormalizeArch(goos, goarch string) (string, error) {
 // Assets are published under the project's Generic Package Registry as
 // orbit-local-<os>-<arch>.tar.gz (Unix) or orbit-local-windows-<arch>.zip.
 // Each archive contains a single executable that we extract during install.
+//
+// On Linux, we download the statically-linked musl build
+// (orbit-local-linux-musl-<arch>.tar.gz) instead of the default glibc (gnu)
+// build. The gnu binary requires GLIBC >= 2.34, GLIBCXX >= 3.4.30, and
+// CXXABI 1.3.13, which are unavailable on older or minimal hosts (RHEL/UBI 8,
+// Alpine, distroless, scratch). The musl build has zero host library
+// dependencies and runs everywhere. See knowledge-graph#769.
 func orbitAssetName(goos, arch string) string {
-	if goos == "windows" {
+	switch goos {
+	case "windows":
 		return "orbit-local-" + goos + "-" + arch + ".zip"
+	case "linux":
+		return "orbit-local-linux-musl-" + arch + ".tar.gz"
+	default: // darwin
+		return "orbit-local-" + goos + "-" + arch + ".tar.gz"
 	}
-	return "orbit-local-" + goos + "-" + arch + ".tar.gz"
 }
 
 func orbitInstalledName(goos string) string {
