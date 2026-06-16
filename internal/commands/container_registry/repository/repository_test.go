@@ -1,0 +1,30 @@
+//go:build !integration
+
+package repository
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
+)
+
+func TestNewCmd(t *testing.T) {
+	t.Parallel()
+
+	cmd := NewCmd(cmdtest.NewTestFactory(nil))
+
+	assert.Equal(t, "repository <command> [flags]", cmd.Use)
+	assert.Empty(t, cmd.Aliases)
+	listCmd, _, err := cmd.Find([]string{"list"})
+	require.NoError(t, err)
+	assert.Equal(t, "list [flags]", listCmd.Use)
+	viewCmd, _, err := cmd.Find([]string{"view"})
+	require.NoError(t, err)
+	assert.Equal(t, "view <repository-id> [flags]", viewCmd.Use)
+	deleteCmd, _, err := cmd.Find([]string{"delete"})
+	require.NoError(t, err)
+	assert.Equal(t, "delete <repository-id> [flags]", deleteCmd.Use)
+}
