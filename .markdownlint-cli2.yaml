@@ -1,5 +1,12 @@
 ---
 # See https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md for explanations of each rule
+
+# Issue and merge request templates are rendered into GitLab forms, not as
+# standalone documents, so rules like MD041 (first-line H1) don't apply.
+ignores:
+  - ".gitlab/issue_templates/**"
+  - ".gitlab/merge_request_templates/**"
+
 config:
   # First, set the default
   default: true

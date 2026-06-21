@@ -16,5 +16,5 @@ Resolves #[issue_number]
 
 ## Screenshots (if appropriate):
 
-/label ~"devops::create" ~"group::code review" ~"Category:GitLab CLI" ~"cli" ~"section::dev"
+/label ~"devops::ai coding" ~"group::code review" ~"category:gitlab cli"
 /assign me
