@@ -29,7 +29,7 @@ func main() {
 	// Generate Ed25519 key
 	path := filepath.Join(testdataDir, "ed25519_key.pem")
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		if err := generateEd25519Key(path); err != nil {
+		if err := generateED25519Key(path); err != nil {
 			log.Fatalf("Failed to generate Ed25519 key: %v", err)
 		}
 	}
@@ -47,7 +47,7 @@ func main() {
 	for _, c := range curves {
 		path := filepath.Join(testdataDir, c.name+"_key.pem")
 		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			if err := generateEcdsaKey(path, c.curve); err != nil {
+			if err := generateECDSAKey(path, c.curve); err != nil {
 				log.Fatalf("Failed to generate ECDSA key for %s: %v", c.name, err)
 			}
 		}
@@ -56,7 +56,7 @@ func main() {
 	// Generate P-224 key separately since it's not supported by SSH
 	path = filepath.Join(testdataDir, "ecdsa_p224_key.pem")
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		if err := generateEcdsaKeyManual(path, elliptic.P224()); err != nil {
+		if err := generateECDSAKeyManual(path, elliptic.P224()); err != nil {
 			log.Fatalf("Failed to generate ECDSA P-224 key: %v", err)
 		}
 	}
@@ -75,14 +75,14 @@ func main() {
 	for _, r := range rsaSizes {
 		path := filepath.Join(testdataDir, r.name+"_key.pem")
 		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			if err := generateRsaKey(path, r.bits); err != nil {
+			if err := generateRSAKey(path, r.bits); err != nil {
 				log.Fatalf("Failed to generate RSA key for %s: %v", r.name, err)
 			}
 		}
 	}
 }
 
-func generateRsaKey(filename string, bits int) error {
+func generateRSAKey(filename string, bits int) error {
 	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func generateRsaKey(filename string, bits int) error {
 	return savePrivateKeyAsSSH(filename, privateKey)
 }
 
-func generateEd25519Key(filename string) error {
+func generateED25519Key(filename string) error {
 	_, privateKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ func generateEd25519Key(filename string) error {
 	return savePrivateKeyAsSSH(filename, privateKey)
 }
 
-func generateEcdsaKey(filename string, curve elliptic.Curve) error {
+func generateECDSAKey(filename string, curve elliptic.Curve) error {
 	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
 		return err
@@ -117,7 +117,7 @@ func generateEcdsaKey(filename string, curve elliptic.Curve) error {
 	return savePrivateKeyAsSSH(filename, privateKey)
 }
 
-func generateEcdsaKeyManual(filename string, curve elliptic.Curve) error {
+func generateECDSAKeyManual(filename string, curve elliptic.Curve) error {
 	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
 		return err
