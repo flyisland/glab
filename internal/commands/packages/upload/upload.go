@@ -39,7 +39,8 @@ func NewCmd(f cmdutils.Factory) *cobra.Command {
 		Use:   "upload <file> --name <package> --version <version> [flags]",
 		Short: `Upload a file to a project's package registry.`,
 		Long: heredoc.Docf(`
-		Upload a local file to a project's package registry as a generic package.
+		Uploaded files are stored as generic packages: arbitrary files identified
+		by a package name, version, and file name.
 
 		The file is stored under the given package name and version. By default
 		it keeps its original file name; use %[1]s--filename%[1]s to store it under a

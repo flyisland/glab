@@ -35,9 +35,9 @@ func NewCmd(f cmdutils.Factory) *cobra.Command {
 		Use:   "list [flags]",
 		Short: `List packages in a project's package registry.`,
 		Long: heredoc.Docf(`
-		List the packages in a project's package registry. All package types
-		(generic, npm, maven, etc.) are returned. Use %[1]s--page%[1]s and %[1]s--per-page%[1]s
-		to paginate the result, and %[1]s--name%[1]s to filter by package name.
+		Packages of all types (generic, npm, maven, etc.) are returned. Use
+		%[1]s--package-type%[1]s to filter by type and %[1]s--name%[1]s to filter by name. Use
+		%[1]s--page%[1]s and %[1]s--per-page%[1]s to paginate the result.
 
 		By default, packages are listed for the current project. Use %[1]s--repo%[1]s
 		to target another project.
@@ -90,7 +90,7 @@ func NewCmd(f cmdutils.Factory) *cobra.Command {
 		"pypi",
 		"terraform_module",
 	}
-	fl.String("package-type", "", fmt.Sprintf("Package type %s", strings.Join(pkgTypes, ", ")))
+	fl.String("package-type", "", fmt.Sprintf("Filter packages by type. One of: %s.", strings.Join(pkgTypes, ", ")))
 
 	cmdutils.AddJQFlag(cmd, f.IO())
 	return cmd

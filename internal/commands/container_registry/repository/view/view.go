@@ -33,9 +33,10 @@ func NewCmd(f cmdutils.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "view <repository-id> [flags]",
 		Short: "View a container registry repository.",
-		Long: heredoc.Doc(`
-			View details for a single container registry repository.
-		`),
+		Long: heredoc.Docf(`
+			Returns the container registry repository's details. Use %[1]s--include-tags%[1]s to include its
+			tags in the output.
+		`, "`"),
 		Aliases: []string{"show"},
 		Args:    cobra.ExactArgs(1),
 		Example: heredoc.Doc(`

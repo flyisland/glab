@@ -20,7 +20,7 @@ func NewCmd(f cmdutils.Factory) *cobra.Command {
 		registry, using your existing %[1]sglab%[1]s authentication.
 
 		%[1]slist%[1]s and %[1]sdelete%[1]s operate on packages of any type. %[1]supload%[1]s and %[1]sdownload%[1]s
-		are currently limited to generic packages, which let you store and retrieve
+		are limited to generic packages, which let you store and retrieve
 		arbitrary files identified by a package name, version, and file name.
 		`, "`"),
 	}
