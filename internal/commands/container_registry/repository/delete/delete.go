@@ -38,8 +38,6 @@ func NewCmd(f cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"del"},
 		Args:    cobra.ExactArgs(1),
 		Long: heredoc.Doc(`
-			Delete a container registry repository.
-
 			This action permanently deletes the repository and all images and tags
 			published to it.
 		`),

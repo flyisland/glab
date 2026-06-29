@@ -35,8 +35,8 @@ func NewCmd(f cmdutils.Factory) *cobra.Command {
 		Use:   "delete <id>",
 		Short: `Delete a package from a project's package registry.`,
 		Long: heredoc.Docf(`
-		Delete a package from a project's package registry, identified by its
-		numeric ID. Use %[1]sglab packages list%[1]s to find the ID.
+		Packages are identified by their numeric ID. Use %[1]sglab packages list%[1]s
+		to find the ID.
 
 		The command asks for confirmation before deleting; use %[1]s-y%[1]s to skip
 		the prompt in scripts.
@@ -72,7 +72,7 @@ func NewCmd(f cmdutils.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVarP(&opts.forceDelete, "yes", "y", false, "Skip the confirmation prompt. (default false)")
+	cmd.Flags().BoolVarP(&opts.forceDelete, "yes", "y", false, "Skip the confirmation prompt.")
 
 	return cmd
 }
