@@ -3,11 +3,9 @@ package mrutils
 import (
 	"fmt"
 	"io"
-	"sort"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
 
-	issuableView "gitlab.com/gitlab-org/cli/internal/commands/issuable/view"
 	"gitlab.com/gitlab-org/cli/internal/iostreams"
 	"gitlab.com/gitlab-org/cli/internal/utils"
 )
@@ -30,8 +28,18 @@ func noteTimeAgo(n *gitlab.Note) string {
 	return ""
 }
 
-// PrintDiscussionsTTY renders discussions in TTY format to the given writer.
-func PrintDiscussionsTTY(out io.Writer, ios *iostreams.IOStreams, discussions []*gitlab.Discussion, showSystemLogs bool) {
+// renderBody renders the body as markdown for a terminal, or returns it
+// verbatim when piped so the raw output stays free of control characters.
+func renderBody(ios *iostreams.IOStreams, body string) string {
+	if !ios.IsOutputTTY() {
+		return body
+	}
+	out, _ := utils.RenderMarkdown(body, ios.BackgroundColor())
+	return out
+}
+
+// PrintDiscussions renders discussions to out.
+func PrintDiscussions(out io.Writer, ios *iostreams.IOStreams, discussions []*gitlab.Discussion, showSystemLogs bool) {
 	c := ios.Color()
 
 	for _, discussion := range discussions {
@@ -48,8 +56,7 @@ func PrintDiscussionsTTY(out io.Writer, ios *iostreams.IOStreams, discussions []
 
 		// Threaded discussions (not individual notes)
 		if !discussion.IndividualNote && len(discussion.Notes) > 1 {
-			// Print thread header with first note ID
-			fmt.Fprintf(out, "Thread [#%d]", firstNote.ID)
+			fmt.Fprintf(out, "Thread [discussion: %s]", TruncateDiscussionID(discussion.ID))
 
 			// Show resolution status if resolvable
 			if firstNote.Resolvable {
@@ -64,13 +71,13 @@ func PrintDiscussionsTTY(out io.Writer, ios *iostreams.IOStreams, discussions []
 			// Print first note
 			createdAt := noteTimeAgo(firstNote)
 			fmt.Fprintf(out, "  @%s commented ", noteUsername(firstNote))
-			fmt.Fprintln(out, c.Gray(createdAt))
+			fmt.Fprintf(out, "%s %s\n", c.Gray(createdAt), c.Gray(fmt.Sprintf("[note #%d]", firstNote.ID)))
 
 			if firstNote.Position != nil {
 				PrintCommentFileContext(out, c, firstNote.Position)
 			}
 
-			body, _ := utils.RenderMarkdown(firstNote.Body, ios.BackgroundColor())
+			body := renderBody(ios, firstNote.Body)
 			fmt.Fprintln(out, utils.Indent(body, "  "))
 			fmt.Fprintln(out)
 
@@ -81,9 +88,9 @@ func PrintDiscussionsTTY(out io.Writer, ios *iostreams.IOStreams, discussions []
 				}
 				replyTime := noteTimeAgo(note)
 				fmt.Fprintf(out, "    @%s replied ", noteUsername(note))
-				fmt.Fprintln(out, c.Gray(replyTime))
+				fmt.Fprintf(out, "%s %s\n", c.Gray(replyTime), c.Gray(fmt.Sprintf("[note #%d]", note.ID)))
 
-				replyBody, _ := utils.RenderMarkdown(note.Body, ios.BackgroundColor())
+				replyBody := renderBody(ios, note.Body)
 				fmt.Fprintln(out, utils.Indent(replyBody, "    "))
 				if i < len(discussion.Notes[1:])-1 {
 					fmt.Fprintln(out)
@@ -99,9 +106,9 @@ func PrintDiscussionsTTY(out io.Writer, ios *iostreams.IOStreams, discussions []
 				fmt.Fprintf(out, " %s ", note.Body)
 				fmt.Fprintln(out, c.Gray(createdAt))
 			} else {
-				body, _ := utils.RenderMarkdown(note.Body, ios.BackgroundColor())
+				body := renderBody(ios, note.Body)
 				fmt.Fprint(out, " commented ")
-				fmt.Fprintf(out, c.Gray("%s\n"), createdAt)
+				fmt.Fprintf(out, "%s %s\n", c.Gray(createdAt), c.Gray(fmt.Sprintf("[note #%d]", note.ID)))
 
 				if note.Position != nil {
 					PrintCommentFileContext(out, c, note.Position)
@@ -112,32 +119,6 @@ func PrintDiscussionsTTY(out io.Writer, ios *iostreams.IOStreams, discussions []
 			fmt.Fprintln(out)
 		}
 	}
-}
-
-// PrintDiscussionsRaw renders discussions as flat, chronologically sorted notes in raw format.
-func PrintDiscussionsRaw(out io.Writer, discussions []*gitlab.Discussion, showSystemLogs bool) {
-	var notes []*gitlab.Note
-	for _, discussion := range discussions {
-		for _, note := range discussion.Notes {
-			if note.System && !showSystemLogs {
-				continue
-			}
-			notes = append(notes, note)
-		}
-	}
-
-	// Sort notes chronologically by creation time (nil CreatedAt sorts first)
-	sort.Slice(notes, func(i, j int) bool {
-		if notes[i].CreatedAt == nil {
-			return true
-		}
-		if notes[j].CreatedAt == nil {
-			return false
-		}
-		return notes[i].CreatedAt.Before(*notes[j].CreatedAt)
-	})
-
-	fmt.Fprint(out, issuableView.RawIssuableNotes(notes, true, showSystemLogs, "merge request"))
 }
 
 // PrintCommentFileContext prints file and line context for a note position.

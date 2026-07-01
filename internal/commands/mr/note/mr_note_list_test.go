@@ -83,7 +83,7 @@ func Test_NoteList(t *testing.T) {
 		require.NoError(t, err)
 
 		out := output.String()
-		// Uses shared PrintDiscussionsTTY format
+		// Uses shared PrintDiscussions renderer
 		assert.Contains(t, out, "@alice commented")
 		assert.Contains(t, out, "General comment")
 		assert.Contains(t, out, "@bob commented")
@@ -410,11 +410,13 @@ func Test_NoteList(t *testing.T) {
 		require.NoError(t, err)
 
 		out := output.String()
-		// Thread format from PrintDiscussionsTTY
-		assert.Contains(t, out, "Thread [#100]")
+		// Thread format from PrintDiscussions
+		assert.Contains(t, out, "Thread [discussion: thread12…]")
 		assert.Contains(t, out, "@alice commented")
+		assert.Contains(t, out, "[note #100]")
 		assert.Contains(t, out, "First note")
 		assert.Contains(t, out, "@bob replied")
+		assert.Contains(t, out, "[note #101]")
 		assert.Contains(t, out, "Reply here")
 	})
 
