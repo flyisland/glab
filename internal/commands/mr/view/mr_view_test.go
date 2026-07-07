@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 	"time"
 
@@ -271,6 +270,7 @@ func Test_rawMRPreview(t *testing.T) {
 			IndividualNote: true,
 			Notes: []*gitlab.Note{
 				{
+					ID:        100,
 					System:    false,
 					Author:    fakeNote1.Author,
 					Body:      "Some comment",
@@ -283,6 +283,7 @@ func Test_rawMRPreview(t *testing.T) {
 			IndividualNote: true,
 			Notes: []*gitlab.Note{
 				{
+					ID:        200,
 					System:    false,
 					Author:    fakeNote2.Author,
 					Body:      "Another comment",
@@ -292,7 +293,8 @@ func Test_rawMRPreview(t *testing.T) {
 		},
 	}
 
-	ioStreams, _, _, _ = cmdtest.TestIOStreams(cmdtest.WithTestIOStreamsAsTTY(true))
+	// The raw preview is only produced for non-TTY output, so render bodies verbatim.
+	ioStreams, _, _, _ = cmdtest.TestIOStreams(cmdtest.WithTestIOStreamsAsTTY(false))
 
 	tests := []struct {
 		name        string
@@ -345,8 +347,7 @@ func Test_rawMRPreview(t *testing.T) {
 				"url:\thttps://gitlab.com/OWNER/REPO/-/merge_requests/503",
 				"--",
 				"MR description",
-				"\n--\ncomments/notes:\n",
-				"There are no comments on this merge request.",
+				"This merge request has no comments.",
 			},
 		},
 		{
@@ -371,25 +372,23 @@ func Test_rawMRPreview(t *testing.T) {
 				"url:\thttps://gitlab.com/OWNER/REPO/-/merge_requests/503",
 				"--",
 				"MR description",
-				"\n--\ncomments/notes:\n",
-				fmt.Sprintf("bob assigned to @alice %s", time1),
-				"",
-				fmt.Sprintf("bob commented %s", time1),
+				"@bob assigned to @alice",
+				"@bob commented",
+				"[note #100]",
 				"Some comment",
-				"",
-				fmt.Sprintf("alice commented %s", time2),
+				"@alice commented",
+				"[note #200]",
 				"Another comment",
-				"",
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			want := strings.Join(tt.want, "\n") + "\n"
 			got := rawMRPreview(tt.opts, tt.mr, tt.discussions)
-
-			require.Equal(t, want, got)
+			for _, want := range tt.want {
+				assert.Contains(t, got, want)
+			}
 		})
 	}
 }

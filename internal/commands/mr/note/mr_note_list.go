@@ -120,11 +120,7 @@ func (o *listOptions) run(ctx context.Context) error {
 
 	showSystemLogs := o.noteType == "system"
 
-	if o.factory.IO().IsOutputTTY() {
-		mrutils.PrintDiscussionsTTY(out, o.factory.IO(), filtered, showSystemLogs)
-	} else {
-		mrutils.PrintDiscussionsRaw(out, filtered, showSystemLogs)
-	}
+	mrutils.PrintDiscussions(out, o.factory.IO(), filtered, showSystemLogs)
 
 	return nil
 }
