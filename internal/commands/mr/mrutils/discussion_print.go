@@ -19,13 +19,17 @@ func noteUsername(n *gitlab.Note) string {
 	return "unknown"
 }
 
-// noteTimeAgo returns a human-readable "time ago" string for the note's
-// creation time, or an empty string if CreatedAt is nil.
+// noteTimeAgo returns a human-readable timestamp for the note's creation time
+// combining a relative "time ago" string with the absolute time, e.g.
+// "1 day ago (2026-06-26 05:35:51)", or an empty string if CreatedAt is nil.
 func noteTimeAgo(n *gitlab.Note) string {
-	if n.CreatedAt != nil {
-		return utils.TimeToPrettyTimeAgo(*n.CreatedAt)
+	if n.CreatedAt == nil {
+		return ""
 	}
-	return ""
+	return fmt.Sprintf("%s (%s)",
+		utils.TimeToPrettyTimeAgo(*n.CreatedAt),
+		n.CreatedAt.Format("2006-01-02 15:04:05"),
+	)
 }
 
 // renderBody renders the body as markdown for a terminal, or returns it

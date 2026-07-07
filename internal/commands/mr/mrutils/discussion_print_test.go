@@ -5,6 +5,7 @@ package mrutils
 import (
 	"bytes"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -12,6 +13,19 @@ import (
 
 	"gitlab.com/gitlab-org/cli/internal/testing/cmdtest"
 )
+
+func Test_noteTimeAgo(t *testing.T) {
+	t.Run("combines relative and absolute time", func(t *testing.T) {
+		created := time.Now().Add(-24 * time.Hour)
+		got := noteTimeAgo(&gitlab.Note{CreatedAt: &created})
+		expected := "about 1 day ago (" + created.Format("2006-01-02 15:04:05") + ")"
+		assert.Equal(t, expected, got)
+	})
+
+	t.Run("empty when CreatedAt is nil", func(t *testing.T) {
+		assert.Empty(t, noteTimeAgo(&gitlab.Note{}))
+	})
+}
 
 func Test_PrintCommentFileContext(t *testing.T) {
 	// NOTE: we need to force disable colors, otherwise we'd need ANSI sequences in our test output assertions.
