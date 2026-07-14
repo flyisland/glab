@@ -616,7 +616,7 @@ func DescribeByTags() (string, error) {
 		return "", fmt.Errorf("running cmd: %s out: %s: %w", gitCmd.String(), output, err)
 	}
 
-	return string(output), nil
+	return firstLine(output), nil
 }
 
 // ListTags gives a slice of tags from the current repository.
