@@ -361,12 +361,12 @@ func TestDescribeByTags(t *testing.T) {
 		errorValue error
 	}{
 		"commit is tag": {
-			expected:   "1.0.0\n",
+			expected:   "1.0.0",
 			output:     "1.0.0",
 			errorValue: nil,
 		},
 		"commit is not tag": {
-			expected:   "1.0.0-1-g4aa1b8\n",
+			expected:   "1.0.0-1-g4aa1b8",
 			output:     "1.0.0-1-g4aa1b8",
 			errorValue: nil,
 		},
