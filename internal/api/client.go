@@ -444,11 +444,16 @@ func NewHTTPRequest(ctx context.Context, c *Client, method string, baseURL *url.
 		req.Header.Set("User-Agent", c.Lab().UserAgent)
 	}
 
-	name, value, err := c.authSource.Header(ctx)
-	if err != nil {
-		return nil, err
+	// gitlab.Unauthenticated's Header returns a sentinel error; the go-gitlab
+	// client's AllHeadersAuthStrategy skips the header in that case. Mirror
+	// that here so `glab api` works on public endpoints without auth.
+	if _, ok := c.authSource.(gitlab.Unauthenticated); !ok {
+		name, value, err := c.authSource.Header(ctx)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set(name, value)
 	}
-	req.Header.Set(name, value)
 
 	return req, nil
 }

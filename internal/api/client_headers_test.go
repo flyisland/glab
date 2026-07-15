@@ -141,6 +141,21 @@ func TestCustomHeadersWithRequestBody(t *testing.T) {
 	require.JSONEq(t, `{"key": "value", "data": "test"}`, string(bodyBytes))
 }
 
+func TestNewHTTPRequest_UnauthenticatedAuthSource(t *testing.T) {
+	client := &Client{
+		gitlabClient: &gitlab.Client{},
+		authSource:   gitlab.Unauthenticated{},
+	}
+
+	baseURL, _ := url.Parse("https://example.com/api")
+	req, err := NewHTTPRequest(t.Context(), client, "GET", baseURL, nil, []string{}, false)
+	require.NoError(t, err)
+	require.NotNil(t, req)
+	require.Empty(t, req.Header.Get("PRIVATE-TOKEN"))
+	require.Empty(t, req.Header.Get("Authorization"))
+	require.Empty(t, req.Header.Get("Job-Token"))
+}
+
 func TestClientInitializationWithNoCustomHeaders(t *testing.T) {
 	tests := []struct {
 		name          string
