@@ -600,6 +600,8 @@
       url: 'cli/variable/export/'
     - title: glab variable get
       url: 'cli/variable/get/'
+    - title: glab variable import
+      url: 'cli/variable/import/'
     - title: glab variable list
       url: 'cli/variable/list/'
     - title: glab variable set
