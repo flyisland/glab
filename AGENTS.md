@@ -41,7 +41,10 @@ infer from reading the tree.
 - **Updating a command's docs** — author the change in the Go source
   (`Short`, `Long`, `Example`, flag descriptions on the `cobra.Command`),
   run `make gen-docs`, commit the regenerated files under `docs/source/`
-  in the same commit. Never edit `docs/source/` directly.
+  in the same commit. Never edit `docs/source/` directly. `make gen-docs`
+  also prunes pages for removed, deprecated, and hidden commands (and
+  deletes any emptied directories), so never hand-delete pages under
+  `docs/source/`. Instead regenerate the docs and commit the deletions.
 - **Reviewing MR feedback** — use the `glab` CLI (or `glab` MCP tools)
   end-to-end, not raw `glab api`:
   - Fetch: `glab mr view <id> --output json`.
