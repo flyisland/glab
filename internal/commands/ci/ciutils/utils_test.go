@@ -375,6 +375,25 @@ func TestTraceJob(t *testing.T) {
 			},
 		},
 		{
+			name:    "when the job was canceled",
+			jobName: "1122",
+			setupMock: func(tc *gitlabtesting.TestClient) {
+				// The API reports this state as "canceled". A single GetJob call
+				// is expected: the trace loop has to stop once it sees it.
+				tc.MockJobs.EXPECT().
+					GetJob("OWNER/REPO", int64(1122), gomock.Any()).
+					Return(&gitlab.Job{
+						ID:     1122,
+						Name:   "lint",
+						Status: "canceled",
+					}, nil, nil)
+
+				tc.MockJobs.EXPECT().
+					GetTraceFile("OWNER/REPO", int64(1122), gomock.Any()).
+					Return(bytes.NewReader([]byte("Job canceled")), nil, nil)
+			},
+		},
+		{
 			name:          "when traceJob is requested and getJob throws error",
 			jobName:       "1122",
 			expectedError: "failed to find job:",
