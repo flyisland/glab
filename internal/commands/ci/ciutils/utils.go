@@ -237,7 +237,7 @@ func runTrace(ctx context.Context, apiClient *gitlab.Client, w io.Writer, pid an
 
 		if job.Status == "success" ||
 			job.Status == "failed" ||
-			job.Status == "cancelled" {
+			job.Status == "canceled" {
 			return nil
 		}
 	}
