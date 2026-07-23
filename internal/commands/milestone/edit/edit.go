@@ -113,7 +113,10 @@ func (o *options) run() error {
 		}
 		o.io.LogInfof("Updated group milestone %s (ID: %d)", milestone.Title, milestone.ID)
 	default:
-		repo, _ := o.baseRepo()
+		repo, err := o.baseRepo()
+		if err != nil {
+			return err
+		}
 		milestone, _, err := client.Milestones.UpdateMilestone(repo.FullName(), o.milestoneID, updateMilestoneOptions)
 		if err != nil {
 			return err

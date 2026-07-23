@@ -97,7 +97,10 @@ func (o *options) run() error {
 
 		o.io.LogInfo(fmt.Sprintf("Deleted group milestone with ID %d.", o.milestoneID))
 	default:
-		repo, _ := o.baseRepo()
+		repo, err := o.baseRepo()
+		if err != nil {
+			return err
+		}
 		_, err = client.Milestones.DeleteMilestone(repo.FullName(), o.milestoneID)
 		if err != nil {
 			return err
