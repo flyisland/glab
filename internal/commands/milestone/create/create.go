@@ -143,7 +143,10 @@ func (o *options) run() error {
 	}
 
 	// run for the current project
-	repo, _ := o.baseRepo()
+	repo, err := o.baseRepo()
+	if err != nil {
+		return err
+	}
 	createMilestoneOptions := &gitlab.CreateMilestoneOptions{
 		Title:       &o.title,
 		Description: &o.description,

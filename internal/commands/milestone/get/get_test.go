@@ -182,3 +182,22 @@ func TestMilestoneGet_JSON(t *testing.T) {
 	assert.Contains(t, out.String(), `"state":"closed"`)
 	assert.Empty(t, out.Stderr())
 }
+
+// Without an explicit --project or --group, these commands fall back to the
+// base repository. When that lookup fails the error has to surface instead of
+// being dropped, otherwise the nil repository is dereferenced and glab panics.
+func Test_GetProjectMilestone_BaseRepoError(t *testing.T) {
+	testClient := gitlabtesting.NewTestClient(t)
+	exec := cmdtest.SetupCmdForTest(
+		t,
+		NewCmdGet,
+		false,
+		cmdtest.WithApiClient(cmdtest.NewTestApiClient(t, nil, "", "", api.WithGitLabClient(testClient.Client))),
+		cmdtest.WithBaseRepoError(errors.New("no base repository")),
+	)
+
+	_, err := exec("123")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no base repository")
+}

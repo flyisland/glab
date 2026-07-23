@@ -115,7 +115,10 @@ func (o *options) run() error {
 	}
 
 	// run for the current project
-	repo, _ := o.baseRepo()
+	repo, err := o.baseRepo()
+	if err != nil {
+		return err
+	}
 	milestone, _, err := client.Milestones.GetMilestone(repo.FullName(), o.milestoneID)
 	if err != nil {
 		return err
