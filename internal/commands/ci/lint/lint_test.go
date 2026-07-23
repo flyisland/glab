@@ -4,6 +4,8 @@ package lint
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"path"
 	"runtime"
 	"testing"
@@ -159,4 +161,58 @@ func Test_lintRun(t *testing.T) {
 			assert.Equal(t, tt.StdOut, result.String())
 		})
 	}
+}
+
+func Test_lintRun_remoteURL(t *testing.T) {
+	t.Parallel()
+
+	t.Run("a failing response is not linted", func(t *testing.T) {
+		t.Parallel()
+
+		// GIVEN a URL that does not serve a CI configuration.
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Error(w, "not found", http.StatusNotFound)
+		}))
+		t.Cleanup(srv.Close)
+
+		testClient := gitlabtesting.NewTestClient(t)
+		testClient.MockProjects.EXPECT().
+			GetProject("OWNER/REPO", gomock.Any()).
+			Return(&gitlab.Project{ID: 123}, nil, nil)
+		// No ProjectNamespaceLint call is expected: the error body must not
+		// reach the lint API.
+
+		exec := cmdtest.SetupCmdForTest(t, NewCmdLint, false, cmdtest.WithGitLabClient(testClient.Client))
+
+		// WHEN
+		_, err := exec(srv.URL + "/missing.yml")
+
+		// THEN
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "404 Not Found")
+	})
+
+	t.Run("a successful response is linted", func(t *testing.T) {
+		t.Parallel()
+
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprint(w, "job:\n  script: echo hello\n")
+		}))
+		t.Cleanup(srv.Close)
+
+		testClient := gitlabtesting.NewTestClient(t)
+		testClient.MockProjects.EXPECT().
+			GetProject("OWNER/REPO", gomock.Any()).
+			Return(&gitlab.Project{ID: 123}, nil, nil)
+		testClient.MockValidate.EXPECT().
+			ProjectNamespaceLint(int64(123), gomock.Any()).
+			Return(&gitlab.ProjectLintResult{Valid: true}, nil, nil)
+
+		exec := cmdtest.SetupCmdForTest(t, NewCmdLint, false, cmdtest.WithGitLabClient(testClient.Client))
+
+		result, err := exec(srv.URL + "/.gitlab-ci.yml")
+
+		require.NoError(t, err)
+		assert.Equal(t, "Validating...\n✓ CI/CD YAML is valid!\n", result.String())
+	})
 }

@@ -112,6 +112,9 @@ func (o *options) run(ctx context.Context) error {
 			return err
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+			return fmt.Errorf("fetching %s: %s", o.path, resp.Status)
+		}
 		_, err = io.Copy(&stdout, resp.Body)
 		if err != nil {
 			return err
