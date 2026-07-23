@@ -127,5 +127,5 @@ set (see `GetHostOrSkip` in `test/helpers.go`). The token must have the
 - `GLAB_CONFIG_DIR` — Overrides the configuration directory. Highest priority.
 - `GLAB_ENABLE_CI_AUTOLOGIN=true` — Together with `GITLAB_CI=true`,
   enables `CI_JOB_TOKEN` auto-login.
-- `DEBUG=true` — Verbose logging for Git commands, expanded aliases, and
+- `GLAB_DEBUG=true` — Verbose logging for Git commands, expanded aliases, and
   DNS.
