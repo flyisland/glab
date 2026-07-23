@@ -141,7 +141,9 @@ func TestSetup_SkillScopeResolution(t *testing.T) {
 
 	t.Run("--global resolves to ~/.agents/skills/", func(t *testing.T) {
 		home := t.TempDir()
+		// Set both HOME (Unix/macOS) and USERPROFILE (Windows) for cross-platform compatibility
 		t.Setenv("HOME", home)
+		t.Setenv("USERPROFILE", home)
 		o := &options{global: true}
 		require.NoError(t, o.complete())
 		assert.Equal(t, filepath.Join(home, skillsRelDir), o.skillTargetDir)

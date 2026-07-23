@@ -128,7 +128,7 @@ func Test_NewCmdRun(t *testing.T) {
 			)
 
 			// WHEN
-			_, err := exec("main secret_detection --path=" + tempPath)
+			_, err := exec("main secret_detection --path=" + filepath.ToSlash(tempPath))
 
 			// THEN
 			filePathWanted := filepath.Join(tempPath, tt.want)
@@ -162,7 +162,7 @@ func Test_NewCmdRun(t *testing.T) {
 		)
 
 		// WHEN
-		_, err := exec("main secret_detection --path=" + tempPath)
+		_, err := exec("main secret_detection --path=" + filepath.ToSlash(tempPath))
 
 		// THEN
 		assert.Error(t, err, "file in artifact would overwrite a symbolic link- cannot extract")
