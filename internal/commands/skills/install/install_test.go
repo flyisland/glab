@@ -21,7 +21,7 @@ func TestNewCmdInstall_PathFlag(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	exec := cmdtest.SetupCmdForTest(t, NewCmdInstall, false)
-	out, err := exec("--path " + tmpDir)
+	out, err := exec("--path " + filepath.ToSlash(tmpDir))
 
 	require.NoError(t, err)
 	assert.Contains(t, out.String(), "Installed")
@@ -35,7 +35,9 @@ func TestNewCmdInstall_PathFlag(t *testing.T) {
 
 func TestNewCmdInstall_GlobalFlag(t *testing.T) {
 	home := t.TempDir()
+	// Set both HOME (Unix/macOS) and USERPROFILE (Windows) for cross-platform compatibility
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
 
 	exec := cmdtest.SetupCmdForTest(t, NewCmdInstall, false)
 	out, err := exec("--global")
@@ -81,10 +83,10 @@ func TestNewCmdInstall_ForceOverwrites(t *testing.T) {
 	tmpDir := t.TempDir()
 	exec := cmdtest.SetupCmdForTest(t, NewCmdInstall, false)
 
-	_, err := exec("--path " + tmpDir)
+	_, err := exec("--path " + filepath.ToSlash(tmpDir))
 	require.NoError(t, err)
 
-	out, err := exec("--force --path " + tmpDir)
+	out, err := exec("--force --path " + filepath.ToSlash(tmpDir))
 	require.NoError(t, err)
 	assert.Contains(t, out.String(), "Overwrote")
 }
@@ -95,10 +97,10 @@ func TestNewCmdInstall_SkipsWithoutForce(t *testing.T) {
 	tmpDir := t.TempDir()
 	exec := cmdtest.SetupCmdForTest(t, NewCmdInstall, false)
 
-	_, err := exec("--path " + tmpDir)
+	_, err := exec("--path " + filepath.ToSlash(tmpDir))
 	require.NoError(t, err)
 
-	out, err := exec("--path " + tmpDir)
+	out, err := exec("--path " + filepath.ToSlash(tmpDir))
 	require.NoError(t, err)
 	assert.Contains(t, out.Stderr(), "already exists. Use --force to overwrite")
 }
@@ -108,7 +110,7 @@ func TestNewCmdInstall_FreshInstallNoWarnings(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	exec := cmdtest.SetupCmdForTest(t, NewCmdInstall, false)
-	out, err := exec("--path " + tmpDir)
+	out, err := exec("--path " + filepath.ToSlash(tmpDir))
 
 	require.NoError(t, err)
 	assert.Contains(t, out.String(), "Installed")
@@ -120,7 +122,7 @@ func TestNewCmdInstall_NamedSkill(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	exec := cmdtest.SetupCmdForTest(t, NewCmdInstall, false)
-	out, err := exec("glab --path " + tmpDir)
+	out, err := exec("glab --path " + filepath.ToSlash(tmpDir))
 
 	require.NoError(t, err)
 	assert.Contains(t, out.String(), "Installed")
@@ -138,7 +140,7 @@ func TestNewCmdInstall_UnknownSkill(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	exec := cmdtest.SetupCmdForTest(t, NewCmdInstall, false)
-	_, err := exec("does-not-exist --path " + tmpDir)
+	_, err := exec("does-not-exist --path " + filepath.ToSlash(tmpDir))
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), `unknown skill "does-not-exist"`)
@@ -181,7 +183,7 @@ func TestNewCmdInstall_NoNameSkipsRemoteSkills(t *testing.T) {
 	// a false "Installed" success without writing anything to disk.
 	tmpDir := t.TempDir()
 	exec := cmdtest.SetupCmdForTest(t, NewCmdInstall, false)
-	out, err := exec("--path " + tmpDir)
+	out, err := exec("--path " + filepath.ToSlash(tmpDir))
 
 	require.NoError(t, err)
 
@@ -200,7 +202,7 @@ func TestNewCmdInstall_TooManyArgs(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	exec := cmdtest.SetupCmdForTest(t, NewCmdInstall, false)
-	_, err := exec("glab extra --path " + tmpDir)
+	_, err := exec("glab extra --path " + filepath.ToSlash(tmpDir))
 
 	require.Error(t, err)
 }
