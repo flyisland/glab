@@ -3,10 +3,12 @@
 package iostreams
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_HelperFunctions(t *testing.T) {
@@ -228,6 +230,24 @@ func Test_stripControlCharacters(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := stripControlCharacters(tt.args.badString)
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+// A PAGER holding only whitespace is not a runnable command. shlex.Split
+// returns no arguments for it, so building the command indexed into an empty
+// slice and panicked. Treat it the same as an unset pager.
+func TestStartPager_BlankCommand(t *testing.T) {
+	for _, pager := range []string{"   ", "\t", "\n", " \t\n "} {
+		t.Run(fmt.Sprintf("%q", pager), func(t *testing.T) {
+			ios := New(WithPagerCommand(pager))
+			ios.IsaTTY = true
+			originalStdOut := ios.StdOut
+
+			err := ios.StartPager()
+
+			require.NoError(t, err)
+			assert.Equal(t, originalStdOut, ios.StdOut, "no pager should have been started")
 		})
 	}
 }
