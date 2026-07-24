@@ -510,3 +510,7 @@ Breaking changes are a last resort, and we try our best to only introduce them w
 The GitLab CLI was adopted from [Clement Sam](https://gitlab.com/profclems) in 2022 to serve as the official CLI of GitLab. Over the years the project has been inspired by both the [GitHub CLI](https://github.com/cli/cli) and [Zaq? Wiedmann's](https://gitlab.com/zaquestion) [lab](https://github.com/zaquestion/lab).
 
 Lab has served as the foundation for many of the GitLab CI/CD commands including `ci view` and `ci trace`.
+
+Synced from https://gitlab.com/gitlab-org/cli
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/flyisland/glab)
